@@ -1,0 +1,189 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Login Styles */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f5f5f5;
+}
+
+.login-box {
+    background: white;
+    padding: 30px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 350px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.login-box h2 {
+    margin-top: 0;
+    color: #2c2f4a;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    background: #2c2f4a;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.login-box button:hover {
+    background: #444;
+}
+
+.acceso-rapido {
+    margin: 20px 0;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.acceso-rapido p {
+    font-size: 12px;
+    color: #666;
+    margin: 5px 0;
+}
+
+.acceso-rapido button {
+    width: 48%;
+    margin: 3px 1%;
+    padding: 5px;
+    font-size: 11px;
+}
+
+.error {
+    color: #c00;
+    font-size: 12px;
+    margin: 10px 0;
+}
+
+/* App Styles */
+body.app-body {
+    display: flex;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.barra {
+    width: 200px;
+    background: #2c2f4a;
+    color: white;
+    height: 100vh;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.barra h2 {
+    font-size: 18px;
+}
+
+.barra a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    margin: 10px 0;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background 0.2s;
+}
+
+.barra a:hover {
+    background: #444;
+}
+
+.contenido {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.seccion {
+    display: none;
+}
+
+.activa {
+    display: block;
+}
+
+input, select, button {
+    margin: 5px;
+    padding: 5px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: left;
+}
+
+.user-info {
+    font-size: 12px;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    padding: 8px;
+    background: #f9f9f9;
+    margin: 5px 0;
+    border-radius: 3px;
+    border-left: 3px solid #2c2f4a;
+}
+
+#formEstudiantes, #formMaterias, #formNotas {
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+}
+
+button {
+    background: #2c2f4a;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #444;
+}
+
+input[type="text"], input[type="password"], input[type="number"], select {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 8px;
+}
