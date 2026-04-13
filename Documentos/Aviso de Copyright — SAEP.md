@@ -1,4 +1,4 @@
-**Sistema de Administración Escolar con PHP**  
+**Sistema de Administración Escolar**  
 **Última actualización:** 31 de marzo de 2026
 
 ---
