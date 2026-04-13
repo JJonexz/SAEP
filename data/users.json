@@ -12,5 +12,33 @@
         "role": "admin",
         "status": "approved",
         "manual": false
+    },
+    {
+        "id": "69dd7960c7bad6.18044340",
+        "github_id": 275840114,
+        "username": "Amer-mer",
+        "avatar": "https:\/\/avatars.githubusercontent.com\/u\/275840114?v=4",
+        "email": "anicofaulkner@hotmail.com",
+        "nombre": null,
+        "apellido": null,
+        "dni": null,
+        "telefono": null,
+        "role": "admin",
+        "status": "approved",
+        "manual": false
+    },
+    {
+        "id": "69dd7a15948ce1.75245546",
+        "github_id": 204078649,
+        "username": "gonzonuke",
+        "avatar": "https:\/\/avatars.githubusercontent.com\/u\/204078649?v=4",
+        "email": "gonzalolez737@gmail.com",
+        "nombre": null,
+        "apellido": null,
+        "dni": null,
+        "telefono": null,
+        "role": "admin",
+        "status": "approved",
+        "manual": false
     }
 ]
