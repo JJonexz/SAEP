@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAEP - Login</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-box">
+        <h2>SAEP - Login</h2>
+        <input type="text" id="usuario" placeholder="Usuario">
+        <input type="password" id="contrasena" placeholder="Contraseña">
+        <button onclick="iniciarSesion()">Entrar</button>
+        <div id="errorMsg" class="error"></div>
+        <div class="acceso-rapido">
+            <p><b>Acceso rápido:</b></p>
+            <button onclick="accesRapido('maestro','maestro123')">Maestro</button>
+            <button onclick="accesRapido('alumno1','alumno123')">Alumno 1</button>
+            <br>
+            <button onclick="accesRapido('alumno2','alumno123')">Alumno 2</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/login.js"></script>
+</body>
+</html>
