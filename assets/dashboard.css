@@ -165,3 +165,16 @@ textarea.code{flex:1;width:100%;background:#1e2d40;color:#e2e8f0;font-family:'Co
 .section-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:.75rem}
 .alert{padding:.75rem 1rem;border-radius:var(--radius);font-size:.8rem;margin-bottom:.85rem}
 .alert-amber{background:var(--amber-dim);border:0.052vw solid var(--amber);color:var(--amber)}
+
+/* ── Responsive Mail Panel ── */
+.ml-container{display:flex;gap:1.25rem;flex:1;min-height:0}
+.ml-sidebar{width:16.667vw;flex-shrink:0;display:flex;flex-direction:column;background:var(--white);border:0.052vw solid var(--border);border-radius:0.417vw;overflow:hidden}
+.ml-compose{flex:1;display:flex;flex-direction:column;gap:.75rem}
+@media(max-width:1024px){
+  .ml-container{flex-direction:column}
+  .ml-sidebar{width:100%;min-height:200px}
+}
+@media(max-width:768px){
+  .ml-sidebar{min-height:180px}
+  .ml-compose{gap:.5rem}
+}
