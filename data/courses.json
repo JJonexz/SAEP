@@ -12,7 +12,9 @@
                 "profesor_id": null
             }
         ],
-        "alumnos": [],
+        "alumnos": [
+            "69dd9f8a9e3f4g.99001122"
+        ],
         "profesores": []
     }
 ]
