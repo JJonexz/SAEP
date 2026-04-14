@@ -58,7 +58,7 @@ function selectRepo(repo){S.activeRepo=repo;S.repoPath=[];S.editorFile=null;rend
 function renderRepoHeader(){
     const r=S.activeRepo;
     document.getElementById('repo-main-area').innerHTML=`
-        <div style="padding:1rem 1.25rem;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
+        <div style="padding:1rem 1.25rem;background:var(--white);border-bottom:0.093vh solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
             <div><div style="font-weight:700;font-size:.95rem;color:var(--text)">${r.name}</div><div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">${r.description||'Sin descripción'}</div></div>
             <div class="btn-group"><button class="btn btn-outline" onclick="openNewFileModal()">+ Archivo</button><button class="btn btn-red" onclick="openDeleteRepoModal()">Eliminar</button></div>
         </div>
@@ -193,7 +193,7 @@ async function openWorkDetail(workId){
         const avg=s.nota_promedio;
         const avgColor=avg===null?'nota-pending':avg>=6?'nota-ok':'nota-fail';
         const estBadge=s.estado_calificacion==='aprobado'?'badge-green':s.estado_calificacion==='desaprobado'?'badge-red':'badge-amber';
-        const profGrades=(s.notas_profesores||[]).map(g=>{const p=S.users.find(u=>u.id===g.profesor_id);return `<div style="font-size:.75rem;margin-top:.3rem;padding:.4rem .6rem;background:#f8f9fc;border-radius:4px"><strong>${p?p.apellido+' '+p.nombre:'Profesor'}</strong>: <span class="nota-val ${g.nota>=6?'nota-ok':'nota-fail'}">${g.nota??'—'}</span>${g.devolucion?`<div class="devolucion-box">${esc(g.devolucion)}</div>`:''}</div>`}).join('');
+        const profGrades=(s.notas_profesores||[]).map(g=>{const p=S.users.find(u=>u.id===g.profesor_id);return `<div style="font-size:.75rem;margin-top:.3rem;padding:.4rem .6rem;background:#f8f9fc;border-radius:0.208vw"><strong>${p?p.apellido+' '+p.nombre:'Profesor'}</strong>: <span class="nota-val ${g.nota>=6?'nota-ok':'nota-fail'}">${g.nota??'—'}</span>${g.devolucion?`<div class="devolucion-box">${esc(g.devolucion)}</div>`:''}</div>`}).join('');
         return `<div class="sub-row" style="flex-direction:column;align-items:flex-start;gap:.35rem;padding:.75rem 0">
             <div style="display:flex;align-items:center;gap:.75rem;width:100%">
                 <span class="sub-name">${aName}</span>
@@ -206,7 +206,7 @@ async function openWorkDetail(workId){
             ${profGrades}
         </div>`;
     }).join('');
-    modal(`<h3>${work.titulo}</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">${work.descripcion||''}</p><div class="submissions-list">${rows||'<div class="empty">Sin alumnos asignados</div>'}</div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cerrar</button></div>`,'640px');
+    modal(`<h3>${work.titulo}</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">${work.descripcion||''}</p><div class="submissions-list">${rows||'<div class="empty">Sin alumnos asignados</div>'}</div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cerrar</button></div>`,'33.333vw');
 }
 function openGradeForm(workId,alumnoId,alumnoName){
     modal(`<h3>Calificar entrega</h3><p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">Alumno: <strong>${alumnoName}</strong></p>
@@ -349,7 +349,7 @@ function renderUsersTable(){
         <td style="color:var(--muted)">${u.username}</td>
         <td>${u.dni||'—'}</td><td>${u.email||'—'}</td><td>${u.telefono||'—'}</td>
         <td><span class="badge ${u.manual?'badge-amber':'badge-blue'}">${u.manual?'Manual':'GitHub'}</span></td>
-        <td><select onchange="changeRole('${u.id}',this.value)" ${u.id===MY_ID?'disabled':''} style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:1px solid var(--border);border-radius:4px">
+        <td><select onchange="changeRole('${u.id}',this.value)" ${u.id===MY_ID?'disabled':''} style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:0.052vw solid var(--border);border-radius:0.208vw">
             ${['admin','director','subdirector','profesor','preceptor','alumno'].map(r=>`<option value="${r}"${u.role===r?' selected':''}>${r}</option>`).join('')}
             ${!u.role?'<option value="" selected>Sin rol</option>':''}
         </select></td>
@@ -430,7 +430,7 @@ function openCourseDetail(course){
             <div class="inline-form mb1"><div class="field"><label>Agregar profesor</label><select id="cd-ps"><option value="">Seleccionar...</option>${allProf.map(p=>`<option value="${p.id}">${p.apellido} ${p.nombre}</option>`).join('')}</select></div><button class="btn btn-navy" onclick="addToGroup('${course.id}','add_profesor','cd-ps','user_id')">Agregar</button></div>
             <table><thead><tr><th>Profesor</th><th>Email</th><th></th></tr></thead><tbody>${profes.map(p=>`<tr><td>${p.apellido} ${p.nombre}</td><td>${p.email||'—'}</td><td><button class="btn btn-red" style="font-size:.7rem;padding:.2rem .5rem" onclick="removeFromGroup('${course.id}','remove_profesor','${p.id}')">Quitar</button></td></tr>`).join('')}</tbody></table>
         </div>
-        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cerrar</button></div>`,'640px');
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cerrar</button></div>`,'33.333vw');
 }
 function cdTab(n){document.querySelectorAll('#modal-root .tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('#modal-root .tab-content').forEach(t=>t.classList.remove('visible'));event.target.classList.add('active');document.getElementById('cd-'+n)?.classList.add('visible');}
 async function addToGroup(cid,action,selId,field){const val=document.getElementById(selId)?.value;if(!val)return;await api('api/courses/courses.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:cid,action,[field]:val})});await loadCourses();const upd=S.courses.find(c=>c.id===cid);if(upd)openCourseDetail(upd);}
@@ -446,8 +446,8 @@ async function loadRooms(){
     const precs=S.users.filter(u=>u.role==='preceptor'&&u.status==='approved');
     document.getElementById('rooms-tbl').innerHTML=`<table><thead><tr><th>Aula</th><th>Ubicación</th><th>Cap.</th><th>Curso asignado</th><th>Preceptor</th><th></th></tr></thead><tbody>${S.rooms.map(r=>{
         return `<tr><td style="font-weight:600">${r.nombre}</td><td>${r.ubicacion||'—'}</td><td>${r.capacidad||'—'}</td>
-            <td><select onchange="assignRC('${r.id}',this.value)" style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:1px solid var(--border);border-radius:4px"><option value="">Sin asignar</option>${S.courses.map(c=>`<option value="${c.id}"${r.curso_id===c.id?' selected':''}>${c.anio}° ${c.division} — ${c.nombre}</option>`).join('')}</select></td>
-            <td><select onchange="assignRP('${r.id}',this.value)" style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:1px solid var(--border);border-radius:4px"><option value="">Sin asignar</option>${precs.map(p=>`<option value="${p.id}"${r.preceptor_id===p.id?' selected':''}>${p.apellido} ${p.nombre}</option>`).join('')}</select></td>
+            <td><select onchange="assignRC('${r.id}',this.value)" style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:0.052vw solid var(--border);border-radius:0.208vw"><option value="">Sin asignar</option>${S.courses.map(c=>`<option value="${c.id}"${r.curso_id===c.id?' selected':''}>${c.anio}° ${c.division} — ${c.nombre}</option>`).join('')}</select></td>
+            <td><select onchange="assignRP('${r.id}',this.value)" style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:0.052vw solid var(--border);border-radius:0.208vw"><option value="">Sin asignar</option>${precs.map(p=>`<option value="${p.id}"${r.preceptor_id===p.id?' selected':''}>${p.apellido} ${p.nombre}</option>`).join('')}</select></td>
             <td><button class="btn btn-red" style="font-size:.7rem;padding:.25rem .5rem" onclick="deleteRoom('${r.id}')">Eliminar</button></td></tr>`;
     }).join('')}</tbody></table>`;
 }
@@ -458,7 +458,7 @@ async function assignRP(id,pid){await api('api/rooms/rooms.php',{method:'PATCH',
 async function deleteRoom(id){if(!confirm('¿Eliminar esta aula?'))return;await api('api/rooms/rooms.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});loadRooms();}
 
 // ── Modal helpers ──────────────────────────────────────────────────────────
-function modal(html,maxW='540px'){document.getElementById('modal-root').innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:${maxW}">${html}</div></div>`;}
+function modal(html,maxW='28.125vw'){document.getElementById('modal-root').innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:${maxW}">${html}</div></div>`;}
 function closeModal(){document.getElementById('modal-root').innerHTML='';}
 
 // ── Utils ──────────────────────────────────────────────────────────────────
@@ -507,6 +507,12 @@ function mlFilter() {
     mlRender();
 }
 
+function autoGrow(el) {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+}
+
 const ML_STATUS_LABEL = { approved:'Aprobado', pending_approval:'Pendiente', rejected:'Rechazado', pending_profile:'Sin perfil' };
 const ML_STATUS_BADGE = { approved:'badge-green', pending_approval:'badge-amber', rejected:'badge-red', pending_profile:'badge-gray' };
 const ML_ROLE_BADGE   = { admin:'badge-blue', director:'badge-blue', subdirector:'badge-blue', profesor:'badge-green', preceptor:'badge-amber', alumno:'badge-gray' };
@@ -529,7 +535,7 @@ function mlRender() {
         const stLabel = ML_STATUS_LABEL[u.status] || u.status;
         const rlBadge = ML_ROLE_BADGE[u.role]   || 'badge-gray';
 
-        return `<label style="display:flex;align-items:flex-start;gap:.6rem;padding:.55rem .75rem;border-bottom:1px solid var(--border);cursor:${noEmail?'default':'pointer'};${noEmail?'opacity:.45':''}">
+        return `<label style="display:flex;align-items:flex-start;gap:.6rem;padding:.55rem .75rem;border-bottom:0.093vh solid var(--border);cursor:${noEmail?'default':'pointer'};${noEmail?'opacity:.45':''}">
             <input type="checkbox" ${checked} ${noEmail?'disabled':''} style="margin-top:.15rem;cursor:pointer" onchange="mlToggleUser('${u.id}',this.checked)">
             <div style="flex:1;min-width:0">
                 <div style="font-size:.78rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(name)}</div>
@@ -589,7 +595,7 @@ function mlUpdateChips() {
         const u    = S.users.find(x => x.id === id);
         if (!u) return '';
         const name = (u.apellido && u.nombre) ? `${u.apellido} ${u.nombre}` : u.username;
-        return `<span style="display:inline-flex;align-items:center;gap:.3rem;background:var(--navy-faint);color:var(--navy);font-size:.7rem;font-weight:600;padding:.2rem .5rem;border-radius:20px;border:1px solid #b8c8e8">
+        return `<span style="display:inline-flex;align-items:center;gap:.3rem;background:var(--navy-faint);color:var(--navy);font-size:.7rem;font-weight:600;padding:.2rem .5rem;border-radius:1.042vw;border:0.052vw solid #b8c8e8">
             ${esc(name)}
             <span onclick="mlRemoveChip('${id}')" style="cursor:pointer;font-size:.8rem;line-height:1;color:var(--muted)">×</span>
         </span>`;

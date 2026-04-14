@@ -104,7 +104,7 @@ $role=$user['role'];
 <div class="panel" id="panel-works">
     <div class="ph"><div><h2>Trabajos y entregas</h2></div><button class="btn btn-navy" onclick="openCreateWorkModal()">+ Nuevo trabajo</button></div>
     <div class="pb">
-        <div class="fgrid mb1" style="max-width:560px">
+        <div class="fgrid mb1" style="max-width:29.167vw">
             <div class="field"><label>Curso</label><select id="wf-curso" onchange="loadWorks()"><option value="">Todos</option></select></div>
             <div class="field"><label>Materia</label><select id="wf-materia" onchange="loadWorks()"><option value="">Todas</option></select></div>
         </div>
@@ -133,7 +133,7 @@ $role=$user['role'];
             <?php endif; ?>
         </div>
         <div class="tab-content visible" id="gtab-ver">
-            <div class="fgrid mb1" style="max-width:560px">
+            <div class="fgrid mb1" style="max-width:29.167vw">
                 <div class="field"><label>Curso</label><select id="gv-curso" onchange="loadGradesTable()"><option value="">Todos</option></select></div>
                 <div class="field"><label>Cuatrimestre</label><select id="gv-cuatri" onchange="loadGradesTable()"><option value="">Ambos</option><option value="1">1°</option><option value="2">2°</option></select></div>
             </div>
@@ -141,7 +141,7 @@ $role=$user['role'];
         </div>
         <?php if(in_array($role,['admin','director','subdirector','profesor'])): ?>
         <div class="tab-content" id="gtab-cargar">
-            <div class="fgrid" style="max-width:600px">
+            <div class="fgrid" style="max-width:31.25vw">
                 <div class="field"><label>Curso</label><select id="gc-curso" onchange="gcLoadStudents()"><option value="">Seleccionar...</option></select></div>
                 <div class="field"><label>Materia</label><select id="gc-materia"><option value="">Seleccionar...</option></select></div>
                 <div class="field"><label>Alumno</label><select id="gc-alumno"><option value="">Seleccionar...</option></select></div>
@@ -164,7 +164,7 @@ $role=$user['role'];
 <div class="panel" id="panel-my-grades">
     <div class="ph"><h2>Mis calificaciones</h2></div>
     <div class="pb">
-        <div class="field mb1" style="max-width:200px"><label>Cuatrimestre</label><select id="mg-cuatri" onchange="loadMyGrades()"><option value="">Ambos</option><option value="1">1°</option><option value="2">2°</option></select></div>
+        <div class="field mb1" style="max-width:10.417vw"><label>Cuatrimestre</label><select id="mg-cuatri" onchange="loadMyGrades()"><option value="">Ambos</option><option value="1">1°</option><option value="2">2°</option></select></div>
         <div class="tbl-wrap" id="my-grades-tbl"></div>
     </div>
 </div>
@@ -179,7 +179,7 @@ $role=$user['role'];
             <?php if($role==='admin'): ?>
             <button class="btn btn-navy" onclick="openManualUserModal()">+ Crear usuario</button>
             <?php endif; ?>
-            <select id="uf-status" onchange="filterUsers()" style="font-family:var(--font);font-size:.78rem;padding:.4rem .7rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text2)">
+            <select id="uf-status" onchange="filterUsers()" style="font-family:var(--font);font-size:.78rem;padding:.4rem .7rem;border:0.052vw solid var(--border);border-radius:var(--radius);color:var(--text2)">
                 <option value="">Todos</option><option value="pending_approval">Pendientes</option><option value="approved">Aprobados</option><option value="rejected">Rechazados</option>
             </select>
         </div>
@@ -209,21 +209,21 @@ $role=$user['role'];
 <div class="panel" id="panel-mail">
     <div class="ph">
         <div><h2>Enviar correo</h2><div class="sub">Enviá mensajes a usuarios del sistema</div></div>
-        <div id="ml-counter" style="font-size:.78rem;font-weight:600;color:var(--navy);background:var(--navy-faint);padding:.3rem .75rem;border-radius:20px;display:none"></div>
+        <div id="ml-counter" style="font-size:.78rem;font-weight:600;color:var(--navy);background:var(--navy-faint);padding:.3rem .75rem;border-radius:1.042vw;display:none"></div>
     </div>
     <div class="pb" style="display:flex;gap:1.25rem;flex:1;min-height:0">
 
         <!-- ── Columna izquierda: selector de usuarios ── -->
-        <div style="width:320px;flex-shrink:0;display:flex;flex-direction:column;background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <div style="width:16.667vw;flex-shrink:0;display:flex;flex-direction:column;background:var(--white);border:0.052vw solid var(--border);border-radius:0.417vw;overflow:hidden">
 
             <!-- Filtros -->
-            <div style="padding:.75rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:.5rem">
+            <div style="padding:.75rem;border-bottom:0.093vh solid var(--border);display:flex;flex-direction:column;gap:.5rem">
                 <input id="ml-search" type="text" placeholder="Buscar por nombre, email, DNI..."
                     oninput="mlFilter()"
-                    style="width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:.45rem .65rem;font-family:var(--font);font-size:.78rem;color:var(--text)">
+                    style="width:100%;border:0.052vw solid var(--border);border-radius:var(--radius);padding:.45rem .65rem;font-family:var(--font);font-size:.78rem;color:var(--text)">
 
                 <div style="display:flex;gap:.4rem;flex-wrap:wrap">
-                    <select id="ml-f-rol" onchange="mlFilter()" style="flex:1;font-family:var(--font);font-size:.73rem;padding:.3rem .45rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text2)">
+                    <select id="ml-f-rol" onchange="mlFilter()" style="flex:1;font-family:var(--font);font-size:.73rem;padding:.3rem .45rem;border:0.052vw solid var(--border);border-radius:var(--radius);color:var(--text2)">
                         <option value="">Todos los roles</option>
                         <option value="admin">Admin</option>
                         <option value="director">Director</option>
@@ -232,7 +232,7 @@ $role=$user['role'];
                         <option value="preceptor">Preceptor</option>
                         <option value="alumno">Alumno</option>
                     </select>
-                    <select id="ml-f-estado" onchange="mlFilter()" style="flex:1;font-family:var(--font);font-size:.73rem;padding:.3rem .45rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text2)">
+                    <select id="ml-f-estado" onchange="mlFilter()" style="flex:1;font-family:var(--font);font-size:.73rem;padding:.3rem .45rem;border:0.052vw solid var(--border);border-radius:var(--radius);color:var(--text2)">
                         <option value="">Todos los estados</option>
                         <option value="approved">Aprobados</option>
                         <option value="pending_approval">Pendientes</option>
@@ -258,24 +258,24 @@ $role=$user['role'];
         <div style="flex:1;display:flex;flex-direction:column;gap:.75rem">
 
             <!-- Chips de seleccionados -->
-            <div id="ml-chips" style="display:none;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:.6rem .75rem">
+            <div id="ml-chips" style="display:none;background:var(--white);border:0.052vw solid var(--border);border-radius:0.417vw;padding:.6rem .75rem">
                 <div style="font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">Destinatarios seleccionados</div>
                 <div id="ml-chips-inner" style="display:flex;flex-wrap:wrap;gap:.3rem"></div>
             </div>
 
             <div class="field" style="margin:0">
                 <label>Asunto</label>
-                <input id="ml-subject" placeholder="Reunión de padres — viernes 18/04" style="width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:.55rem .75rem;font-family:var(--font);font-size:.82rem;color:var(--text)">
+                <input id="ml-subject" placeholder="Reunión de padres — viernes 18/04" style="width:100%;border:0.052vw solid var(--border);border-radius:var(--radius);padding:.55rem .75rem;font-family:var(--font);font-size:.82rem;color:var(--text)">
             </div>
 
-            <div class="field" style="margin:0;flex:1;display:flex;flex-direction:column">
+            <div class="field" style="margin:0;display:flex;flex-direction:column">
                 <label>Mensaje</label>
-                <textarea id="ml-body" placeholder="Escribí el mensaje aquí..."
-                    style="flex:1;min-height:220px;width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:.55rem .75rem;font-family:var(--font);font-size:.82rem;color:var(--text);resize:vertical"></textarea>
+                <textarea id="ml-body" placeholder="Escribí el mensaje aquí..." oninput="autoGrow(this)"
+                    style="min-height:12.963vh;max-height:59.222vh;width:100%;border:0.052vw solid var(--border);border-radius:var(--radius);padding:.55rem .75rem;font-family:var(--font);font-size:.82rem;color:var(--text);resize:none;overflow:hidden"></textarea>
             </div>
 
             <div id="ml-err" class="err-msg"></div>
-            <div id="ml-ok"  style="display:none;color:var(--green);font-size:.8rem;font-weight:600;padding:.5rem .75rem;background:var(--green-dim);border:1px solid var(--green);border-radius:var(--radius)"></div>
+            <div id="ml-ok"  style="display:none;color:var(--green);font-size:.8rem;font-weight:600;padding:.5rem .75rem;background:var(--green-dim);border:0.052vw solid var(--green);border-radius:var(--radius)"></div>
 
             <div>
                 <button class="btn btn-navy" onclick="sendMail()" id="ml-btn">
