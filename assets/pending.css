@@ -1,15 +1,15 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--navy:#1a3a6b;--bg:#f0f2f5;--white:#fff;--border:#dde1e7;--text:#1e2d40;--muted:#6b7280;--warn:#f59e0b;--font:'Inter',sans-serif}
 html,body{height:100%;background:var(--bg);font-family:var(--font);display:flex;align-items:center;justify-content:center}
-.card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:2.5rem;width:100%;max-width:420px;text-align:center;box-shadow:0 4px 24px rgba(26,58,107,.08)}
+.card{background:var(--white);border:0.052vw solid var(--border);border-radius:0.417vw;padding:2.5rem;width:100%;max-width:21.875vw;text-align:center;box-shadow:0 0.208vw 1.25vw rgba(26,58,107,.08)}
 .icon{font-size:3rem;margin-bottom:1rem}
 h2{font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:.6rem}
 p{font-size:.82rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.6}
-.info{background:#f8f9fc;border:1px solid var(--border);border-radius:6px;padding:1rem;text-align:left;margin-bottom:1.5rem}
+.info{background:#f8f9fc;border:0.052vw solid var(--border);border-radius:0.312vw;padding:1rem;text-align:left;margin-bottom:1.5rem}
 .info-row{margin-bottom:.6rem;display:flex;gap:.5rem;font-size:.8rem}
-.info-row span{color:var(--muted);width:90px;flex-shrink:0;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding-top:.1rem}
+.info-row span{color:var(--muted);width:4.687vw;flex-shrink:0;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding-top:.1rem}
 .info-row strong{color:var(--text)}
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:.4rem}
+.dot{display:inline-block;width:0.417vw;height:0.741vh;border-radius:50%;background:var(--warn);margin-right:.4rem}
 .btns{display:flex;gap:.5rem;justify-content:center}
-.btn{font-family:var(--font);font-size:.8rem;font-weight:600;padding:.55rem 1.25rem;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--muted);cursor:pointer;transition:all .15s}
+.btn{font-family:var(--font);font-size:.8rem;font-weight:600;padding:.55rem 1.25rem;border:0.052vw solid var(--border);border-radius:0.312vw;background:#fff;color:var(--muted);cursor:pointer;transition:all .15s}
 .btn:hover{border-color:var(--navy);color:var(--navy)}
