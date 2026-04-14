@@ -86,8 +86,12 @@ tr:hover td{background:#fafbff}
 
 /* ── Cards ── */
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(12.5vw,1fr));gap:1rem}
-.card{background:var(--white);border:0.052vw solid var(--border);border-radius:0.417vw;padding:1.25rem;transition:box-shadow .15s,border-color .15s}
-.card:hover{box-shadow:0 0.208vw 0.833vw rgba(26,58,107,.1);border-color:#b8c8e8}
+.card{background:var(--white);border:0.052vw solid var(--border);border-radius:0.417vw;padding:1.25rem;transition:box-shadow .15s,border-color .15s;border-top:0.209vw solid var(--border)}
+.card:hover{box-shadow:0 0.208vw 0.833vw rgba(26,58,107,.1)}
+.card-prog{border-top-color:#2563eb;background: #e0e6f4;}
+.card-mmo{border-top-color:#e63946;background:#f3dddd}
+.card-basico{border-top-color:#d97706;background:#f4ebdb}
+.card-turismo{border-top-color:#16a34a;background:#e1f8e2}
 .card h3{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
 .card p{font-size:.75rem;color:var(--muted);line-height:1.5}
 .card-meta{display:flex;gap:.4rem;margin-top:.75rem;flex-wrap:wrap}
