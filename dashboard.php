@@ -132,7 +132,13 @@ $role=$user['role'];
         <div class="tab-content visible" id="gtab-ver">
             <div class="fgrid mb1" style="max-width:560px">
                 <div class="field"><label>Curso</label><select id="gv-curso" onchange="loadGradesTable()"><option value="">Todos</option></select></div>
-                <div class="field"><label>Cuatrimestre</label><select id="gv-cuatri" onchange="loadGradesTable()"><option value="">Ambos</option><option value="1">1° Informe</option><option value="2">1°</option><option value="3">2° Informe</option><option value="4">2°</option></select></div>
+                <div class="field"><label>Cuatrimestre</label><select id="gv-cuatri" onchange="loadGradesTable()">
+                    <option value="">Todos</option>
+                    <option value="1i">1° Informe</option>
+                    <option value="1">1°</option>
+                    <option value="2i">2° Informe</option>
+                    <option value="2">2°</option>
+                </select></div>
             </div>
             <div class="tbl-wrap" id="grades-tbl"></div>
         </div>
@@ -142,7 +148,12 @@ $role=$user['role'];
                 <div class="field"><label>Curso</label><select id="gc-curso" onchange="gcLoadStudents()"><option value="">Seleccionar...</option></select></div>
                 <div class="field"><label>Materia</label><select id="gc-materia"><option value="">Seleccionar...</option></select></div>
                 <div class="field"><label>Alumno</label><select id="gc-alumno"><option value="">Seleccionar...</option></select></div>
-                <div class="field"><label>Cuatrimestre</label><select id="gc-cuatri"><option value="1">1° Informe</option><option value="2">1°</option><option value="3">2° Informe</option>/select><option value="4">2°</option></select></div>
+                <div class="field"><label>Cuatrimestre</label><select id="gc-cuatri">
+                    <option value="1i">1° Informe</option>
+                    <option value="1">1°</option>
+                    <option value="2i">2° Informe</option>
+                    <option value="2">2°</option>
+                </select></div>
                 <div class="field"><label>Nota (1–10)</label><input type="number" id="gc-nota" min="1" max="10" step="0.1" placeholder="7"></div>
                 <div class="field"><label>Trayectoria estudiantil</label><select id="gc-concepto"><option value="">—</option><option value="TED">TED</option><option value="TEP">TEP</option><option value="TEA">TEA</option></select></div>
                 <div class="field"><label>Asistencia %</label><input type="number" id="gc-asist" min="0" max="100" placeholder="80"></div>
