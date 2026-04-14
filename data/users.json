@@ -40,5 +40,19 @@
         "role": "admin",
         "status": "approved",
         "manual": false
+    },
+    {
+        "id": "69dd854df291a6.72571091",
+        "github_id": 181020735,
+        "username": "Jarpyy",
+        "avatar": "https:\/\/avatars.githubusercontent.com\/u\/181020735?v=4",
+        "email": "llanosjairo05@gmail.com",
+        "nombre": null,
+        "apellido": null,
+        "dni": null,
+        "telefono": null,
+        "role": "admin",
+        "status": "approved",
+        "manual": false
     }
 ]
