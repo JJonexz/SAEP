@@ -280,7 +280,7 @@ $role=$user['role'];
             <div>
                 <button class="btn btn-navy" onclick="sendMail()" id="ml-btn">
                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    Enviar correo
+                    Enviar correo.
                 </button>
             </div>
         </div>
