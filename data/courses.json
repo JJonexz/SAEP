@@ -13,7 +13,30 @@
             }
         ],
         "alumnos": [
+<<<<<<< Updated upstream
             "69dd9f8a9e3f4g.99001122"
+=======
+            "69dd9f8a7c1d2e.77889900"
+        ],
+        "profesores": []
+    },
+    {
+        "id": "69decc34bd5e13.81161256",
+        "nombre": "2°a",
+        "anio": 2,
+        "division": "a",
+        "turno": "Mañana",
+        "orientacion": "Ciclo Básico",
+        "materias": [
+            {
+                "id": "69decc510d4f90.35821837",
+                "nombre": "Mate",
+                "profesor_id": "69dd9f8a7i1j2k.77889900"
+            }
+        ],
+        "alumnos": [
+            "69dd9f8a0f4g5h.00112233"
+>>>>>>> Stashed changes
         ],
         "profesores": []
     }

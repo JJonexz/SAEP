@@ -273,6 +273,9 @@ async function submitWork(workId){
 }
 
 // ── GRADES ─────────────────────────────────────────────────────────────────
+const CUATRI_LABEL={'1':'1° Informe','2':'1°','3':'2° Informe','4':'2°'};
+function cuatriLabel(v){return CUATRI_LABEL[String(v)]||v+'°';}
+function cuatriBase(v){return v?v.replace('_informe',''):'';}
 async function initGrades(){
     if(!S.courses.length){const r=await api('api/courses/courses.php');S.courses=await r.json();}
     if(!S.users.length&&['admin','director','subdirector'].includes(ROLE)){const r=await api('api/admin/users.php');S.users=await r.json();}
@@ -285,8 +288,11 @@ async function initGrades(){
 async function loadGradesTable(){
     const cid=document.getElementById('gv-curso')?.value||'';
     const qua=document.getElementById('gv-cuatri')?.value||'';
-    let url='api/grades/grades.php?'; if(cid)url+=`curso_id=${cid}&`; if(qua)url+=`cuatrimestre=${qua}&`;
-    const r=await api(url); const grades=await r.json();
+    const quaBase=cuatriBase(qua); // '1' o '2' o '' para la API
+    let url='api/grades/grades.php?'; if(cid)url+=`curso_id=${cid}&`; if(quaBase)url+=`cuatrimestre=${quaBase}&`;
+    const r=await api(url); let grades=await r.json();
+    // Filtro fino en cliente: si se eligió un valor específico, filtrar por cuatrimestre exacto
+    if(qua) grades=grades.filter(g=>String(g.cuatrimestre)===qua);
     const el=document.getElementById('grades-tbl');
     if(!grades.length){el.innerHTML='<div class="empty" style="padding:1.5rem">Sin calificaciones.</div>';return;}
     el.innerHTML=`<table><thead><tr><th>Alumno</th><th>Curso</th><th>Materia</th><th>Cuatri</th><th>Nota</th><th>Concepto</th><th>Asistencia</th><th>Estado</th><th></th></tr></thead><tbody>${grades.map(g=>{
@@ -295,7 +301,7 @@ async function loadGradesTable(){
         const ma=co?.materias?.find(m=>m.id===g.materia_id);
         const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
         const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<tr><td>${al?al.apellido+' '+al.nombre:'—'}</td><td>${co?co.anio+'° '+co.division:'—'}</td><td>${ma?ma.nombre:'—'}</td><td>${g.cuatrimestre}°</td><td><span class="nota-val ${nc}">${g.nota??'—'}</span></td><td>${g.concepto||'—'}</td><td>${g.asistencia!=null?g.asistencia+'%':'—'}</td><td><span class="badge ${estB}">${g.estado}</span></td><td><button class="btn btn-red" style="font-size:.7rem;padding:.2rem .5rem" onclick="delGrade('${g.id}')">✕</button></td></tr>`;
+        return `<tr><td>${al?al.apellido+' '+al.nombre:'—'}</td><td>${co?co.anio+'° '+co.division:'—'}</td><td>${ma?ma.nombre:'—'}</td><td>${cuatriLabel(g.cuatrimestre)}</td><td><span class="nota-val ${nc}">${g.nota??'—'}</span></td><td>${g.concepto||'—'}</td><td>${g.asistencia!=null?g.asistencia+'%':'—'}</td><td><span class="badge ${estB}">${g.estado}</span></td><td><button class="btn btn-red" style="font-size:.7rem;padding:.2rem .5rem" onclick="delGrade('${g.id}')">✕</button></td></tr>`;
     }).join('')}</tbody></table>`;
 }
 function gcLoadStudents(){
@@ -323,8 +329,10 @@ function gTab(name){document.querySelectorAll('#panel-grades .tab').forEach(t=>t
 async function loadMyGrades(){
     if(!S.courses.length){const r=await api('api/courses/courses.php');S.courses=await r.json();}
     const qua=document.getElementById('mg-cuatri')?.value||'';
-    let url=`api/grades/grades.php?alumno_id=${MY_ID}`; if(qua)url+=`&cuatrimestre=${qua}`;
-    const r=await api(url); const grades=await r.json();
+    const quaBase=cuatriBase(qua);
+    let url=`api/grades/grades.php?alumno_id=${MY_ID}`; if(quaBase)url+=`&cuatrimestre=${quaBase}`;
+    const r=await api(url); let grades=await r.json();
+    if(qua) grades=grades.filter(g=>String(g.cuatrimestre)===qua);
     const el=document.getElementById('my-grades-tbl');
     if(!grades.length){el.innerHTML='<div class="empty" style="padding:1.5rem">Sin calificaciones registradas.</div>';return;}
     el.innerHTML=`<table><thead><tr><th>Materia</th><th>Curso</th><th>Cuatri</th><th>Nota</th><th>Concepto</th><th>Asistencia</th><th>Estado</th></tr></thead><tbody>${grades.map(g=>{
@@ -332,7 +340,7 @@ async function loadMyGrades(){
         const ma=co?.materias?.find(m=>m.id===g.materia_id);
         const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
         const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<tr><td>${ma?ma.nombre:'—'}</td><td>${co?co.anio+'° '+co.division:'—'}</td><td>${g.cuatrimestre}°</td><td><span class="nota-val ${nc}">${g.nota??'—'}</span></td><td>${g.concepto||'—'}</td><td>${g.asistencia!=null?g.asistencia+'%':'—'}</td><td><span class="badge ${estB}">${g.estado}</span></td></tr>`;
+        return `<tr><td>${ma?ma.nombre:'—'}</td><td>${co?co.anio+'° '+co.division:'—'}</td><td>${cuatriLabel(g.cuatrimestre)}</td><td><span class="nota-val ${nc}">${g.nota??'—'}</span></td><td>${g.concepto||'—'}</td><td>${g.asistencia!=null?g.asistencia+'%':'—'}</td><td><span class="badge ${estB}">${g.estado}</span></td></tr>`;
     }).join('')}</tbody></table>`;
 }
 
