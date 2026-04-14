@@ -7,7 +7,7 @@ function nav(id){
     document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
     document.getElementById('panel-'+id)?.classList.add('visible');
     document.getElementById('nav-'+id)?.classList.add('active');
-    const loaders={repos:loadRepos,users:loadUsers,courses:loadCourses,rooms:loadRooms,grades:initGrades,'my-grades':loadMyGrades,'my-works':loadMyWorks,inicio:loadInicio};
+    const loaders={repos:loadRepos,users:loadUsers,courses:loadCourses,rooms:loadRooms,grades:initGrades,'my-grades':loadMyGrades,'my-works':loadMyWorks,inicio:loadInicio,mail:initMail};
     loaders[id]?.();
 }
 
@@ -467,6 +467,189 @@ document.addEventListener('keydown',e=>{
     if(e.key==='Escape')closeModal();
     if((e.ctrlKey||e.metaKey)&&e.key==='s'&&S.editorFile){e.preventDefault();saveFile();}
 });
+
+// ── CORREOS ────────────────────────────────────────────────────────────────
+// Pegá este bloque completo al final de assets/dashboard.js
+
+const ML = { selected: new Set(), filtered: [] };
+
+function initMail() {
+    if (!S.users.length) {
+        api('api/admin/users.php').then(r => r.json()).then(u => { S.users = u; mlBuildList(); });
+    } else {
+        mlBuildList();
+    }
+}
+
+function mlBuildList() {
+    ML.filtered = [...S.users];
+    mlRender();
+}
+
+function mlFilter() {
+    const q     = (document.getElementById('ml-search')?.value || '').toLowerCase().replace(/,/g, '').replace(/\s+/g, ' ').trim();
+    const rol   = document.getElementById('ml-f-rol')?.value   || '';
+    const estado= document.getElementById('ml-f-estado')?.value || '';
+
+    ML.filtered = S.users.filter(u => {
+        if (rol    && u.role   !== rol)    return false;
+        if (estado && u.status !== estado) return false;
+        if (q) {
+            const name  = ((u.apellido||'') + ' ' + (u.nombre||'')).toLowerCase();
+            const email = (u.email||'').toLowerCase();
+            const dni   = String(u.dni||'');
+            const user  = (u.username||'').toLowerCase();
+            if (!name.includes(q) && !email.includes(q) && !dni.includes(q) && !user.includes(q)) return false;
+        }
+        return true;
+    });
+
+    mlRender();
+}
+
+const ML_STATUS_LABEL = { approved:'Aprobado', pending_approval:'Pendiente', rejected:'Rechazado', pending_profile:'Sin perfil' };
+const ML_STATUS_BADGE = { approved:'badge-green', pending_approval:'badge-amber', rejected:'badge-red', pending_profile:'badge-gray' };
+const ML_ROLE_BADGE   = { admin:'badge-blue', director:'badge-blue', subdirector:'badge-blue', profesor:'badge-green', preceptor:'badge-amber', alumno:'badge-gray' };
+
+function mlRender() {
+    const el = document.getElementById('ml-user-list');
+    if (!ML.filtered.length) {
+        el.innerHTML = '<div class="empty" style="padding:1.5rem">Sin usuarios para mostrar.</div>';
+        document.getElementById('ml-visible-count').textContent = '0 usuarios';
+        document.getElementById('ml-chk-all').checked = false;
+        mlUpdateCounter();
+        return;
+    }
+
+    el.innerHTML = ML.filtered.map(u => {
+        const name    = (u.apellido && u.nombre) ? `${u.apellido}, ${u.nombre}` : u.username;
+        const checked = ML.selected.has(u.id) ? 'checked' : '';
+        const noEmail = !u.email;
+        const stBadge = ML_STATUS_BADGE[u.status] || 'badge-gray';
+        const stLabel = ML_STATUS_LABEL[u.status] || u.status;
+        const rlBadge = ML_ROLE_BADGE[u.role]   || 'badge-gray';
+
+        return `<label style="display:flex;align-items:flex-start;gap:.6rem;padding:.55rem .75rem;border-bottom:1px solid var(--border);cursor:${noEmail?'default':'pointer'};${noEmail?'opacity:.45':''}">
+            <input type="checkbox" ${checked} ${noEmail?'disabled':''} style="margin-top:.15rem;cursor:pointer" onchange="mlToggleUser('${u.id}',this.checked)">
+            <div style="flex:1;min-width:0">
+                <div style="font-size:.78rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(name)}</div>
+                <div style="font-size:.7rem;color:var(--muted);margin-top:.1rem">${u.email ? esc(u.email) : 'Sin email'}</div>
+                <div style="display:flex;gap:.3rem;margin-top:.3rem;flex-wrap:wrap">
+                    <span class="badge ${rlBadge}" style="font-size:.6rem">${u.role||'—'}</span>
+                    <span class="badge ${stBadge}" style="font-size:.6rem">${stLabel}</span>
+                    ${u.dni ? `<span class="badge badge-gray" style="font-size:.6rem">DNI ${u.dni}</span>` : ''}
+                </div>
+            </div>
+        </label>`;
+    }).join('');
+
+    document.getElementById('ml-visible-count').textContent = ML.filtered.length + ' usuario' + (ML.filtered.length !== 1 ? 's' : '');
+
+    const allChecked = ML.filtered.filter(u => u.email).every(u => ML.selected.has(u.id));
+    document.getElementById('ml-chk-all').checked = allChecked && ML.filtered.some(u => u.email);
+
+    mlUpdateCounter();
+    mlUpdateChips();
+}
+
+function mlToggleUser(id, checked) {
+    if (checked) ML.selected.add(id);
+    else ML.selected.delete(id);
+    mlUpdateCounter();
+    mlUpdateChips();
+    // sync "select all" checkbox
+    const allChecked = ML.filtered.filter(u => u.email).every(u => ML.selected.has(u.id));
+    document.getElementById('ml-chk-all').checked = allChecked && ML.filtered.some(u => u.email);
+}
+
+function mlToggleAll(checked) {
+    ML.filtered.filter(u => u.email).forEach(u => {
+        if (checked) ML.selected.add(u.id);
+        else ML.selected.delete(u.id);
+    });
+    mlRender();
+}
+
+function mlUpdateCounter() {
+    const cnt = ML.selected.size;
+    const el  = document.getElementById('ml-counter');
+    if (!el) return;
+    if (cnt === 0) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    el.textContent   = cnt + ' seleccionado' + (cnt !== 1 ? 's' : '');
+}
+
+function mlUpdateChips() {
+    const wrap  = document.getElementById('ml-chips');
+    const inner = document.getElementById('ml-chips-inner');
+    if (!wrap || !inner) return;
+    if (ML.selected.size === 0) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    inner.innerHTML = [...ML.selected].map(id => {
+        const u    = S.users.find(x => x.id === id);
+        if (!u) return '';
+        const name = (u.apellido && u.nombre) ? `${u.apellido} ${u.nombre}` : u.username;
+        return `<span style="display:inline-flex;align-items:center;gap:.3rem;background:var(--navy-faint);color:var(--navy);font-size:.7rem;font-weight:600;padding:.2rem .5rem;border-radius:20px;border:1px solid #b8c8e8">
+            ${esc(name)}
+            <span onclick="mlRemoveChip('${id}')" style="cursor:pointer;font-size:.8rem;line-height:1;color:var(--muted)">×</span>
+        </span>`;
+    }).join('');
+}
+
+function mlRemoveChip(id) {
+    ML.selected.delete(id);
+    // uncheck in list
+    const el = document.querySelector(`#ml-user-list input[onchange*="${id}"]`);
+    if (el) el.checked = false;
+    const allChecked = ML.filtered.filter(u => u.email).every(u => ML.selected.has(u.id));
+    document.getElementById('ml-chk-all').checked = allChecked && ML.filtered.some(u => u.email);
+    mlUpdateCounter();
+    mlUpdateChips();
+}
+
+async function sendMail() {
+    const subject = document.getElementById('ml-subject')?.value.trim();
+    const message = document.getElementById('ml-body')?.value.trim();
+    const err     = document.getElementById('ml-err');
+    const ok      = document.getElementById('ml-ok');
+    const btn     = document.getElementById('ml-btn');
+
+    err.style.display = 'none';
+    ok.style.display  = 'none';
+
+    if (!ML.selected.size) { err.textContent = 'Seleccioná al menos un destinatario.'; err.style.display = 'block'; return; }
+    if (!subject)          { err.textContent = 'El asunto es obligatorio.';            err.style.display = 'block'; return; }
+    if (!message)          { err.textContent = 'El mensaje no puede estar vacío.';     err.style.display = 'block'; return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Enviando...';
+
+    const r = await api('api/mail/send.php', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ ids: [...ML.selected], subject, message }),
+    });
+    const d = await r.json();
+
+    btn.disabled  = false;
+    btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar correo';
+
+    if (d.success) {
+        ok.textContent  = `✓ Enviado a ${d.sent} de ${d.total} destinatario(s).${d.failed.length ? ' Sin enviar: ' + d.failed.join(', ') : ''}`;
+        ok.style.display = 'block';
+        document.getElementById('ml-subject').value = '';
+        document.getElementById('ml-body').value    = '';
+        ML.selected.clear();
+        mlRender();
+    } else {
+        err.textContent   = d.error || 'Error al enviar.';
+        err.style.display = 'block';
+    }
+}
+
+// En la función nav(), agregá 'mail' al objeto loaders:
+// mail: () => { if(!S.users.length && ['admin','director','subdirector'].includes(ROLE)){api('api/admin/users.php').then(r=>r.json()).then(u=>S.users=u);} }
+// O simplemente no hace falta porque los users ya se cargan al init.
 
 // ── Init ───────────────────────────────────────────────────────────────────
 loadInicio();
