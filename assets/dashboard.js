@@ -397,12 +397,13 @@ async function loadCourses(){
 function renderCoursesCards(){
     const el=document.getElementById('courses-cards');
     if(!S.courses.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Sin cursos creados.</div>';return;}
-    el.innerHTML=S.courses.map(c=>`<div class="card">
+    const orientColors={"Programación":"prog","MMO":"mmo","Ciclo Básico":"basico","Turismo":"turismo"};
+    el.innerHTML=S.courses.map(c=>{const oClass=orientColors[c.orientacion]||'';return `<div class="card card-${oClass}">
         <h3>${c.anio}° ${c.division}</h3>
-        <p>${c.nombre}<br><span style="color:var(--muted)">Turno: ${c.turno}</span></p>
+        <p>${c.nombre}<br><span style="color:var(--muted)">Turno: ${c.turno}</span><br><span style="color:var(--muted);font-size:.7rem">${c.orientacion||''}</span></p>
         <div class="card-meta"><span class="badge badge-blue">${c.alumnos?.length||0} alumnos</span><span class="badge badge-gray">${c.materias?.length||0} materias</span></div>
         <div class="card-actions"><button class="btn btn-outline" onclick='openCourseDetail(${JSON.stringify(c)})'>Gestionar</button><button class="btn btn-red" onclick="deleteCourse('${c.id}')">Eliminar</button></div>
-    </div>`).join('');
+    </div>`}).join('');
 }
 function openCourseModal(){modal(`<h3>Nuevo curso</h3><div class="fgrid"><div class="field ffull"><label>Nombre</label><input id="cc-n" placeholder="3° Técnico Informática"></div><div class="field"><label>Año</label><input id="cc-a" type="number" min="1" max="7" placeholder="3"></div><div class="field"><label>División</label><input id="cc-d" placeholder="A"></div><div class="field ffull"><label>Turno</label><select id="cc-t"><option>Mañana</option><option>Tarde</option><option>Noche</option></select></div><div class="field ffull"><label>Orientación</label><select id="cc-o"><option>Ciclo Básico</option><option>MMO</option><option>Programación</option><option>Turismo</option></select></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-navy" onclick="saveCourse()">Crear</button></div>`);}
 async function saveCourse(){const b={nombre:document.getElementById('cc-n').value.trim(),anio:document.getElementById('cc-a').value,division:document.getElementById('cc-d').value.trim(),turno:document.getElementById('cc-t').value,orientacion:document.getElementById('cc-o').value};if(!b.nombre||!b.anio||!b.division)return;const r=await api('api/courses/courses.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();closeModal();if(d.success)loadCourses();else alert('Error: '+d.error);}

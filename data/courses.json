@@ -17,17 +17,6 @@
         "profesores": []
     },
     {
-        "id": "69deb6e45756b8.67926995",
-        "nombre": "5 C",
-        "anio": 5,
-        "division": "C",
-        "turno": "Noche",
-        "orientacion": "Programación",
-        "materias": [],
-        "alumnos": [],
-        "profesores": []
-    },
-    {
         "id": "69debaa5a427e5.75618697",
         "nombre": "7 C Prog",
         "anio": 7,
@@ -56,6 +45,28 @@
         "division": "a",
         "turno": "Mañana",
         "orientacion": "Ciclo Básico",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": "69debef5be03a0.34008186",
+        "nombre": "5 a mmo",
+        "anio": 5,
+        "division": "A",
+        "turno": "Tarde",
+        "orientacion": "MMO",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": "69debf038ee9d3.01175061",
+        "nombre": "7 zzz",
+        "anio": 7,
+        "division": "z",
+        "turno": "Noche",
+        "orientacion": "Turismo",
         "materias": [],
         "alumnos": [],
         "profesores": []
