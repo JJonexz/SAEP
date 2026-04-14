@@ -14,10 +14,10 @@ require_role(['admin','director','subdirector']);
 $body=json_decode(file_get_contents('php://input'),true);
 
 if ($method==='POST') {
-    $nombre=trim($body['nombre']??''); $anio=intval($body['anio']??0); $division=trim($body['division']??''); $turno=trim($body['turno']??'');
+    $nombre=trim($body['nombre']??''); $anio=intval($body['anio']??0); $division=trim($body['division']??''); $turno=trim($body['turno']??''); $orientacion=trim($body['orientacion']??'');
     if (!$nombre||!$anio||!$division||!$turno) { http_response_code(400); echo json_encode(['error'=>'Todos los campos obligatorios']); exit; }
     $courses=db_read(COURSES_FILE);
-    $courses[]=['id'=>generate_id(),'nombre'=>$nombre,'anio'=>$anio,'division'=>$division,'turno'=>$turno,'materias'=>[],'alumnos'=>[],'profesores'=>[]];
+    $courses[]=['id'=>generate_id(),'nombre'=>$nombre,'anio'=>$anio,'division'=>$division,'turno'=>$turno,'orientacion'=>$orientacion,'materias'=>[],'alumnos'=>[],'profesores'=>[]];
     db_write(COURSES_FILE,$courses);
     echo json_encode(['success'=>true]); exit;
 }

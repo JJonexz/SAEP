@@ -5,6 +5,7 @@
         "anio": 3,
         "division": "a",
         "turno": "Mañana",
+        "orientacion": "Ciclo Básico",
         "materias": [
             {
                 "id": "69d3d25e80e495.81126422",
@@ -12,6 +13,50 @@
                 "profesor_id": null
             }
         ],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": "69deb6e45756b8.67926995",
+        "nombre": "5 C",
+        "anio": 5,
+        "division": "C",
+        "turno": "Noche",
+        "orientacion": "Programación",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": "69debaa5a427e5.75618697",
+        "nombre": "7 C Prog",
+        "anio": 7,
+        "division": "c",
+        "turno": "Noche",
+        "orientacion": "Programación",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": "69debb5ebfcb34.71382345",
+        "nombre": "7 B prog",
+        "anio": 7,
+        "division": "B",
+        "turno": "Noche",
+        "orientacion": "Programación",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": "69debb8aef1b54.40366566",
+        "nombre": "2",
+        "anio": 2,
+        "division": "a",
+        "turno": "Mañana",
+        "orientacion": "Ciclo Básico",
+        "materias": [],
         "alumnos": [],
         "profesores": []
     }
