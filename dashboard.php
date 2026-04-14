@@ -211,10 +211,10 @@ $role=$user['role'];
         <div><h2>Enviar correo</h2><div class="sub">Enviá mensajes a usuarios del sistema</div></div>
         <div id="ml-counter" style="font-size:.78rem;font-weight:600;color:var(--navy);background:var(--navy-faint);padding:.3rem .75rem;border-radius:1.042vw;display:none"></div>
     </div>
-    <div class="pb" style="display:flex;gap:1.25rem;flex:1;min-height:0">
+    <div class="pb ml-container">
 
         <!-- ── Columna izquierda: selector de usuarios ── -->
-        <div style="width:16.667vw;flex-shrink:0;display:flex;flex-direction:column;background:var(--white);border:0.052vw solid var(--border);border-radius:0.417vw;overflow:hidden">
+        <div class="ml-sidebar">
 
             <!-- Filtros -->
             <div style="padding:.75rem;border-bottom:0.093vh solid var(--border);display:flex;flex-direction:column;gap:.5rem">
@@ -255,7 +255,7 @@ $role=$user['role'];
         </div>
 
         <!-- ── Columna derecha: redactar ── -->
-        <div style="flex:1;display:flex;flex-direction:column;gap:.75rem">
+        <div class="ml-compose">
 
             <!-- Chips de seleccionados -->
             <div id="ml-chips" style="display:none;background:var(--white);border:0.052vw solid var(--border);border-radius:0.417vw;padding:.6rem .75rem">
