@@ -128,5 +128,18 @@
         "estado": "aprobado",
         "fecha": "2026-04-15",
         "registrado_por": "69dd7a15948ce1.75245546"
+    },
+    {
+        "id": "69e002aa090fb5.40187598",
+        "alumno_id": "69dd9f8a1w5x6y.11223344",
+        "curso_id": "69decf09321e69.91034466",
+        "materia_id": "69decf164ad7a3.54192330",
+        "cuatrimestre": 4,
+        "nota": 5,
+        "concepto": "TED",
+        "asistencia": 10,
+        "estado": "desaprobado",
+        "fecha": "2026-04-15",
+        "registrado_por": "69dd7a15948ce1.75245546"
     }
 ]
