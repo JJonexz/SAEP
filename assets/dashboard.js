@@ -372,7 +372,7 @@ async function openNotasModal(alumnoId, alumnoNombre, cursoId){
         : '<option value="">Sin materias</option>';
 
     modal(`
-        <div style="display:flex;flex-direction:column;gap:.85rem;width:min(960px,92vw)">
+        <div style="display:flex;flex-direction:column;gap:.85rem;width:100%">
             <!-- Header alumno -->
             <div style="display:flex;align-items:center;gap:.75rem">
                 <div style="width:36px;height:36px;flex-shrink:0;background:var(--navy-faint);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy);font-size:.9rem">${esc(alumnoNombre.charAt(0))}</div>
@@ -390,7 +390,7 @@ async function openNotasModal(alumnoId, alumnoNombre, cursoId){
             </div>
 
             <!-- Tabla de notas -->
-            <div id="notas-tabla-wrap" style="overflow-x:auto">
+            <div id="notas-tabla-wrap">
                 <div class="empty" style="padding:2rem;text-align:center;color:var(--muted);font-size:.82rem">
                     Seleccioná una materia para ver las notas.
                 </div>
@@ -400,7 +400,7 @@ async function openNotasModal(alumnoId, alumnoNombre, cursoId){
                 <button class="btn btn-outline" onclick="closeModal()">Cerrar</button>
             </div>
         </div>
-    `);
+    `,'min(1200px,94vw)');
     // Auto-cargar si hay materias
     if(materias.length) renderNotasTabla(alumnoId, cursoId);
 }
@@ -438,15 +438,15 @@ async function renderNotasTabla(alumnoId, cursoId){
     });
 
     wrap.innerHTML=`
-    <table style="width:100%;font-size:.8rem">
+    <table style="width:100%;font-size:.78rem;border-collapse:collapse">
         <thead>
             <tr>
-                <th style="white-space:nowrap">Nom. Materia</th>
-                <th style="white-space:nowrap">Cuatri</th>
-                <th>Nota</th>
-                <th style="white-space:nowrap">Trayectoria Estudiantil</th>
-                <th>Asistencia</th>
-                <th>Estado</th>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Materia</th>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Cuatrimestre</th>
+                <th style="padding:.45rem .6rem;text-align:center">Nota</th>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Trayectoria</th>
+                <th style="padding:.45rem .6rem;text-align:center">Asistencia</th>
+                <th style="padding:.45rem .6rem;text-align:center">Estado</th>
             </tr>
         </thead>
         <tbody>
@@ -455,12 +455,12 @@ async function renderNotasTabla(alumnoId, cursoId){
                 const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
                 const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
                 return `<tr>
-                    <td style="font-weight:600;white-space:nowrap">${ma?esc(ma.nombre):'—'}</td>
-                    <td style="white-space:nowrap">${cuatriLabel(g.cuatrimestre)}</td>
-                    <td><span class="nota-val ${nc}">${g.nota??'—'}</span></td>
-                    <td>${g.concepto||'—'}</td>
-                    <td style="white-space:nowrap">${g.asistencia!=null?g.asistencia+'%':'—'}</td>
-                    <td><span class="badge ${estB}">${g.estado}</span></td>
+                    <td style="font-weight:600;white-space:nowrap;padding:.4rem .6rem">${ma?esc(ma.nombre):'—'}</td>
+                    <td style="white-space:nowrap;padding:.4rem .6rem">${cuatriLabel(g.cuatrimestre)}</td>
+                    <td style="padding:.4rem .6rem;text-align:center"><span class="nota-val ${nc}" style="font-size:.82rem">${g.nota??'—'}</span></td>
+                    <td style="padding:.4rem .6rem">${g.concepto||'—'}</td>
+                    <td style="white-space:nowrap;padding:.4rem .6rem;text-align:center">${g.asistencia!=null?g.asistencia+'%':'—'}</td>
+                    <td style="padding:.4rem .6rem;text-align:center"><span class="badge ${estB}" style="font-size:.68rem">${g.estado}</span></td>
                 </tr>`;
             }).join('')}
         </tbody>
