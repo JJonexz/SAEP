@@ -10,7 +10,7 @@ if ($user['status']==='pending_profile') { header('Location: complete-profile.ph
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><title>SAEP — Pendiente</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAEP — Pendiente</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="assets/pending.css" rel="stylesheet">
 </head>

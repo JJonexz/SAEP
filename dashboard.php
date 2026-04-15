@@ -22,6 +22,11 @@ $role=$user['role'];
 <!-- Header -->
 <header>
     <div class="hdr-left">
+        <button class="hamburger" id="hamburger-btn" aria-label="Menú" onclick="toggleSidebar()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
         <div class="logo-badge">S</div>
         <div><div class="brand-name">SAEP</div><div class="brand-sub">Sistema de Administración Educativa y Proyectos</div></div>
     </div>
@@ -33,8 +38,11 @@ $role=$user['role'];
     </div>
 </header>
 
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
 <!-- Sidebar -->
-<aside>
+<aside id="main-sidebar">
     <div class="nav-sec">
         <div class="nav-lbl">Principal</div>
         <div class="nav-item active" onclick="nav('inicio')" id="nav-inicio">
@@ -297,5 +305,26 @@ window.ROLE = '<?=$role?>';
 window.MY_ID = '<?=$user['id']?>';
 </script>
 <script src="assets/dashboard.js"></script>
+<script>
+function toggleSidebar(){
+    const aside = document.getElementById('main-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const isOpen = aside.classList.toggle('open');
+    overlay.classList.toggle('visible', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+// Close sidebar when a nav item is clicked on mobile
+document.querySelectorAll('.nav-item').forEach(function(el){
+    el.addEventListener('click', function(){
+        if(window.innerWidth <= 768){
+            const aside = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            aside.classList.remove('open');
+            overlay.classList.remove('visible');
+            document.body.style.overflow = '';
+        }
+    });
+});
+</script>
 </body>
 </html>
