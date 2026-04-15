@@ -192,7 +192,16 @@ $role=$user['role'];
 <?php if(in_array($role,['admin','director','subdirector'])): ?>
 <div class="panel" id="panel-courses">
     <div class="ph"><h2>Cursos y materias</h2><button class="btn btn-navy" onclick="openCourseModal()">+ Nuevo curso</button></div>
-    <div class="pb"><div class="cards" id="courses-cards"></div></div>
+    <div class="pb">
+        <div class="courses-filter-row" id="courses-filter">
+            <button class="filter-btn filter-btn-active" onclick="filterCourses(null)">Todos</button>
+            <button class="filter-btn filter-btn-prog" onclick="filterCourses('prog')">Programación</button>
+            <button class="filter-btn filter-btn-mmo" onclick="filterCourses('mmo')">MMO</button>
+            <button class="filter-btn filter-btn-turismo" onclick="filterCourses('turismo')">Turismo</button>
+            <button class="filter-btn filter-btn-basico" onclick="filterCourses('basico')">Ciclo Básico</button>
+        </div>
+        <div class="cards" id="courses-cards"></div>
+    </div>
 </div>
 <?php endif; ?>
 

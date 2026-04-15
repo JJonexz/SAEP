@@ -7,6 +7,7 @@
     --blue:#2563eb;--blue-dim:rgba(37,99,235,.1);
     --bg:#f0f2f5;--white:#ffffff;--border:#dde1e7;
     --text:#1e2d40;--text2:#374151;--muted:#6b7280;
+    --o-cb:#d97706;--o-prog:#2563eb;--o-tur:#16a34a;--o-mmo:#e63946;
     --font:'Inter',sans-serif;--radius:0.312vw
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:0.729vw;overflow:hidden}
@@ -88,10 +89,10 @@ tr:hover td{background:#fafbff}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(12.5vw,1fr));gap:1rem}
 .card{background:var(--white);border:0.052vw solid var(--border);border-radius:0.417vw;padding:1.25rem;transition:box-shadow .15s,border-color .15s;border-top:0.209vw solid var(--border)}
 .card:hover{box-shadow:0 0.208vw 0.833vw rgba(26,58,107,.1)}
-.card-prog{border-top-color:#2563eb;background: #e0e6f4;}
-.card-mmo{border-top-color:#e63946;background:#f3dddd}
-.card-basico{border-top-color:#d97706;background:#f4ebdb}
-.card-turismo{border-top-color:#16a34a;background:#e1f8e2}
+.card-prog{border-top-color:var(--o-prog);background: #e0e6f4;}
+.card-mmo{border-top-color:var(--o-mmo);background:#f3dddd}
+.card-basico{border-top-color:var(--o-cb);background:#f4ebdb}
+.card-turismo{border-top-color:var(--o-tur);background:#e1f8e2}
 .card h3{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
 .card p{font-size:.75rem;color:var(--muted);line-height:1.5}
 .card-meta{display:flex;gap:.4rem;margin-top:.75rem;flex-wrap:wrap}
@@ -99,6 +100,17 @@ tr:hover td{background:#fafbff}
 .tag{font-size:.68rem;padding:.18rem .5rem;border-radius:0.208vw;border:0.052vw solid var(--border);color:var(--muted)}
 .tag-pub{border-color:var(--green);color:var(--green)}
 .tag-priv{border-color:var(--amber);color:var(--amber)}
+
+/* ── Filter Buttons ── */
+.courses-filter-row{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.filter-btn{font-family:var(--font);font-size:.78rem;font-weight:600;padding:.45rem .9rem;border-radius:var(--radius);border:0.104vw solid;cursor:pointer;transition:all .15s;background:#fff}
+.filter-btn-active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.filter-btn:not(.filter-btn-active){border-color:var(--border);color:var(--text2)}
+.filter-btn:not(.filter-btn-active):hover{border-color:var(--navy);color:var(--navy)}
+.filter-btn-prog:not(.filter-btn-active):hover{border-color:var(--o-prog);color:var(--o-prog)}
+.filter-btn-mmo:not(.filter-btn-active):hover{border-color:var(--o-mmo);color:var(--o-mmo)}
+.filter-btn-turismo:not(.filter-btn-active):hover{border-color:var(--o-tur);color:var(--o-tur)}
+.filter-btn-basico:not(.filter-btn-active):hover{border-color:var(--o-cb);color:var(--o-cb)}
 
 /* ── Forms ── */
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}

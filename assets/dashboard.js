@@ -1,5 +1,5 @@
 const ROLE = window.ROLE, MY_ID = window.MY_ID;
-const S={repos:[],activeRepo:null,repoPath:[],editorFile:null,editorSha:null,users:[],courses:[],rooms:[],isPrivate:false};
+const S={repos:[],activeRepo:null,repoPath:[],editorFile:null,editorSha:null,users:[],courses:[],rooms:[],isPrivate:false,courseFilter:null};
 
 // ── Nav ────────────────────────────────────────────────────────────────────
 function nav(id){
@@ -394,11 +394,20 @@ async function loadCourses(){
     if(!S.users.length){const ur=await api('api/admin/users.php');S.users=await ur.json();}
     renderCoursesCards();
 }
+function filterCourses(orientation){
+    S.courseFilter=orientation;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('filter-btn-active'));
+    if(orientation===null){document.querySelector('[onclick="filterCourses(null)"]').classList.add('filter-btn-active');}
+    else{document.querySelector(`[onclick="filterCourses('${orientation}')"]`).classList.add('filter-btn-active');}
+    renderCoursesCards();
+}
 function renderCoursesCards(){
     const el=document.getElementById('courses-cards');
-    if(!S.courses.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Sin cursos creados.</div>';return;}
     const orientColors={"Programación":"prog","MMO":"mmo","Ciclo Básico":"basico","Turismo":"turismo"};
-    el.innerHTML=S.courses.map(c=>{const oClass=orientColors[c.orientacion]||'';return `<div class="card card-${oClass}">
+    let filtered=S.courses;
+    if(S.courseFilter){filtered=S.courses.filter(c=>orientColors[c.orientacion]===S.courseFilter);}
+    if(!filtered.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Sin cursos creados.</div>';return;}
+    el.innerHTML=filtered.map(c=>{const oClass=orientColors[c.orientacion]||'';return `<div class="card card-${oClass}">
         <h3>${c.anio}° ${c.division}</h3>
         <p>${c.nombre}<br><span style="color:var(--muted)">Turno: ${c.turno}</span><br><span style="color:var(--muted);font-size:.7rem">${c.orientacion||''}</span></p>
         <div class="card-meta"><span class="badge badge-blue">${c.alumnos?.length||0} alumnos</span><span class="badge badge-gray">${c.materias?.length||0} materias</span></div>
