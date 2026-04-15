@@ -29,7 +29,7 @@ $body=json_decode(file_get_contents('php://input'),true);
 if ($method==='POST') {
     $required=['alumno_id','curso_id','materia_id','cuatrimestre'];
     foreach ($required as $r) { if (empty($body[$r])) { http_response_code(400); echo json_encode(['error'=>"$r requerido"]); exit; } }
-    if (!in_array((int)$body['cuatrimestre'],[1,2])) { http_response_code(400); echo json_encode(['error'=>'Cuatrimestre inválido']); exit; }
+    if (!in_array((int)$body['cuatrimestre'],[1,2,3,4])) { http_response_code(400); echo json_encode(['error'=>'Cuatrimestre inválido']); exit; }
     $nota=isset($body['nota'])&&$body['nota']!==''?floatval($body['nota']):null;
     if ($nota!==null&&($nota<1||$nota>10)) { http_response_code(400); echo json_encode(['error'=>'Nota 1-10']); exit; }
     $grades=db_read(GRADES_FILE);
