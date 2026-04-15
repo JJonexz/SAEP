@@ -134,8 +134,8 @@ $role=$user['role'];
         </div>
         <div class="tab-content visible" id="gtab-ver">
             <div class="fgrid mb1" style="max-width:560px">
-                <div class="field"><label>Curso</label><select id="gv-curso" onchange="loadGradesTable()"><option value="">Todos</option></select></div>
-                <div class="field"><label>Cuatrimestre</label><select id="gv-cuatri" onchange="loadGradesTable()"><option value="">Todos</option><option value="1_informe">1° Informe</option><option value="1">1°</option><option value="2_informe">2° Informe</option><option value="2">2°</option></select></div>
+                <div class="field"><label>Curso</label><select id="gv-curso" onchange="gvOnCursoChange()"><option value="">Seleccionar curso...</option></select></div>
+                <div class="field" id="gv-cuatri-field" style="display:none"><label>Cuatrimestre</label><select id="gv-cuatri" onchange="loadGradesTable()"><option value="">Todos</option><option value="1_informe">1° Informe</option><option value="1">1°</option><option value="2_informe">2° Informe</option><option value="2">2°</option></select></div>
             </div>
             <div class="tbl-wrap" id="grades-tbl"></div>
         </div>

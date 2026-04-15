@@ -280,9 +280,26 @@ async function initGrades(){
     if(!S.courses.length){const r=await api('api/courses/courses.php');S.courses=await r.json();}
     if(!S.users.length&&['admin','director','subdirector'].includes(ROLE)){const r=await api('api/admin/users.php');S.users=await r.json();}
     const gvC=document.getElementById('gv-curso'),gcC=document.getElementById('gc-curso');
-    const opts='<option value="">Todos</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
+    const opts='<option value="">Seleccionar curso...</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
     if(gvC)gvC.innerHTML=opts;
     if(gcC)gcC.innerHTML='<option value="">Seleccionar...</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
+    // No cargar tabla hasta que se elija un curso
+    const el=document.getElementById('grades-tbl');
+    if(el)el.innerHTML='<div class="empty" style="padding:1.5rem">Seleccioná un curso para ver las calificaciones.</div>';
+}
+function gvOnCursoChange(){
+    const cid=document.getElementById('gv-curso')?.value||'';
+    const cuatriField=document.getElementById('gv-cuatri-field');
+    const cuatriSel=document.getElementById('gv-cuatri');
+    if(cid){
+        if(cuatriField)cuatriField.style.display='';
+    } else {
+        if(cuatriField)cuatriField.style.display='none';
+        if(cuatriSel)cuatriSel.value='';
+        const el=document.getElementById('grades-tbl');
+        if(el)el.innerHTML='<div class="empty" style="padding:1.5rem">Seleccioná un curso para ver las calificaciones.</div>';
+        return;
+    }
     loadGradesTable();
 }
 async function loadGradesTable(){
