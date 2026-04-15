@@ -8,7 +8,7 @@ $github_base   = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/\\');
 define('GITHUB_REDIRECT_URI',  "$github_scheme://$github_host$github_base/callback.php");
 define('GITHUB_SCOPE',         'read:user user:email repo delete_repo');
 
-define('DATA_DIR',      __DIR__ . '/data/');
+define('DATA_DIR',      __DIR__ . '/../data/');
 define('USERS_FILE',    DATA_DIR . 'users.json');
 define('COURSES_FILE',  DATA_DIR . 'courses.json');
 define('SUBJECTS_FILE', DATA_DIR . 'subjects.json');

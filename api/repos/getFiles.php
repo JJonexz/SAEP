@@ -1,7 +1,7 @@
 <?php
 session_start(); header('Content-Type: application/json');
 require_once __DIR__.'/../../lib/auth.php';
-require_once __DIR__.'/../../config.php';
+require_once __DIR__.'/../config/config.php';
 require_approved();
 $at=$_SESSION['access_token']; $fn=$_GET['repo']??''; $path=$_GET['path']??'';
 if(!$fn){http_response_code(400);echo json_encode(['error'=>'repo requerido']);exit;}
