@@ -316,6 +316,30 @@ async function saveGrade(){
     if(d.success){loadGradesTable();document.getElementById('gc-nota').value='';document.getElementById('gc-asist').value='';}
     else{err.textContent=d.error||'Error';err.style.display='block';}
 }
+async function sendGradeEmail(alumnoId,nota,concepto,estado){
+    const alumno=S.users.find(u=>u.id===alumnoId);
+    if(!alumno||!alumno.email){console.warn('No se encontró email del alumno');return false;}
+    try{
+        const r=await api('api/mail/sendGradeEmail.php',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                alumno_id:alumnoId,
+                email:alumno.email,
+                nombre:alumno.nombre,
+                apellido:alumno.apellido,
+                nota:nota,
+                concepto:concepto,
+                estado:estado
+            })
+        });
+        const d=await r.json();
+        return d.success||false;
+    }catch(e){
+        console.error('Error al enviar email:',e);
+        return false;
+    }
+}
 async function delGrade(id){if(!confirm('¿Eliminar esta calificación?'))return;await api('api/grades/grades.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});loadGradesTable();}
 function gTab(name){document.querySelectorAll('#panel-grades .tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('#panel-grades .tab-content').forEach(t=>t.classList.remove('visible'));event.target.classList.add('active');document.getElementById('gtab-'+name)?.classList.add('visible');}
 
