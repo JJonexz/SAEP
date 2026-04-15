@@ -96,8 +96,8 @@ tr:hover td{background:#fafbff}
 
 /* ── Cards ── */
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
-.card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:1.25rem;transition:box-shadow .15s,border-color .15s}
-.card:hover{box-shadow:0 4px 16px rgba(26,58,107,.1);border-color:#b8c8e8}
+.card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:1.25rem;transition:box-shadow .15s,border-color .15s;border-top:4px solid var(--border)}
+.card:hover{box-shadow:0 4px 16px rgba(26,58,107,.1)}
 .card-prog{border-top-color:var(--o-prog);background: #e0e6f4;}
 .card-mmo{border-top-color:var(--o-mmo);background:#f3dddd}
 .card-basico{border-top-color:var(--o-cb);background:#f4ebdb}
