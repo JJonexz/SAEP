@@ -296,21 +296,23 @@ function gvOnCursoChange(){
     } else {
         if(cuatriField)cuatriField.style.display='none';
         if(cuatriSel)cuatriSel.value='';
-        const el=document.getElementById('grades-tbl');
-        if(el)el.innerHTML='<div class="empty" style="padding:1.5rem">Seleccioná un curso para ver las calificaciones.</div>';
-        return;
     }
     loadGradesTable();
 }
 async function loadGradesTable(){
     const cid=document.getElementById('gv-curso')?.value||'';
     const qua=document.getElementById('gv-cuatri')?.value||'';
-    const quaBase=cuatriBase(qua); // '1' o '2' o '' para la API
+    const search=(document.getElementById('gv-search')?.value||'').toLowerCase().trim();
+    const el=document.getElementById('grades-tbl');
+    // Si no hay curso ni búsqueda, mostrar mensaje inicial
+    if(!cid&&!search){el.innerHTML='<div class="empty" style="padding:1.5rem">Seleccioná un curso o buscá un alumno para ver las calificaciones.</div>';return;}
+    const quaBase=cuatriBase(qua);
     let url='api/grades/grades.php?'; if(cid)url+=`curso_id=${cid}&`; if(quaBase)url+=`cuatrimestre=${quaBase}&`;
     const r=await api(url); let grades=await r.json();
-    // Filtro fino en cliente: si se eligió un valor específico, filtrar por cuatrimestre exacto
+    // Filtro fino por cuatrimestre exacto
     if(qua) grades=grades.filter(g=>String(g.cuatrimestre)===qua);
-    const el=document.getElementById('grades-tbl');
+    // Filtro por nombre/apellido del alumno
+    if(search) grades=grades.filter(g=>{const al=S.users.find(u=>u.id===g.alumno_id);if(!al)return false;return (al.nombre+' '+al.apellido).toLowerCase().includes(search)||(al.apellido+' '+al.nombre).toLowerCase().includes(search);});
     if(!grades.length){el.innerHTML='<div class="empty" style="padding:1.5rem">Sin calificaciones.</div>';return;}
     el.innerHTML=`<table><thead><tr><th>Alumno</th><th>Curso</th><th>Materia</th><th>Cuatri</th><th>Nota</th><th>Concepto</th><th>Asistencia</th><th>Estado</th><th></th></tr></thead><tbody>${grades.map(g=>{
         const al=S.users.find(u=>u.id===g.alumno_id);
