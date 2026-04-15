@@ -458,7 +458,7 @@ async function renderNotasTabla(alumnoId, cursoId){
                     <td style="font-weight:600;white-space:nowrap;padding:.4rem .6rem">${ma?esc(ma.nombre):'—'}</td>
                     <td style="white-space:nowrap;padding:.4rem .6rem">${cuatriLabel(g.cuatrimestre)}</td>
                     <td style="padding:.4rem .6rem;text-align:center"><span class="nota-val ${nc}" style="font-size:.82rem">${g.nota??'—'}</span></td>
-                    <td style="padding:.4rem .6rem">${g.concepto||'—'}</td>
+                    <td style="padding:.4rem .6rem">${g.concepto?`<span class="badge ${g.concepto==='TED'?'badge-red':g.concepto==='TEP'?'badge-amber':'badge-green'}" style="font-size:.68rem">${g.concepto}</span>`:'—'}</td>
                     <td style="white-space:nowrap;padding:.4rem .6rem;text-align:center">${g.asistencia!=null?g.asistencia+'%':'—'}</td>
                     <td style="padding:.4rem .6rem;text-align:center"><span class="badge ${estB}" style="font-size:.68rem">${g.estado}</span></td>
                 </tr>`;
@@ -475,7 +475,21 @@ function gcLoadStudents(){
     asel.innerHTML='<option value="">Seleccionar...</option>'+alumnos.map(a=>`<option value="${a.id}">${a.apellido} ${a.nombre}</option>`).join('');
     msel.innerHTML='<option value="">Seleccionar...</option>'+(c.materias||[]).map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
 }
+function gcAutoFill(){
+    const nota=parseFloat(document.getElementById('gc-nota').value);
+    const concEl=document.getElementById('gc-concepto');
+    const estEl=document.getElementById('gc-estado');
+    if(isNaN(nota)||nota<1||nota>10){
+        concEl.value=''; estEl.value='pendiente'; return;
+    }
+    // Trayectoria: 1-3 → TED, 4-6 → TEP, 7-10 → TEA
+    concEl.value = nota<=3 ? 'TED' : nota<=6 ? 'TEP' : 'TEA';
+    // Estado: 1-3 → desaprobado, 4-6 → pendiente, 7-10 → aprobado
+    estEl.value  = nota<=3 ? 'desaprobado' : nota<=6 ? 'pendiente' : 'aprobado';
+}
 async function saveGrade(){
+    // Asegurar que concepto y estado estén al día antes de guardar
+    gcAutoFill();
     const body={alumno_id:document.getElementById('gc-alumno').value,curso_id:document.getElementById('gc-curso').value,materia_id:document.getElementById('gc-materia').value,cuatrimestre:document.getElementById('gc-cuatri').value,nota:document.getElementById('gc-nota').value||null,concepto:document.getElementById('gc-concepto').value||null,asistencia:document.getElementById('gc-asist').value||null,estado:document.getElementById('gc-estado').value};
     const err=document.getElementById('gc-err'); err.style.display='none';
     if(!body.alumno_id||!body.curso_id||!body.materia_id){err.textContent='Seleccioná curso, materia y alumno.';err.style.display='block';return;}

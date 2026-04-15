@@ -146,10 +146,16 @@ $role=$user['role'];
                 <div class="field"><label>Materia</label><select id="gc-materia"><option value="">Seleccionar...</option></select></div>
                 <div class="field"><label>Alumno</label><select id="gc-alumno"><option value="">Seleccionar...</option></select></div>
                 <div class="field"><label>Cuatrimestre</label><select id="gc-cuatri"><option value="1">1° Informe</option><option value="2">1°</option><option value="3">2° Informe</option><option value="4">2°</option></select></div>
-                <div class="field"><label>Nota (1–10)</label><input type="number" id="gc-nota" min="1" max="10" step="0.1" placeholder="7"></div>
-                <div class="field"><label>Trayectoria Estudiantil</label><select id="gc-concepto"><option value="">—</option><option value="TED">TED</option><option value="TEP">TEP</option><option value="TEA">TEA</option></select></div>
+                <div class="field"><label>Nota (1–10)</label><input type="number" id="gc-nota" min="1" max="10" step="0.1" placeholder="7" oninput="gcAutoFill()"></div>
+                <div class="field"><label>Trayectoria Estudiantil</label>
+                    <select id="gc-concepto" disabled style="background:var(--bg,#f5f6fa);color:var(--text2,#6b7280);cursor:not-allowed"><option value="">—</option><option value="TED">TED</option><option value="TEP">TEP</option><option value="TEA">TEA</option></select>
+                    <div style="font-size:.7rem;color:var(--muted,#9ca3af);margin-top:.25rem">Se asigna automáticamente según la nota</div>
+                </div>
                 <div class="field"><label>Asistencia %</label><input type="number" id="gc-asist" min="0" max="100" placeholder="80"></div>
-                <div class="field"><label>Estado</label><select id="gc-estado"><option value="pendiente">Pendiente</option><option value="aprobado">Aprobado</option><option value="desaprobado">Desaprobado</option></select></div>
+                <div class="field"><label>Estado</label>
+                    <select id="gc-estado" disabled style="background:var(--bg,#f5f6fa);color:var(--text2,#6b7280);cursor:not-allowed"><option value="pendiente">Pendiente</option><option value="aprobado">Aprobado</option><option value="desaprobado">Desaprobado</option></select>
+                    <div style="font-size:.7rem;color:var(--muted,#9ca3af);margin-top:.25rem">Se asigna automáticamente según la nota</div>
+                </div>
             </div>
             <div class="err-msg" id="gc-err"></div>
             <button class="btn btn-navy" onclick="saveGrade()" style="margin-top:.75rem">Guardar calificación</button>

@@ -141,5 +141,18 @@
         "estado": "desaprobado",
         "fecha": "2026-04-15",
         "registrado_por": "69dd7a15948ce1.75245546"
+    },
+    {
+        "id": "69e0122e390416.36060552",
+        "alumno_id": "69dd9f8a8d2e3f.88990011",
+        "curso_id": "69decefd951746.30670855",
+        "materia_id": "69dffafda7ceb4.38701186",
+        "cuatrimestre": 2,
+        "nota": 6,
+        "concepto": "TEP",
+        "asistencia": 80,
+        "estado": "pendiente",
+        "fecha": "2026-04-15",
+        "registrado_por": "69dd7a15948ce1.75245546"
     }
 ]
