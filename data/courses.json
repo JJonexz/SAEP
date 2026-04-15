@@ -1,19 +1,45 @@
 [
     {
-        "id": "69d3d1e5e0e3f1.01390662",
-        "nombre": "3a",
-        "anio": 3,
+        "id": "69decefd951746.30670855",
+        "nombre": "2°a",
+        "anio": 2,
         "division": "a",
         "turno": "Mañana",
         "orientacion": "Ciclo Básico",
         "materias": [
             {
-                "id": "69d3d25e80e495.81126422",
-                "nombre": "mete",
-                "profesor_id": null
+                "id": "69decf0e36bd11.89893847",
+                "nombre": "Mate",
+                "profesor_id": "69dd9f8a7i1j2k.77889900"
+            },
+            {
+                "id": "69dffafda7ceb4.38701186",
+                "nombre": "Ingles",
+                "profesor_id": "69dd9f8a8j2k3l.88990011"
             }
         ],
-        "alumnos": [],
+        "alumnos": [
+            "69dd9f8a9e3f4g.99001122",
+            "69dd9f8a8d2e3f.88990011"
+        ],
+        "profesores": []
+    },
+    {
+        "id": "69decf09321e69.91034466",
+        "nombre": "3°c",
+        "anio": 3,
+        "division": "c",
+        "turno": "Mañana",
+        "materias": [
+            {
+                "id": "69decf164ad7a3.54192330",
+                "nombre": "Ingles",
+                "profesor_id": "69dd9f8a7i1j2k.77889900"
+            }
+        ],
+        "alumnos": [
+            "69dd9f8a1w5x6y.11223344"
+        ],
         "profesores": []
     },
     {
