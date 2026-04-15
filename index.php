@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once 'lib/db.php';
-require_once 'config/config.php';
+require_once 'config.php';
 if (isset($_SESSION['github_id'])) {
     $users = db_read(USERS_FILE);
     $user  = db_find($users, 'github_id', $_SESSION['github_id']);

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/config.php';
+require_once 'config.php';
 require_once 'lib/db.php';
 
 if (!isset($_GET['code'],$_GET['state']) || $_GET['state'] !== $_SESSION['oauth_state']) { http_response_code(403); exit('Solicitud inválida.'); }

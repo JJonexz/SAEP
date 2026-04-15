@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/config.php'; require_once 'lib/db.php';
+require_once 'config.php'; require_once 'lib/db.php';
 if (!isset($_SESSION['github_id'])) { header('Location: index.php'); exit; }
 $users=db_read(USERS_FILE); $user=db_find($users,'github_id',$_SESSION['github_id']);
 if (!$user) { header('Location: index.php'); exit; }

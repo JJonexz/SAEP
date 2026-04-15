@@ -1,7 +1,7 @@
 <?php
 session_start(); header('Content-Type: application/json');
 require_once __DIR__.'/../../lib/auth.php';
-require_once __DIR__.'/../config/config.php';
+require_once __DIR__.'/../../config.php';
 require_approved();
 $at=$_SESSION['access_token'];
 $body=json_decode(file_get_contents('php://input'),true);

@@ -1,7 +1,7 @@
 <?php
 session_start(); header('Content-Type: application/json');
 require_once __DIR__.'/../../lib/auth.php';
-require_once __DIR__.'/../config/config.php';
+require_once __DIR__.'/../../config.php';
 require_approved();
 $at=$_SESSION['access_token'];
 $r=file_get_contents('https://api.github.com/user/repos?per_page=100&sort=updated&affiliation=owner',false,stream_context_create(['http'=>['method'=>'GET','header'=>"Authorization: Bearer $at\r\nUser-Agent: SAEP\r\nAccept: application/json\r\n"]]));
