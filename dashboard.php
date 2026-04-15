@@ -133,11 +133,9 @@ $role=$user['role'];
             <?php endif; ?>
         </div>
         <div class="tab-content visible" id="gtab-ver">
-            <div class="mb1" style="display:flex;align-items:flex-end;gap:1rem;width:100%">
-                <div class="field" style="margin:0;min-width:200px"><label>Curso</label><select id="gv-curso" onchange="gvOnCursoChange()"><option value="">Seleccionar curso...</option></select></div>
-                <div class="field" id="gv-cuatri-field" style="display:none;margin:0;min-width:170px"><label>Cuatrimestre</label><select id="gv-cuatri" onchange="loadGradesTable()"><option value="">Todos</option><option value="1_informe">1° Informe</option><option value="1">1°</option><option value="2_informe">2° Informe</option><option value="2">2°</option></select></div>
-                <div style="flex:1"></div>
-                <div class="field" style="margin:0;min-width:220px"><label>Buscar alumno</label><input type="text" id="gv-search" placeholder="Nombre o apellido..." oninput="loadGradesTable()"></div>
+            <div class="mb1" style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap">
+                <div class="field" style="margin:0;min-width:220px"><label>Curso</label><select id="gv-curso" onchange="gvOnCursoChange()"><option value="">Seleccionar curso...</option></select></div>
+                <div class="field" style="margin:0;min-width:240px"><label>Buscar alumno</label><input type="text" id="gv-search" placeholder="Nombre, apellido o DNI..." oninput="loadGradesTable()"></div>
             </div>
             <div class="tbl-wrap" id="grades-tbl"></div>
         </div>

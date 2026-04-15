@@ -288,40 +288,183 @@ async function initGrades(){
     if(el)el.innerHTML='<div class="empty" style="padding:1.5rem">Seleccioná un curso para ver las calificaciones.</div>';
 }
 function gvOnCursoChange(){
-    const cid=document.getElementById('gv-curso')?.value||'';
-    const cuatriField=document.getElementById('gv-cuatri-field');
-    const cuatriSel=document.getElementById('gv-cuatri');
-    if(cid){
-        if(cuatriField)cuatriField.style.display='';
-    } else {
-        if(cuatriField)cuatriField.style.display='none';
-        if(cuatriSel)cuatriSel.value='';
-    }
     loadGradesTable();
 }
 async function loadGradesTable(){
     const cid=document.getElementById('gv-curso')?.value||'';
-    const qua=document.getElementById('gv-cuatri')?.value||'';
     const search=(document.getElementById('gv-search')?.value||'').toLowerCase().trim();
     const el=document.getElementById('grades-tbl');
-    // Si no hay curso ni búsqueda, mostrar mensaje inicial
-    if(!cid&&!search){el.innerHTML='<div class="empty" style="padding:1.5rem">Seleccioná un curso o buscá un alumno para ver las calificaciones.</div>';return;}
-    const quaBase=cuatriBase(qua);
-    let url='api/grades/grades.php?'; if(cid)url+=`curso_id=${cid}&`; if(quaBase)url+=`cuatrimestre=${quaBase}&`;
-    const r=await api(url); let grades=await r.json();
-    // Filtro fino por cuatrimestre exacto
-    if(qua) grades=grades.filter(g=>String(g.cuatrimestre)===qua);
-    // Filtro por nombre/apellido del alumno
-    if(search) grades=grades.filter(g=>{const al=S.users.find(u=>u.id===g.alumno_id);if(!al)return false;return (al.nombre+' '+al.apellido).toLowerCase().includes(search)||(al.apellido+' '+al.nombre).toLowerCase().includes(search);});
-    if(!grades.length){el.innerHTML='<div class="empty" style="padding:1.5rem">Sin calificaciones.</div>';return;}
-    el.innerHTML=`<table><thead><tr><th>Alumno</th><th>Curso</th><th>Materia</th><th>Cuatri</th><th>Nota</th><th>Concepto</th><th>Asistencia</th><th>Estado</th><th></th></tr></thead><tbody>${grades.map(g=>{
-        const al=S.users.find(u=>u.id===g.alumno_id);
-        const co=S.courses.find(c=>c.id===g.curso_id);
-        const ma=co?.materias?.find(m=>m.id===g.materia_id);
-        const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
-        const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<tr><td>${al?al.apellido+' '+al.nombre:'—'}</td><td>${co?co.anio+'° '+co.division:'—'}</td><td>${ma?ma.nombre:'—'}</td><td>${cuatriLabel(g.cuatrimestre)}</td><td><span class="nota-val ${nc}">${g.nota??'—'}</span></td><td>${g.concepto||'—'}</td><td>${g.asistencia!=null?g.asistencia+'%':'—'}</td><td><span class="badge ${estB}">${g.estado}</span></td><td><button class="btn btn-red" style="font-size:.7rem;padding:.2rem .5rem" onclick="delGrade('${g.id}')">✕</button></td></tr>`;
-    }).join('')}</tbody></table>`;
+
+    // Sin curso seleccionado: mostrar mensaje
+    if(!cid&&!search){
+        el.innerHTML='<div class="empty" style="padding:1.5rem">Seleccioná un curso para ver los alumnos.</div>';
+        return;
+    }
+
+    // Obtener alumnos del curso seleccionado
+    let alumnos=[];
+    if(cid){
+        const curso=S.courses.find(c=>c.id===cid);
+        if(curso&&curso.alumnos?.length){
+            alumnos=S.users.filter(u=>curso.alumnos.includes(u.id));
+        }
+    } else {
+        // Sin curso pero con búsqueda: buscar en todos los cursos
+        const idsEnCursos=new Set(S.courses.flatMap(c=>c.alumnos||[]));
+        alumnos=S.users.filter(u=>idsEnCursos.has(u.id));
+    }
+
+    // Filtro por nombre, apellido o DNI
+    if(search){
+        alumnos=alumnos.filter(u=>{
+            const fullName=((u.apellido||'')+' '+(u.nombre||'')).toLowerCase();
+            const fullName2=((u.nombre||'')+' '+(u.apellido||'')).toLowerCase();
+            const dni=String(u.dni||'').toLowerCase();
+            return fullName.includes(search)||fullName2.includes(search)||dni.includes(search);
+        });
+    }
+
+    if(!alumnos.length){
+        el.innerHTML='<div class="empty" style="padding:1.5rem">No se encontraron alumnos.</div>';
+        return;
+    }
+
+    // Determinar curso para cada alumno (en caso de búsqueda sin curso fijo)
+    const getCurso=u=>cid?S.courses.find(c=>c.id===cid):S.courses.find(c=>c.alumnos?.includes(u.id));
+
+    el.innerHTML=`
+    <table>
+        <thead>
+            <tr>
+                <th>Alumno</th>
+                <th>Curso</th>
+                <th>DNI</th>
+                <th style="text-align:right"></th>
+            </tr>
+        </thead>
+        <tbody>
+            ${alumnos.map(u=>{
+                const co=getCurso(u);
+                const cursoLabel=co?`${co.anio}° ${co.division} — ${co.nombre}`:'—';
+                const dni=u.dni||'—';
+                return `<tr>
+                    <td style="font-weight:600">${esc(u.apellido||'')} ${esc(u.nombre||'')}</td>
+                    <td>${esc(cursoLabel)}</td>
+                    <td>${esc(String(dni))}</td>
+                    <td style="text-align:right">
+                        <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
+                            onclick="openNotasModal('${u.id}','${esc(u.apellido||'')} ${esc(u.nombre||'')}','${co?.id||''}')">
+                            Ver Notas
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
+}
+
+async function openNotasModal(alumnoId, alumnoNombre, cursoId){
+    const curso=S.courses.find(c=>c.id===cursoId);
+    const materias=curso?.materias||[];
+
+    const matSelectOpts=materias.length
+        ? '<option value="">Todas las materias</option>'+materias.map(m=>`<option value="${m.id}">${esc(m.nombre)}</option>`).join('')
+        : '<option value="">Sin materias</option>';
+
+    modal(`
+        <div style="display:flex;flex-direction:column;gap:.85rem;width:min(960px,92vw)">
+            <!-- Header alumno -->
+            <div style="display:flex;align-items:center;gap:.75rem">
+                <div style="width:36px;height:36px;flex-shrink:0;background:var(--navy-faint);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy);font-size:.9rem">${esc(alumnoNombre.charAt(0))}</div>
+                <div>
+                    <div style="font-weight:700;font-size:1rem;color:var(--text)">${esc(alumnoNombre)}</div>
+                    <div style="font-size:.75rem;color:var(--muted)">${curso?curso.anio+'° '+curso.division+' — '+curso.nombre:'Sin curso'}</div>
+                </div>
+                <!-- Selector de materia inline -->
+                <div style="margin-left:auto;min-width:200px">
+                    <select id="notas-mat-select" onchange="renderNotasTabla('${alumnoId}','${cursoId}')"
+                        style="width:100%;font-family:var(--font);font-size:.78rem;padding:.4rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text);background:var(--white)">
+                        ${matSelectOpts}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabla de notas -->
+            <div id="notas-tabla-wrap" style="overflow-x:auto">
+                <div class="empty" style="padding:2rem;text-align:center;color:var(--muted);font-size:.82rem">
+                    Seleccioná una materia para ver las notas.
+                </div>
+            </div>
+
+            <div class="modal-footer" style="padding-top:.25rem">
+                <button class="btn btn-outline" onclick="closeModal()">Cerrar</button>
+            </div>
+        </div>
+    `);
+    // Auto-cargar si hay materias
+    if(materias.length) renderNotasTabla(alumnoId, cursoId);
+}
+
+// Orden canónico de cuatrimestres: 1°Inf → 1° → 2°Inf → 2°
+const CUATRI_ORDER={'1':1,'1_informe':0,'2_informe':2,'2':3};
+function cuatriSortKey(v){const k=String(v).replace('_informe','_informe');return CUATRI_ORDER[String(v)]??99;}
+
+async function renderNotasTabla(alumnoId, cursoId){
+    const sel=document.getElementById('notas-mat-select');
+    const selectedMat=sel?sel.value:'';
+    const wrap=document.getElementById('notas-tabla-wrap');
+    wrap.innerHTML='<div class="empty" style="padding:1.5rem">Cargando...</div>';
+
+    let url=`api/grades/grades.php?alumno_id=${alumnoId}`;
+    if(cursoId)url+=`&curso_id=${cursoId}`;
+    const r=await api(url);
+    let grades=await r.json();
+
+    // Filtrar por materia si se eligió una específica
+    if(selectedMat) grades=grades.filter(g=>g.materia_id===selectedMat);
+
+    if(!grades.length){
+        wrap.innerHTML='<div class="empty" style="padding:1.5rem">Sin calificaciones.</div>';
+        return;
+    }
+
+    // Ordenar: primero por materia, luego por cuatrimestre (1°Inf → 1° → 2°Inf → 2°)
+    const curso=S.courses.find(c=>c.id===cursoId);
+    grades.sort((a,b)=>{
+        const mA=curso?.materias?.findIndex(m=>m.id===a.materia_id)??0;
+        const mB=curso?.materias?.findIndex(m=>m.id===b.materia_id)??0;
+        if(mA!==mB)return mA-mB;
+        return cuatriSortKey(a.cuatrimestre)-cuatriSortKey(b.cuatrimestre);
+    });
+
+    wrap.innerHTML=`
+    <table style="width:100%;font-size:.8rem">
+        <thead>
+            <tr>
+                <th style="white-space:nowrap">Nom. Materia</th>
+                <th style="white-space:nowrap">Cuatri</th>
+                <th>Nota</th>
+                <th style="white-space:nowrap">Trayectoria Estudiantil</th>
+                <th>Asistencia</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${grades.map(g=>{
+                const ma=curso?.materias?.find(m=>m.id===g.materia_id);
+                const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
+                const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
+                return `<tr>
+                    <td style="font-weight:600;white-space:nowrap">${ma?esc(ma.nombre):'—'}</td>
+                    <td style="white-space:nowrap">${cuatriLabel(g.cuatrimestre)}</td>
+                    <td><span class="nota-val ${nc}">${g.nota??'—'}</span></td>
+                    <td>${g.concepto||'—'}</td>
+                    <td style="white-space:nowrap">${g.asistencia!=null?g.asistencia+'%':'—'}</td>
+                    <td><span class="badge ${estB}">${g.estado}</span></td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
 }
 function gcLoadStudents(){
     const cid=document.getElementById('gc-curso').value;
