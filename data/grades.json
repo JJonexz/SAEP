@@ -154,5 +154,57 @@
         "estado": "pendiente",
         "fecha": "2026-04-15",
         "registrado_por": "69dd7a15948ce1.75245546"
+    },
+    {
+        "id": "69e021358c3ce3.71687657",
+        "alumno_id": "69dd9f8a7s1t2u.77889900",
+        "curso_id": "69debaa5a427e5.75618697",
+        "materia_id": "69e0211eb8f052.17157417",
+        "cuatrimestre": 1,
+        "nota": 7,
+        "concepto": "TEA",
+        "asistencia": 80,
+        "estado": "aprobado",
+        "fecha": "2026-04-15",
+        "registrado_por": "69cc5fe70971b9.26938206"
+    },
+    {
+        "id": "69e0213b65cbb1.58214919",
+        "alumno_id": "69dd9f8a5a9b0c.55667788",
+        "curso_id": "69debaa5a427e5.75618697",
+        "materia_id": "69e0211eb8f052.17157417",
+        "cuatrimestre": 1,
+        "nota": null,
+        "concepto": null,
+        "asistencia": null,
+        "estado": "pendiente",
+        "fecha": "2026-04-15",
+        "registrado_por": "69cc5fe70971b9.26938206"
+    },
+    {
+        "id": "69e0214335fe48.91303629",
+        "alumno_id": "69dd9f8a9e3f4g.99001122",
+        "curso_id": "69debaa5a427e5.75618697",
+        "materia_id": "69e0211eb8f052.17157417",
+        "cuatrimestre": 1,
+        "nota": 2,
+        "concepto": "TED",
+        "asistencia": null,
+        "estado": "desaprobado",
+        "fecha": "2026-04-15",
+        "registrado_por": "69cc5fe70971b9.26938206"
+    },
+    {
+        "id": "69e0214a0bf327.58192409",
+        "alumno_id": "69dd9f8a0f4g5h.00112233",
+        "curso_id": "69debaa5a427e5.75618697",
+        "materia_id": "69e0211eb8f052.17157417",
+        "cuatrimestre": 1,
+        "nota": null,
+        "concepto": null,
+        "asistencia": 5,
+        "estado": "pendiente",
+        "fecha": "2026-04-15",
+        "registrado_por": "69cc5fe70971b9.26938206"
     }
 ]
