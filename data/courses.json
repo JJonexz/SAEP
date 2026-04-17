@@ -1,0 +1,120 @@
+[
+    {
+        "id": "69decefd951746.30670855",
+        "nombre": "2°a",
+        "anio": 2,
+        "division": "a",
+        "turno": "Mañana",
+        "orientacion": "Ciclo Básico",
+        "materias": [
+            {
+                "id": "69decf0e36bd11.89893847",
+                "nombre": "Mate",
+                "profesor_id": "69dd9f8a7i1j2k.77889900"
+            },
+            {
+                "id": "69dffafda7ceb4.38701186",
+                "nombre": "Ingles",
+                "profesor_id": "69dd9f8a8j2k3l.88990011"
+            }
+        ],
+        "alumnos": [
+            "69dd9f8a9e3f4g.99001122",
+            "69dd9f8a8d2e3f.88990011"
+        ],
+        "profesores": []
+    },
+    {
+        "id": "69decf09321e69.91034466",
+        "nombre": "3°c",
+        "anio": 3,
+        "division": "c",
+        "turno": "Mañana",
+        "materias": [
+            {
+                "id": "69decf164ad7a3.54192330",
+                "nombre": "Ingles",
+                "profesor_id": "69dd9f8a7i1j2k.77889900"
+            },
+            {
+                "id": "69e020e0840ea9.10401214",
+                "nombre": "mete",
+                "profesor_id": null
+            }
+        ],
+        "alumnos": [
+            "69dd9f8a1w5x6y.11223344"
+        ],
+        "profesores": []
+    },
+    {
+        "id": "69debaa5a427e5.75618697",
+        "nombre": "7 C Prog",
+        "anio": 7,
+        "division": "c",
+        "turno": "Noche",
+        "orientacion": "Programación",
+        "materias": [
+            {
+                "id": "69e0211eb8f052.17157417",
+                "nombre": "mete",
+                "profesor_id": "69dd9f8a8j2k3l.88990011"
+            }
+        ],
+        "alumnos": [
+            "69dd9f8a5a9b0c.55667788",
+            "69dd9f8a7s1t2u.77889900",
+            "69dd9f8a3y7z8a.33445566",
+            "69dd9f8a7c1d2e.77889900",
+            "69dd9f8a9e3f4g.99001122",
+            "69dd9f8a0f4g5h.00112233"
+        ],
+        "profesores": [
+            "69dd9f8a8j2k3l.88990011"
+        ]
+    },
+    {
+        "id": "69debb5ebfcb34.71382345",
+        "nombre": "7 B prog",
+        "anio": 7,
+        "division": "B",
+        "turno": "Noche",
+        "orientacion": "Programación",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": "69debb8aef1b54.40366566",
+        "nombre": "2",
+        "anio": 2,
+        "division": "a",
+        "turno": "Mañana",
+        "orientacion": "Ciclo Básico",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": "69debef5be03a0.34008186",
+        "nombre": "5 a mmo",
+        "anio": 5,
+        "division": "A",
+        "turno": "Tarde",
+        "orientacion": "MMO",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": "69debf038ee9d3.01175061",
+        "nombre": "7 zzz",
+        "anio": 7,
+        "division": "z",
+        "turno": "Noche",
+        "orientacion": "Turismo",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    }
+]
