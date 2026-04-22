@@ -327,28 +327,33 @@ $role=$user['role'];
 
 <a class="skip-link" href="#main-content">Saltar al contenido</a>
 
-<!-- HEADER del gestor de laboratorios -->
-<header class="header" role="banner">
-  <div class="header-logo-area">
-    <img src="assets/img/logo.webp" alt="Logo EEST N°1"
-         onerror="this.outerHTML='<div class=\'header-logo-placeholder\' aria-hidden=\'true\'>E1</div>'"/>
+<!-- BARRA DE NAVEGACIÓN (page-nav con tabs — sin header SAEP) -->
+<nav class="page-nav" role="navigation" aria-label="Navegación del módulo">
+  <div class="pnav-left">
+    <div class="pnav-user" id="pnav-user">
+      <div class="pnav-avatar" id="pnav-avatar" aria-hidden="true">?</div>
+      <div class="pnav-info">
+        <div class="pnav-name" id="pnav-name">Cargando…</div>
+        <div class="pnav-role" id="pnav-role">docente</div>
+      </div>
+    </div>
   </div>
-  <div class="header-info">
-    <div class="escuela-nombre">EEST N°1 "Raúl Scalabrini Ortiz"<span class="version-chip" aria-hidden="true">v4</span></div>
-    <div class="sistema-nombre">Sistema de Gestión de Laboratorios · MiTécnica</div>
-  </div>
-
-  <nav class="header-nav" role="navigation" aria-label="Navegación principal">
-    <button class="nav-btn active" data-page="calendario" aria-current="page" onclick="irA('calendario')">
-      <span class="nav-icon" aria-hidden="true">📅</span> Calendario
+  <div class="pnav-tabs" role="tablist">
+    <button class="pnav-tab active" data-page="calendario" onclick="irA('calendario')" role="tab" aria-selected="true">
+      📅 Calendario
     </button>
-    <button class="nav-btn" data-page="mis-reservas" aria-current="false" onclick="irA('mis-reservas')">
-      <span class="nav-icon" aria-hidden="true">📋</span> Mis reservas
+    <button class="pnav-tab" data-page="mis-reservas" onclick="irA('mis-reservas')" role="tab" aria-selected="false">
+      📋 Mis reservas
     </button>
-    <button class="nav-btn admin-only" data-page="admin" aria-current="false" onclick="irA('admin')" style="display:none;position:relative;">
-      <span class="nav-icon" aria-hidden="true">⚙️</span> Administración
+    <button class="pnav-tab" data-page="seguimiento" onclick="irA('seguimiento')" role="tab" aria-selected="false">
+      📊 Seguimiento
+    </button>
+    <button class="pnav-tab admin-only" data-page="admin" onclick="irA('admin')" role="tab" aria-selected="false" style="display:none;position:relative;">
+      ⚙️ Admin
       <span class="admin-badge" id="admin-badge" role="status" aria-live="polite" style="display:none;"></span>
     </button>
+  </div>
+  <div class="pnav-right">
     <div class="session-widget" role="navigation" aria-label="Sesión de usuario">
       <button class="session-trigger" id="session-trigger" onclick="toggleSessionMenu()"
               aria-haspopup="true" aria-expanded="false" aria-controls="session-menu">
@@ -367,25 +372,10 @@ $role=$user['role'];
         <button class="sm-item danger" role="menuitem" onclick="cerrarSesion()"><span aria-hidden="true">🚪</span> Cerrar sesión</button>
       </div>
     </div>
-  </nav>
-
-  <button class="hamburger" id="hamburger" onclick="toggleMobileNav()"
-          aria-label="Menú de navegación" aria-expanded="false" aria-controls="mobile-nav">
-    <span></span><span></span><span></span>
-  </button>
-</header>
-
-<!-- Nav móvil del gestor de laboratorios -->
-<nav class="mobile-nav" id="mobile-nav" role="navigation" aria-label="Menú móvil">
-  <button class="mobile-nav-btn active" data-page="calendario" aria-current="page" onclick="irA('calendario')"><span aria-hidden="true">📅</span> Calendario</button>
-  <button class="mobile-nav-btn" data-page="mis-reservas" aria-current="false" onclick="irA('mis-reservas')"><span aria-hidden="true">📋</span> Mis reservas</button>
-  <button class="mobile-nav-btn admin-only" data-page="admin" aria-current="false" onclick="irA('admin')" style="display:none"><span aria-hidden="true">⚙️</span> Administración</button>
-  <div class="mobile-nav-sep">
-    <button class="mobile-nav-btn" onclick="cerrarSesion()"><span aria-hidden="true">🚪</span> Cerrar sesión</button>
   </div>
 </nav>
 
-<!-- ORIENT BAR -->
+<!-- FILTRO ORIENTACIONES -->
 <div class="orient-bar" role="tablist" aria-label="Filtrar por orientación">
   <div class="orient-tab all sel" role="tab" aria-selected="true" tabindex="0" onclick="selOrient(this,'all')" onkeydown="if(event.key==='Enter'||event.key===' ')selOrient(this,'all')">
     <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><rect x="1" y="1" width="8" height="8" rx="1"/><rect x="11" y="1" width="8" height="8" rx="1"/><rect x="1" y="11" width="8" height="8" rx="1"/><rect x="11" y="11" width="8" height="8" rx="1"/></svg>
@@ -409,153 +399,183 @@ $role=$user['role'];
   </div>
 </div>
 
-<!-- APP BODY del gestor de laboratorios -->
-<div class="app-body">
+<!-- CONTENIDO PRINCIPAL -->
+<main class="content" id="main-content" tabindex="-1">
 
-  <!-- SIDEBAR del gestor de laboratorios -->
-  <aside class="sidebar" aria-label="Panel lateral">
-    <div>
-      <div class="sec-label" id="labs-heading">Laboratorios</div>
-      <div id="sidebar-labs" role="group" aria-labelledby="labs-heading"></div>
+  <!-- PÁGINA: CALENDARIO -->
+  <div id="page-calendario" class="page active" role="region" aria-label="Calendario diario">
+    <div class="cal-header">
+      <div class="cal-title" id="cal-title-text" aria-live="polite">Cargando…</div>
+      <div class="cal-controls">
+        <div class="lab-filter-bar" role="group" aria-label="Filtrar por laboratorio">
+          <button class="lab-filter-btn active" id="filt-todos" aria-pressed="true" onclick="setLabFilter('todos')">Todos</button>
+          <span id="lab-filter-btns"></span>
+        </div>
+        <div class="week-nav" role="group" aria-label="Navegar semanas">
+          <button class="week-btn" onclick="navSemana(-1)" aria-label="Semana anterior">‹ Sem. ant.</button>
+          <button class="week-btn hoy" onclick="irHoy()" aria-label="Ir a hoy">Hoy</button>
+          <button class="week-btn" onclick="navSemana(1)" aria-label="Semana siguiente">Sem. sig. ›</button>
+        </div>
+      </div>
     </div>
-    <div>
-      <div class="sec-label">Esta semana</div>
-      <div class="mini-stats" id="mini-stats" aria-label="Estadísticas de la semana"></div>
-    </div>
-    <div>
-      <div class="sec-label">Acciones</div>
-      <button class="cta-btn" onclick="abrirModalReserva()" aria-label="Solicitar nuevo turno de laboratorio">+ Solicitar turno</button>
-    </div>
-    <div>
-      <div class="sec-label">Pautas del aula</div>
-      <div id="pautas-list" aria-label="Pautas del aula"></div>
-    </div>
-  </aside>
 
-  <!-- CONTENIDO PRINCIPAL del gestor de laboratorios -->
-  <main class="content" id="main-content" tabindex="-1">
+    <!-- Barra días -->
+    <div class="day-nav-container">
+      <button class="day-nav-arrow" onclick="navDia(-1)" aria-label="Día anterior">‹</button>
+      <div class="day-nav-bar" id="day-nav-bar" role="group" aria-label="Seleccionar día"></div>
+      <button class="day-nav-arrow" onclick="navDia(1)" aria-label="Día siguiente">›</button>
+    </div>
 
-    <!-- PÁGINA: CALENDARIO -->
-    <div id="page-calendario" class="page active" role="region" aria-label="Calendario diario">
-      <div class="cal-header">
-        <div class="cal-title" id="cal-title-text" aria-live="polite">Cargando…</div>
-        <div class="cal-controls">
-          <div class="lab-filter-bar" role="group" aria-label="Filtrar por laboratorio">
-            <button class="lab-filter-btn active" id="filt-todos" aria-pressed="true" onclick="setLabFilter('todos')">Todos</button>
-            <span id="lab-filter-btns"></span>
+    <div class="cal-wrap">
+      <div id="cal-body"></div>
+    </div>
+  </div>
+
+  <!-- PÁGINA: SEGUIMIENTO -->
+  <div id="page-seguimiento" class="page" role="region" aria-label="Seguimiento">
+    <div class="page-header">
+      <div class="page-title-wrap">
+        <div class="page-title">Seguimiento</div>
+        <div class="page-sub">Lista de espera y vencimientos de ciclos</div>
+      </div>
+      <div id="seguimiento-stats" class="seguimiento-stats"></div>
+    </div>
+
+    <div class="seguimiento-grid">
+      <section class="seguimiento-section" aria-label="Lista de espera">
+        <div class="seguimiento-section-header">
+          <div class="seguimiento-section-title">
+            <span>📋</span> Lista de espera
+            <span class="pending-count-badge" id="espera-count" style="display:none;"></span>
           </div>
-          <div class="week-nav" role="group" aria-label="Navegar semanas">
-            <button class="week-btn" onclick="navSemana(-1)" aria-label="Semana anterior">‹ Semana ant.</button>
-            <button class="week-btn hoy" onclick="irHoy()" aria-label="Ir a hoy">Hoy</button>
-            <button class="week-btn" onclick="navSemana(1)" aria-label="Semana siguiente">Semana sig. ›</button>
+          <button class="pnav-espera" onclick="abrirModalEspera()" style="font-size:.78rem;padding:.32rem .7rem;">+ Anotarme</button>
+        </div>
+        <div id="espera-lista"></div>
+      </section>
+
+      <section class="seguimiento-section" aria-label="Próximos vencimientos">
+        <div class="seguimiento-section-header">
+          <div class="seguimiento-section-title">
+            <span>⏰</span> Próximos vencimientos
+            <span class="pending-count-badge" id="venc-count" style="display:none;background:var(--amber);"></span>
           </div>
         </div>
-      </div>
+        <div id="venc-lista"></div>
+      </section>
+    </div>
+  </div>
 
-      <!-- Barra de navegación de días -->
-      <div class="day-nav-container">
-        <button class="day-nav-arrow" onclick="navDia(-1)" aria-label="Día anterior">‹</button>
-        <div class="day-nav-bar" id="day-nav-bar" role="group" aria-label="Seleccionar día"></div>
-        <button class="day-nav-arrow" onclick="navDia(1)" aria-label="Día siguiente">›</button>
+  <!-- PÁGINA: MIS RESERVAS -->
+  <div id="page-mis-reservas" class="page" role="region" aria-label="Mis reservas">
+    <div class="page-header">
+      <div class="page-title-wrap">
+        <div class="page-title" id="mis-reservas-title">Mis reservas</div>
+        <div class="page-sub" id="mis-reservas-sub"></div>
       </div>
+      <button class="cta-btn" style="width:auto;padding:9px 20px;" onclick="abrirModalReserva()">+ Nueva solicitud</button>
+    </div>
+    <div class="stats-strip" id="mis-stats-strip" aria-label="Estadísticas de mis reservas"></div>
+    <div id="mis-reservas-list" aria-live="polite"></div>
+    <div id="mis-reservas-empty" style="display:none;text-align:center;padding:60px 20px;color:var(--muted);" role="status">
+      <div style="font-size:48px;margin-bottom:12px;" aria-hidden="true">📭</div>
+      <div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;">No tenés reservas activas</div>
+      <div style="font-size:13px;">Hacé clic en "+ Nueva solicitud" para comenzar.</div>
+    </div>
+  </div>
 
-      <div class="cal-wrap">
-        <div id="cal-grid"></div>
+  <!-- PÁGINA: ADMINISTRACIÓN -->
+  <div id="page-admin" class="page" role="region" aria-label="Administración">
+    <div class="page-header">
+      <div class="page-title-wrap">
+        <div class="page-title">Administración</div>
+        <div class="page-sub">Panel directivo · EEST N°1</div>
       </div>
-
-      <div class="bottom-cards">
-        <div class="info-card" role="region" aria-label="Lista de espera">
-          <div class="info-card-title"><span aria-hidden="true">📋</span> Lista de espera</div>
-          <div id="espera-lista"></div>
-        </div>
-        <div class="info-card" role="region" aria-label="Próximos vencimientos">
-          <div class="info-card-title"><span aria-hidden="true">⏰</span> Próximos vencimientos</div>
-          <div id="venc-lista"></div>
-        </div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;">
+        <button onclick="exportarDB()" style="font-family:var(--font);font-size:.8rem;font-weight:600;padding:.42rem .85rem;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;">⬇ Exportar BD</button>
+        <button onclick="importarDB()" style="font-family:var(--font);font-size:.8rem;font-weight:600;padding:.42rem .85rem;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;">⬆ Importar BD</button>
+        <button onclick="resetearDB()" style="font-family:var(--font);font-size:.8rem;font-weight:600;padding:.42rem .85rem;border-radius:4px;border:1px solid var(--red);background:#fff;color:var(--red);cursor:pointer;">↺ Resetear</button>
       </div>
     </div>
-
-    <!-- PÁGINA: MIS RESERVAS -->
-    <div id="page-mis-reservas" class="page" role="region" aria-label="Mis reservas">
-      <div class="page-header">
-        <div class="page-title-wrap">
-          <div class="page-title" id="mis-reservas-title">Mis reservas</div>
-          <div class="page-sub" id="mis-reservas-sub"></div>
-        </div>
-        <button class="cta-btn" style="width:auto;padding:9px 20px;" onclick="abrirModalReserva()" aria-label="Crear nueva reserva">+ Nueva solicitud</button>
-      </div>
-      <div class="stats-strip" id="mis-stats-strip" aria-label="Estadísticas de mis reservas"></div>
-      <div id="mis-reservas-list" aria-live="polite"></div>
-      <div id="mis-reservas-empty" style="display:none;text-align:center;padding:60px 20px;color:var(--texto-muted);" role="status">
-        <div style="font-size:48px;margin-bottom:12px;" aria-hidden="true">📭</div>
-        <div style="font-weight:800;font-size:16px;color:var(--texto);margin-bottom:6px;">No tenés reservas activas</div>
-        <div style="font-size:13px;">Hacé clic en "+ Nueva solicitud" para comenzar.</div>
-      </div>
+    <div class="stats-strip" aria-label="Estadísticas generales">
+      <div class="stat-card az"><div class="stat-card-n" id="s-semana">—</div><div class="stat-card-l">Reservas activas</div></div>
+      <div class="stat-card am"><div class="stat-card-n" id="s-pendientes">—</div><div class="stat-card-l">Solicitudes pendientes</div></div>
+      <div class="stat-card vd"><div class="stat-card-n" id="s-docs">—</div><div class="stat-card-l">Docentes activos</div></div>
+      <div class="stat-card rj"><div class="stat-card-n" id="s-labs">—</div><div class="stat-card-l">Laboratorios</div></div>
     </div>
-
-    <!-- PÁGINA: ADMINISTRACIÓN -->
-    <div id="page-admin" class="page" role="region" aria-label="Administración">
-      <div class="page-header">
-        <div class="page-title-wrap">
-          <div class="page-title">Administración</div>
-          <div class="page-sub">Panel directivo · EEST N°1</div>
-        </div>
+    <div class="admin-section admin-section-highlight">
+      <div class="admin-section-header">
+        <div class="admin-section-title"><span aria-hidden="true">⏳</span> Solicitudes pendientes <span id="solicitudes-count" class="pending-count-badge" aria-live="polite"></span></div>
       </div>
-      <div class="stats-strip" aria-label="Estadísticas generales">
-        <div class="stat-card az"><div class="stat-card-n" id="s-semana">—</div><div class="stat-card-l">Reservas activas</div></div>
-        <div class="stat-card am"><div class="stat-card-n" id="s-pendientes">—</div><div class="stat-card-l">Solicitudes pendientes</div></div>
-        <div class="stat-card vd"><div class="stat-card-n" id="s-docs">—</div><div class="stat-card-l">Docentes activos</div></div>
-        <div class="stat-card rj"><div class="stat-card-n" id="s-labs">—</div><div class="stat-card-l">Laboratorios</div></div>
-      </div>
-      <div class="admin-section admin-section-highlight">
-        <div class="admin-section-header">
-          <div class="admin-section-title"><span aria-hidden="true">⏳</span> Solicitudes pendientes <span id="solicitudes-count" class="pending-count-badge" aria-live="polite"></span></div>
-        </div>
-        <div style="overflow-x:auto;"><table class="prof-table" aria-label="Solicitudes pendientes"><thead><tr><th scope="col">Docente</th><th scope="col">Lab</th><th scope="col">Día</th><th scope="col">Módulo</th><th scope="col">Curso</th><th scope="col">Orientación</th><th scope="col">Acciones</th></tr></thead><tbody id="solicitudes-tbody"></tbody></table></div>
-      </div>
-      <div class="admin-section">
-        <div class="admin-section-header">
-          <div class="admin-section-title"><span aria-hidden="true">👥</span> Docentes</div>
-          <button class="cta-btn" style="width:auto;padding:7px 16px;font-size:12px;" onclick="abrirModalDocente()">+ Agregar</button>
-        </div>
-        <div class="search-bar"><input class="search-input" type="search" placeholder="Buscar por nombre o materia…" id="search-prof" oninput="renderProfesores()"></div>
-        <div style="overflow-x:auto;"><table class="prof-table"><thead><tr><th scope="col">Apellido y nombre</th><th scope="col">Materia</th><th scope="col">Orientación</th><th scope="col">Reservas</th><th scope="col">Acciones</th></tr></thead><tbody id="prof-tbody"></tbody></table></div>
-      </div>
-      <div class="admin-section">
-        <div class="admin-section-header">
-          <div class="admin-section-title"><span aria-hidden="true">🏫</span> Espacios / Laboratorios</div>
-          <button class="cta-btn" style="width:auto;padding:7px 16px;font-size:12px;" onclick="abrirModalLab()">+ Agregar</button>
-        </div>
-        <div id="labs-config-list" role="list"></div>
-      </div>
-      <div class="admin-section">
-        <div class="admin-section-header">
-          <div class="admin-section-title"><span aria-hidden="true">📅</span> Todas las reservas</div>
-          <select class="search-input" style="max-width:200px;padding:7px 10px;font-size:12px;" id="admin-filter-orient" onchange="renderAdminReservas()">
-            <option value="all">Todas las orientaciones</option>
-            <option value="info">Informática</option>
-            <option value="const">Construcción</option>
-            <option value="tur">Turismo</option>
-            <option value="bas">Básico</option>
-          </select>
-        </div>
-        <div style="overflow-x:auto;"><table class="prof-table"><thead><tr><th scope="col">Docente</th><th scope="col">Lab</th><th scope="col">Día</th><th scope="col">Módulo</th><th scope="col">Curso</th><th scope="col">Orientación</th><th scope="col">Ciclo</th><th scope="col">Acciones</th></tr></thead><tbody id="admin-reservas-tbody"></tbody></table></div>
-      </div>
-      <div class="admin-section">
-        <div class="admin-section-header">
-          <div class="admin-section-title"><span aria-hidden="true">📌</span> Pautas del aula</div>
-          <button class="cta-btn" style="width:auto;padding:7px 16px;font-size:12px;" onclick="abrirModalPauta()">+ Agregar</button>
-        </div>
-        <div id="pautas-admin-list" role="list"></div>
-      </div>
+      <div id="solicitudes-cards-area" style="padding:.75rem 1rem;"><div id="solicitudes-tbody"></div></div>
     </div>
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <div class="admin-section-title"><span aria-hidden="true">👥</span> Docentes</div>
+        <button class="cta-btn" style="width:auto;padding:8px 18px;font-size:13px;" onclick="abrirModalDocente()">+ Agregar</button>
+      </div>
+      <div class="search-bar"><input class="search-input" type="search" placeholder="Buscar por nombre o materia…" id="search-prof" oninput="renderProfesores()"></div>
+      <div id="prof-cards-area" style="padding:.75rem 1rem;"></div>
+    </div>
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <div class="admin-section-title"><span aria-hidden="true">🏫</span> Espacios / Laboratorios</div>
+        <button class="cta-btn" style="width:auto;padding:8px 18px;font-size:13px;" onclick="abrirModalLab()">+ Agregar</button>
+      </div>
+      <div id="labs-config-list" role="list"></div>
+    </div>
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <div class="admin-section-title"><span aria-hidden="true">📅</span> Todas las reservas</div>
+        <select class="search-input" style="max-width:210px;padding:8px 11px;font-size:13px;" id="admin-filter-orient" onchange="renderAdminReservas()">
+          <option value="all">Todas las orientaciones</option>
+          <option value="info">Informática</option>
+          <option value="const">Construcción</option>
+          <option value="tur">Turismo</option>
+          <option value="bas">Básico</option>
+        </select>
+      </div>
+      <div id="admin-reservas-area" style="padding:.75rem 1rem;"></div>
+    </div>
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <div class="admin-section-title"><span aria-hidden="true">📌</span> Pautas del aula</div>
+        <button class="cta-btn" style="width:auto;padding:8px 18px;font-size:13px;" onclick="abrirModalPauta()">+ Agregar</button>
+      </div>
+      <div id="pautas-admin-list" role="list"></div>
+    </div>
+  </div>
 
-  </main>
+</main>
+
+<!-- MODALES -->
+
+<!-- MODAL PAUTAS DEL AULA (inicio de sesión) -->
+<div class="modal-overlay pautas-overlay" id="modal-pautas-inicio" role="dialog" aria-modal="true" aria-labelledby="pautas-inicio-title">
+  <div class="modal modal-pautas">
+    <div class="modal-header" style="border-radius:6px 6px 0 0;">
+      <h3 id="pautas-inicio-title" style="font-size:1.08rem;">
+        <span aria-hidden="true">📌</span> Pautas del aula · Laboratorios EEST N°1
+      </h3>
+    </div>
+    <div class="modal-body" style="padding:1.25rem 1.5rem;">
+      <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem;line-height:1.55;">
+        Antes de utilizar el sistema, leé y aceptá las pautas de uso de los laboratorios informáticos.
+      </p>
+      <ul id="pautas-inicio-list" style="list-style:none;display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.5rem;"></ul>
+      <label class="pautas-accept-label" id="pautas-accept-label">
+        <input type="checkbox" id="pautas-checkbox" onchange="togglePautasBtn()" style="width:16px;height:16px;accent-color:var(--navy);cursor:pointer;flex-shrink:0;">
+        <span>Leí y acepto todas las pautas del aula</span>
+      </label>
+    </div>
+    <div class="modal-footer" style="border-radius:0 0 6px 6px;justify-content:flex-end;">
+      <button class="btn-ok" id="pautas-continuar-btn" onclick="aceptarPautas()" disabled style="opacity:.45;cursor:not-allowed;transition:opacity .2s;">
+        Continuar →
+      </button>
+    </div>
+  </div>
 </div>
 
-<!-- MODALES del gestor de laboratorios -->
-
-<!-- Solicitar turno (con selector de período) -->
+<!-- Solicitar turno -->
 <div class="modal-overlay" id="modal-reserva" role="dialog" aria-modal="true" aria-labelledby="modal-reserva-title">
   <div class="modal">
     <div class="modal-header">
@@ -582,7 +602,7 @@ $role=$user['role'];
           <select class="form-control" id="f-modulo" required></select>
         </div>
         <div class="form-group">
-          <label class="form-label" for="f-periodo">⏱ Duración / Período</label>
+          <label class="form-label" for="f-periodo">Duración</label>
           <select class="form-control" id="f-periodo">
             <option value="1">1 hora (módulo individual)</option>
             <option value="2">2 horas consecutivas</option>
@@ -609,10 +629,10 @@ $role=$user['role'];
         <div class="form-group">
           <label class="form-label" for="f-orient">Orientación</label>
           <select class="form-control" id="f-orient">
-            <option value="info">Informática</option>
-            <option value="const">Construcción</option>
-            <option value="tur">Turismo</option>
-            <option value="bas">Básico</option>
+            <option value="info">💻 Informática</option>
+            <option value="const">🏗️ Construcción</option>
+            <option value="tur">🌐 Turismo</option>
+            <option value="bas">📚 Básico</option>
           </select>
         </div>
       </div>
@@ -722,7 +742,7 @@ $role=$user['role'];
       <button class="modal-close" onclick="cerrarModal('modal-espera')" aria-label="Cerrar">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--texto-muted);margin-bottom:16px;">Te avisaremos cuando el turno quede disponible.</p>
+      <p style="font-size:.86rem;color:var(--muted);margin-bottom:1rem;">Te avisaremos cuando el turno quede disponible.</p>
       <div class="form-row">
         <div class="form-group"><label class="form-label" for="espera-lab">Laboratorio</label><select class="form-control" id="espera-lab" required></select></div>
         <div class="form-group"><label class="form-label" for="espera-dia">Día</label><select class="form-control" id="espera-dia" required></select></div>
@@ -736,7 +756,7 @@ $role=$user['role'];
   </div>
 </div>
 
-<!-- Pauta -->
+<!-- Pauta (admin) -->
 <div class="modal-overlay" id="modal-pauta" role="dialog" aria-modal="true" aria-labelledby="modal-pauta-title">
   <div class="modal modal-sm">
     <div class="modal-header">
@@ -767,6 +787,10 @@ $role=$user['role'];
     </div>
   </div>
 </div>
+
+<button class="mobile-fab" onclick="abrirModalReserva()" aria-label="Nueva solicitud">
+  <span aria-hidden="true">+</span> Solicitar turno
+</button>
 
 <div id="toast-container" role="region" aria-label="Notificaciones" aria-live="polite"></div>
 
