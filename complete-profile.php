@@ -12,8 +12,8 @@ if ($user['status']==='pending_approval') { header('Location: pending.php'); exi
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SAEP — Completar perfil</title>
 
-<link href="assets/global.css" rel="stylesheet">
-    <link href="assets/complete-profile.css" rel="stylesheet">
+<link href="assets/css/global.css" rel="stylesheet">
+    <link href="assets/css/complete-profile.css" rel="stylesheet">
 </head>
 <body>
 <div class="card">
@@ -32,6 +32,6 @@ if ($user['status']==='pending_approval') { header('Location: pending.php'); exi
     <div class="err" id="err"></div>
     <button class="btn" id="btn" onclick="submit()">Enviar solicitud</button>
 </div>
-<script src="assets/complete-profile.js"></script>
+<script src="assets/js/complete-profile.js"></script>
 </body>
 </html>

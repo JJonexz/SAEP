@@ -16,9 +16,9 @@ $role=$user['role'];
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
-<link href="assets/global.css" rel="stylesheet">
-    <link href="assets/dashboard.css" rel="stylesheet">
-<link href="assets/lab.css" rel="stylesheet">
+<link href="assets/css/global.css" rel="stylesheet">
+    <link href="assets/css/dashboard.css" rel="stylesheet">
+<link href="assets/css/lab.css" rel="stylesheet">
 </head>
 <body>
 <div class="app">
@@ -807,8 +807,8 @@ $role=$user['role'];
 window.ROLE = '<?=$role?>';
 window.MY_ID = '<?=$user['id']?>';
 </script>
-<script src="assets/dashboard.js"></script>
-<script src="assets/lab.js"></script>
+<script src="assets/js/dashboard.js"></script>
+<script src="assets/js/lab.js"></script>
 <script>
 function toggleSidebar(){
     const aside = document.getElementById('main-sidebar');

@@ -12,8 +12,8 @@ if ($user['status']==='pending_profile') { header('Location: complete-profile.ph
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAEP — Pendiente</title>
 
-<link href="assets/global.css" rel="stylesheet">
-    <link href="assets/pending.css" rel="stylesheet">
+<link href="assets/css/global.css" rel="stylesheet">
+    <link href="assets/css/pending.css" rel="stylesheet">
 </head>
 <body>
 <div class="card">
@@ -31,6 +31,6 @@ if ($user['status']==='pending_profile') { header('Location: complete-profile.ph
         <button class="btn" onclick="location.href='logout.php'">Salir</button>
     </div>
 </div>
-<script src="assets/pending.js"></script>
+<script src="assets/js/pending.js"></script>
 </body>
 </html>
