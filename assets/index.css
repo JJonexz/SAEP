@@ -1,26 +1,37 @@
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--navy:#1a3a6b;--navy-dark:#122c54;--navy-light:#2a4f8f;--red:#e63946;--bg:#f0f2f5;--white:#ffffff;--border:#dde1e7;--text:#1e2d40;--muted:#6b7280;--font:'Inter',sans-serif}
-html,body{min-height:100%;background:var(--bg);font-family:var(--font);display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:52px}
-.top-bar{position:fixed;top:0;left:0;right:0;height:52px;background:var(--navy);display:flex;align-items:center;padding:0 2rem;gap:1rem}
-.top-bar .brand{display:flex;align-items:center;gap:.75rem}
-.top-bar .logo-circle{width:32px;height:32px;background:linear-gradient(135deg,var(--red),#ff6b35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.9rem;flex-shrink:0}
-.top-bar h1{color:#fff;font-size:1rem;font-weight:700;line-height:1.2}
-.top-bar p{color:rgba(255,255,255,.6);font-size:.7rem}
-.box{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:2.5rem;width:100%;max-width:400px;text-align:center;box-shadow:0 4px 24px rgba(26,58,107,.08);animation:up .4s ease both}
-@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.box-logo{width:56px;height:56px;background:var(--navy);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-weight:700;color:#fff;font-size:1.3rem}
-.box h2{color:var(--text);font-size:1.2rem;font-weight:700;margin-bottom:.35rem}
-.box p{color:var(--muted);font-size:.82rem;margin-bottom:2rem;line-height:1.5}
-.btn-gh{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;background:var(--navy);color:#fff;font-family:var(--font);font-size:.85rem;font-weight:600;padding:.8rem 1.5rem;border:none;border-radius:6px;cursor:pointer;text-decoration:none;width:100%;transition:background .15s}
-.btn-gh:hover{background:var(--navy-dark)}
+/* ============================================================
+   SAEP · index.css  (requiere global.css)
+   Página de login / landing con top-bar y caja central
+   ============================================================ */
 
-@media(max-width:768px){
-  html,body{padding:1rem;padding-top:64px}
-  .top-bar{padding:0 1rem}
-  .top-bar p{display:none}
-  .box{padding:2rem 1.5rem;max-width:100%;border-radius:12px}
-  .box h2{font-size:1.3rem}
-  .box p{font-size:.9rem}
-  .btn-gh{font-size:1rem;padding:1rem 1.5rem;min-height:48px}
-  .box-logo{width:52px;height:52px}
+html, body {
+  min-height: 100%; background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding-top: 52px;
+}
+
+/* Barra superior */
+.top-bar { position: fixed; top: 0; left: 0; right: 0; height: 52px; background: var(--navy); display: flex; align-items: center; padding: 0 2rem; gap: 1rem; }
+.top-bar .brand { display: flex; align-items: center; gap: .75rem; }
+.top-bar .logo-circle { width: 32px; height: 32px; background: linear-gradient(135deg, var(--red), #ff6b35); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; font-size: .9rem; flex-shrink: 0; }
+.top-bar h1 { color: #fff; font-size: 1rem; font-weight: 700; line-height: 1.2; }
+.top-bar p  { color: rgba(255,255,255,.6); font-size: .7rem; }
+
+/* Caja de login */
+.box { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 2.5rem; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 4px 24px rgba(26,58,107,.08); animation: up .4s ease both; }
+.box-logo { width: 56px; height: 56px; background: var(--navy); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-weight: 700; color: #fff; font-size: 1.3rem; }
+.box h2 { color: var(--text); font-size: 1.2rem; font-weight: 700; margin-bottom: .35rem; }
+.box p  { color: var(--muted); font-size: .82rem; margin-bottom: 2rem; line-height: 1.5; }
+.btn-gh { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; background: var(--navy); color: #fff; font-family: var(--font); font-size: .85rem; font-weight: 600; padding: .8rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; width: 100%; transition: background .15s; }
+.btn-gh:hover { background: var(--navy-dark); }
+
+@media (max-width: 768px) {
+  html, body { padding: 1rem; padding-top: 64px; }
+  .top-bar { padding: 0 1rem; }
+  .top-bar p { display: none; }
+  .box { padding: 2rem 1.5rem; max-width: 100%; border-radius: 12px; }
+  .box h2 { font-size: 1.3rem; }
+  .box p  { font-size: .9rem; }
+  .btn-gh { font-size: 1rem; padding: 1rem 1.5rem; min-height: 48px; }
+  .box-logo { width: 52px; height: 52px; }
 }

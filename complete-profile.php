@@ -11,8 +11,9 @@ if ($user['status']==='pending_approval') { header('Location: pending.php'); exi
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SAEP — Completar perfil</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="assets/complete-profile.css" rel="stylesheet">
+
+<link href="assets/global.css" rel="stylesheet">
+    <link href="assets/complete-profile.css" rel="stylesheet">
 </head>
 <body>
 <div class="card">
