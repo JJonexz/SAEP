@@ -7,7 +7,7 @@ function nav(id){
     document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
     document.getElementById('panel-'+id)?.classList.add('visible');
     document.getElementById('nav-'+id)?.classList.add('active');
-    const loaders={repos:loadRepos,users:loadUsers,courses:loadCourses,rooms:loadRooms,grades:initGrades,'my-grades':loadMyGrades,'my-works':loadMyWorks,inicio:loadInicio,mail:initMail};
+    const loaders={repos:loadRepos,users:loadUsers,courses:loadCourses,rooms:loadRooms,grades:initGrades,'my-grades':loadMyGrades,'my-works':loadMyWorks,works:initWorks,inicio:loadInicio,mail:initMail};
     loaders[id]?.();
 }
 
@@ -548,23 +548,91 @@ function renderUsersTable(){
                 <span class="badge ${stB[u.status]||'badge-gray'}">${stL[u.status]||u.status}</span>
                 ${u.dni?`<span class="tag">DNI ${u.dni}</span>`:''}
             </div>
-            <div style="margin-top:.55rem;display:flex;flex-direction:column;gap:.2rem;font-size:.75rem;color:var(--muted)">
-                ${u.email?`<span>✉ ${u.email}</span>`:''}
-                ${u.telefono?`<span>☎ ${u.telefono}</span>`:''}
-            </div>
-            <div style="margin-top:.65rem">
-                <label style="font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Rol</label>
-                <select onchange="changeRole('${u.id}',this.value)" ${u.id===MY_ID?'disabled':''} style="width:100%;font-family:var(--font);font-size:.75rem;padding:.28rem .4rem;border:1px solid var(--border);border-radius:var(--radius)">
-                    ${['admin','director','subdirector','profesor','preceptor','alumno'].map(r=>`<option value="${r}"${u.role===r?' selected':''}>${r}</option>`).join('')}
-                    ${!u.role?'<option value="" selected>Sin rol</option>':''}
-                </select>
+            <div style="margin-top:.55rem;font-size:.75rem;color:var(--muted)">
+                ${u.email?`<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">✉ ${u.email}</div>`:''}
+                ${u.telefono?`<div>☎ ${u.telefono}</div>`:''}
             </div>
             <div class="card-actions">
+                <button class="btn btn-outline" style="font-size:.7rem;padding:.28rem .55rem" onclick="openUserModal('${u.id}')">Ver info</button>
                 ${u.status==='pending_approval'?`<button class="btn btn-green" style="font-size:.7rem;padding:.28rem .55rem" onclick="approveUser('${u.id}')">Aprobar</button><button class="btn btn-red" style="font-size:.7rem;padding:.28rem .55rem" onclick="rejectUser('${u.id}')">Rechazar</button>`:''}
                 ${u.id!==MY_ID?`<button class="btn btn-red" style="font-size:.7rem;padding:.28rem .55rem" onclick="deleteUser('${u.id}')">Eliminar</button>`:''}
             </div>
         </div>
     `).join('')}</div>`;
+}
+
+function openUserModal(userId){
+    const u=S.users.find(x=>String(x.id)===String(userId));
+    if(!u) return;
+    const stB={pending_profile:'badge-gray',pending_approval:'badge-amber',approved:'badge-green',rejected:'badge-red'};
+    const stL={pending_profile:'Sin perfil',pending_approval:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
+    const roleColors={admin:'#7c3aed',director:'#2563eb',subdirector:'#2563eb',profesor:'#059669',preceptor:'#d97706',alumno:'#6b7280'};
+    const roleColor=roleColors[u.role]||'#6b7280';
+    const initials=((u.apellido||'').charAt(0)+(u.nombre||'').charAt(0)).toUpperCase();
+
+    // Cursos donde figura este usuario
+    const cursosAlumno=S.courses.filter(c=>c.alumnos?.includes(u.id));
+    const cursosProfesor=S.courses.filter(c=>c.profesores?.includes(u.id));
+
+    modal(`
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+
+            <!-- Avatar + nombre -->
+            <div style="display:flex;align-items:center;gap:1rem">
+                <div style="width:56px;height:56px;flex-shrink:0;border-radius:50%;background:${roleColor}22;border:2px solid ${roleColor}44;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:${roleColor}">${initials||'?'}</div>
+                <div>
+                    <div style="font-size:1.15rem;font-weight:800;color:var(--text)">${esc(u.apellido||'')} ${esc(u.nombre||'')}</div>
+                    <div style="font-size:.8rem;color:var(--muted);margin-top:.1rem">@${esc(u.username)}</div>
+                    <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap">
+                        <span class="badge ${stB[u.status]||'badge-gray'}">${stL[u.status]||u.status}</span>
+                        <span class="tag ${u.manual?'tag-amber':'tag-blue'}">${u.manual?'Manual':'GitHub'}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info personal -->
+            <div style="background:var(--bg);border-radius:6px;padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+                <div>
+                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">DNI</div>
+                    <div style="font-size:.88rem;font-weight:600;color:var(--text)">${esc(String(u.dni||'—'))}</div>
+                </div>
+                <div>
+                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Teléfono</div>
+                    <div style="font-size:.88rem;color:var(--text2)">${esc(String(u.telefono||'—'))}</div>
+                </div>
+                <div style="grid-column:1/-1">
+                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Email</div>
+                    <div style="font-size:.88rem;color:var(--text2);word-break:break-all">${u.email?`<a href="mailto:${esc(u.email)}" style="color:var(--navy)">${esc(u.email)}</a>`:'—'}</div>
+                </div>
+            </div>
+
+            <!-- Rol -->
+            <div>
+                <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Rol del sistema</div>
+                <select onchange="changeRole('${u.id}',this.value);S.users.find(x=>x.id==='${u.id}').role=this.value" ${u.id===MY_ID?'disabled':''} style="width:100%;font-family:var(--font);font-size:.88rem;padding:.5rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
+                    ${['admin','director','subdirector','profesor','preceptor','alumno'].map(r=>`<option value="${r}"${u.role===r?' selected':''}>${r}</option>`).join('')}
+                    ${!u.role?'<option value="" selected>Sin rol</option>':''}
+                </select>
+            </div>
+
+            <!-- Cursos -->
+            ${cursosAlumno.length||cursosProfesor.length?`
+            <div>
+                <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Cursos vinculados</div>
+                <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+                    ${cursosAlumno.map(c=>`<span class="tag tag-blue">${c.anio}° ${c.division} — ${esc(c.nombre)}</span>`).join('')}
+                    ${cursosProfesor.map(c=>`<span class="tag tag-green">${c.anio}° ${c.division} — ${esc(c.nombre)}</span>`).join('')}
+                </div>
+            </div>`:''}
+
+            <!-- Acciones -->
+            <div class="modal-footer" style="padding-top:.5rem">
+                ${u.status==='pending_approval'?`<button class="btn btn-green" onclick="approveUser('${u.id}');closeModal()">Aprobar</button><button class="btn btn-red" onclick="rejectUser('${u.id}');closeModal()">Rechazar</button>`:''}
+                ${u.id!==MY_ID?`<button class="btn btn-red" onclick="deleteUser('${u.id}');closeModal()">Eliminar usuario</button>`:''}
+                <button class="btn btn-outline" onclick="closeModal()">Cerrar</button>
+            </div>
+        </div>
+    `);
 }
 async function approveUser(id){await api('api/admin/users.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status:'approved'})});loadUsers();loadInicio();}
 async function rejectUser(id){await api('api/admin/users.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status:'rejected'})});loadUsers();loadInicio();}

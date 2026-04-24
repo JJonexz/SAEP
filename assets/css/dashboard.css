@@ -104,6 +104,8 @@ main { overflow-y: auto; display: flex; flex-direction: column; background: var(
 .card-meta     { display: flex; gap: .4rem; margin-top: .75rem; flex-wrap: wrap; }
 .card-actions  { display: flex; gap: .4rem; margin-top: auto; padding-top: .85rem; flex-wrap: wrap; align-items: center; }
 
+
+
 /* ── Tags (usados en cards Y en celdas de tabla) ── */
 .tag           { font-size: .68rem; padding: .18rem .5rem; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); display: inline-flex; align-items: center; gap: .25rem; white-space: nowrap; }
 .tag-pub       { border-color: var(--green);  color: var(--green); }
