@@ -332,35 +332,24 @@ async function loadGradesTable(){
     // Determinar curso para cada alumno (en caso de búsqueda sin curso fijo)
     const getCurso=u=>cid?S.courses.find(c=>c.id===cid):S.courses.find(c=>c.alumnos?.includes(u.id));
 
-    el.innerHTML=`
-    <table>
-        <thead>
-            <tr>
-                <th>Alumno</th>
-                <th>Curso</th>
-                <th>DNI</th>
-                <th style="text-align:right"></th>
-            </tr>
-        </thead>
-        <tbody>
-            ${alumnos.map(u=>{
-                const co=getCurso(u);
-                const cursoLabel=co?`${co.anio}° ${co.division} — ${co.nombre}`:'—';
-                const dni=u.dni||'—';
-                return `<tr>
-                    <td style="font-weight:600">${esc(u.apellido||'')} ${esc(u.nombre||'')}</td>
-                    <td>${esc(cursoLabel)}</td>
-                    <td>${esc(String(dni))}</td>
-                    <td style="text-align:right">
-                        <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
-                            onclick="openNotasModal('${u.id}','${esc(u.apellido||'')} ${esc(u.nombre||'')}','${co?.id||''}')">
-                            Ver Notas
-                        </button>
-                    </td>
-                </tr>`;
-            }).join('')}
-        </tbody>
-    </table>`;
+    el.innerHTML=`<div class="cards">${alumnos.map(u=>{
+        const co=getCurso(u);
+        const dni=u.dni||'—';
+        return `<div class="card">
+            <h3>${esc(u.apellido||'')} ${esc(u.nombre||'')}</h3>
+            <div class="card-meta">
+                ${co?`<span class="tag tag-blue">${co.anio}° ${co.division}</span>`:''}
+                ${co?`<span class="tag">${esc(co.nombre)}</span>`:''}
+                <span class="tag">DNI ${esc(String(dni))}</span>
+            </div>
+            <div class="card-actions">
+                <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
+                    onclick="openNotasModal('${u.id}','${esc(u.apellido||'')} ${esc(u.nombre||'')}','${co?.id||''}')">
+                    Ver Notas
+                </button>
+            </div>
+        </div>`;
+    }).join('')}</div>`;
 }
 
 async function openNotasModal(alumnoId, alumnoNombre, cursoId){
@@ -437,34 +426,21 @@ async function renderNotasTabla(alumnoId, cursoId){
         return cuatriSortKey(a.cuatrimestre)-cuatriSortKey(b.cuatrimestre);
     });
 
-    wrap.innerHTML=`
-    <table style="width:100%;font-size:.78rem;border-collapse:collapse">
-        <thead>
-            <tr>
-                <th style="white-space:nowrap;padding:.45rem .6rem">Materia</th>
-                <th style="white-space:nowrap;padding:.45rem .6rem">Cuatrimestre</th>
-                <th style="padding:.45rem .6rem;text-align:center">Nota</th>
-                <th style="white-space:nowrap;padding:.45rem .6rem">Trayectoria</th>
-                <th style="padding:.45rem .6rem;text-align:center">Asistencia</th>
-                <th style="padding:.45rem .6rem;text-align:center">Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${grades.map(g=>{
-                const ma=curso?.materias?.find(m=>m.id===g.materia_id);
-                const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
-                const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-                return `<tr>
-                    <td style="font-weight:600;white-space:nowrap;padding:.4rem .6rem">${ma?esc(ma.nombre):'—'}</td>
-                    <td style="white-space:nowrap;padding:.4rem .6rem">${cuatriLabel(g.cuatrimestre)}</td>
-                    <td style="padding:.4rem .6rem;text-align:center"><span class="nota-val ${nc}" style="font-size:.82rem">${g.nota??'—'}</span></td>
-                    <td style="padding:.4rem .6rem">${g.concepto?`<span class="badge ${g.concepto==='TED'?'badge-red':g.concepto==='TEP'?'badge-amber':'badge-green'}" style="font-size:.68rem">${g.concepto}</span>`:'—'}</td>
-                    <td style="white-space:nowrap;padding:.4rem .6rem;text-align:center">${g.asistencia!=null?g.asistencia+'%':'—'}</td>
-                    <td style="padding:.4rem .6rem;text-align:center"><span class="badge ${estB}" style="font-size:.68rem">${g.estado}</span></td>
-                </tr>`;
-            }).join('')}
-        </tbody>
-    </table>`;
+    wrap.innerHTML=`<div class="cards">${grades.map(g=>{
+        const ma=curso?.materias?.find(m=>m.id===g.materia_id);
+        const nc=g.nota!==null?(g.nota>=6?'tag-green':'tag-red'):'tag-amber';
+        const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
+        return `<div class="card">
+            <h3>${ma?esc(ma.nombre):'—'}</h3>
+            <div class="card-meta">
+                <span class="tag">${cuatriLabel(g.cuatrimestre)}</span>
+                <span class="tag ${nc}" style="font-weight:700">Nota: ${g.nota??'—'}</span>
+                ${g.concepto?`<span class="tag ${g.concepto==='TED'?'tag-red':g.concepto==='TEP'?'tag-amber':'tag-green'}">${g.concepto}</span>`:''}
+                ${g.asistencia!=null?`<span class="tag">Asist. ${g.asistencia}%</span>`:''}
+                <span class="badge ${estB}">${g.estado}</span>
+            </div>
+        </div>`;
+    }).join('')}</div>`;
 }
 function gcLoadStudents(){
     const cid=document.getElementById('gc-curso').value;
@@ -535,13 +511,23 @@ async function loadMyGrades(){
     if(qua) grades=grades.filter(g=>String(g.cuatrimestre)===qua);
     const el=document.getElementById('my-grades-tbl');
     if(!grades.length){el.innerHTML='<div class="empty" style="padding:1.5rem">Sin calificaciones registradas.</div>';return;}
-    el.innerHTML=`<table><thead><tr><th>Materia</th><th>Curso</th><th>Cuatri</th><th>Nota</th><th>Concepto</th><th>Asistencia</th><th>Estado</th></tr></thead><tbody>${grades.map(g=>{
+    el.innerHTML=`<div class="cards">${grades.map(g=>{
         const co=S.courses.find(c=>c.id===g.curso_id);
         const ma=co?.materias?.find(m=>m.id===g.materia_id);
-        const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
+        const nc=g.nota!==null?(g.nota>=6?'tag-green':'tag-red'):'tag-amber';
         const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<tr><td>${ma?ma.nombre:'—'}</td><td>${co?co.anio+'° '+co.division:'—'}</td><td>${cuatriLabel(g.cuatrimestre)}</td><td><span class="nota-val ${nc}">${g.nota??'—'}</span></td><td>${g.concepto||'—'}</td><td>${g.asistencia!=null?g.asistencia+'%':'—'}</td><td><span class="badge ${estB}">${g.estado}</span></td></tr>`;
-    }).join('')}</tbody></table>`;
+        return `<div class="card">
+            <h3>${ma?esc(ma.nombre):'—'}</h3>
+            <p>${co?co.anio+'° '+co.division:'—'}</p>
+            <div class="card-meta">
+                <span class="tag">${cuatriLabel(g.cuatrimestre)}</span>
+                <span class="tag ${nc}" style="font-weight:700">Nota: ${g.nota??'—'}</span>
+                ${g.concepto?`<span class="tag ${g.concepto==='TED'?'tag-red':g.concepto==='TEP'?'tag-amber':'tag-green'}">${g.concepto}</span>`:''}
+                ${g.asistencia!=null?`<span class="tag">Asist. ${g.asistencia}%</span>`:''}
+                <span class="badge ${estB}">${g.estado}</span>
+            </div>
+        </div>`;
+    }).join('')}</div>`;
 }
 
 // ── USERS ──────────────────────────────────────────────────────────────────
@@ -552,21 +538,33 @@ function renderUsersTable(){
     const list=f?S.users.filter(u=>u.status===f):S.users;
     const stB={pending_profile:'badge-gray',pending_approval:'badge-amber',approved:'badge-green',rejected:'badge-red'};
     const stL={pending_profile:'Sin perfil',pending_approval:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    document.getElementById('users-tbl').innerHTML=`<table><thead><tr><th>Nombre</th><th>Username</th><th>DNI</th><th>Email</th><th>Tel.</th><th>Tipo</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${list.map(u=>`<tr>
-        <td style="font-weight:500">${u.apellido||''} ${u.nombre||''}</td>
-        <td style="color:var(--muted)">${u.username}</td>
-        <td>${u.dni||'—'}</td><td>${u.email||'—'}</td><td>${u.telefono||'—'}</td>
-        <td><span class="badge ${u.manual?'badge-amber':'badge-blue'}">${u.manual?'Manual':'GitHub'}</span></td>
-        <td><select onchange="changeRole('${u.id}',this.value)" ${u.id===MY_ID?'disabled':''} style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:0.052vw solid var(--border);border-radius:0.208vw">
-            ${['admin','director','subdirector','profesor','preceptor','alumno'].map(r=>`<option value="${r}"${u.role===r?' selected':''}>${r}</option>`).join('')}
-            ${!u.role?'<option value="" selected>Sin rol</option>':''}
-        </select></td>
-        <td><span class="badge ${stB[u.status]||'badge-gray'}">${stL[u.status]||u.status}</span></td>
-        <td><div class="td-act">
-            ${u.status==='pending_approval'?`<button class="btn btn-green" style="font-size:.7rem;padding:.25rem .55rem" onclick="approveUser('${u.id}')">Aprobar</button><button class="btn btn-red" style="font-size:.7rem;padding:.25rem .55rem" onclick="rejectUser('${u.id}')">Rechazar</button>`:''}
-            ${u.id!==MY_ID?`<button class="btn btn-red" style="font-size:.7rem;padding:.25rem .55rem" onclick="deleteUser('${u.id}')">Eliminar</button>`:''}
-        </div></td>
-    </tr>`).join('')}</tbody></table>`;
+    if(!list.length){document.getElementById('users-tbl').innerHTML='<div class="empty">Sin usuarios.</div>';return;}
+    document.getElementById('users-tbl').innerHTML=`<div class="cards">${list.map(u=>`
+        <div class="card">
+            <h3>${u.apellido||''} ${u.nombre||''}</h3>
+            <p>@${u.username}</p>
+            <div class="card-meta">
+                <span class="tag ${u.manual?'tag-amber':'tag-blue'}">${u.manual?'Manual':'GitHub'}</span>
+                <span class="badge ${stB[u.status]||'badge-gray'}">${stL[u.status]||u.status}</span>
+                ${u.dni?`<span class="tag">DNI ${u.dni}</span>`:''}
+            </div>
+            <div style="margin-top:.55rem;display:flex;flex-direction:column;gap:.2rem;font-size:.75rem;color:var(--muted)">
+                ${u.email?`<span>✉ ${u.email}</span>`:''}
+                ${u.telefono?`<span>☎ ${u.telefono}</span>`:''}
+            </div>
+            <div style="margin-top:.65rem">
+                <label style="font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Rol</label>
+                <select onchange="changeRole('${u.id}',this.value)" ${u.id===MY_ID?'disabled':''} style="width:100%;font-family:var(--font);font-size:.75rem;padding:.28rem .4rem;border:1px solid var(--border);border-radius:var(--radius)">
+                    ${['admin','director','subdirector','profesor','preceptor','alumno'].map(r=>`<option value="${r}"${u.role===r?' selected':''}>${r}</option>`).join('')}
+                    ${!u.role?'<option value="" selected>Sin rol</option>':''}
+                </select>
+            </div>
+            <div class="card-actions">
+                ${u.status==='pending_approval'?`<button class="btn btn-green" style="font-size:.7rem;padding:.28rem .55rem" onclick="approveUser('${u.id}')">Aprobar</button><button class="btn btn-red" style="font-size:.7rem;padding:.28rem .55rem" onclick="rejectUser('${u.id}')">Rechazar</button>`:''}
+                ${u.id!==MY_ID?`<button class="btn btn-red" style="font-size:.7rem;padding:.28rem .55rem" onclick="deleteUser('${u.id}')">Eliminar</button>`:''}
+            </div>
+        </div>
+    `).join('')}</div>`;
 }
 async function approveUser(id){await api('api/admin/users.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status:'approved'})});loadUsers();loadInicio();}
 async function rejectUser(id){await api('api/admin/users.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status:'rejected'})});loadUsers();loadInicio();}
@@ -662,12 +660,35 @@ async function loadRooms(){
     S.rooms=await rRes.json();S.courses=await cRes.json();
     if(!S.users.length){const ur=await api('api/admin/users.php');S.users=await ur.json();}
     const precs=S.users.filter(u=>u.role==='preceptor'&&u.status==='approved');
-    document.getElementById('rooms-tbl').innerHTML=`<table><thead><tr><th>Aula</th><th>Ubicación</th><th>Cap.</th><th>Curso asignado</th><th>Preceptor</th><th></th></tr></thead><tbody>${S.rooms.map(r=>{
-        return `<tr><td style="font-weight:600">${r.nombre}</td><td>${r.ubicacion||'—'}</td><td>${r.capacidad||'—'}</td>
-            <td><select onchange="assignRC('${r.id}',this.value)" style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:0.052vw solid var(--border);border-radius:0.208vw"><option value="">Sin asignar</option>${S.courses.map(c=>`<option value="${c.id}"${r.curso_id===c.id?' selected':''}>${c.anio}° ${c.division} — ${c.nombre}</option>`).join('')}</select></td>
-            <td><select onchange="assignRP('${r.id}',this.value)" style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:0.052vw solid var(--border);border-radius:0.208vw"><option value="">Sin asignar</option>${precs.map(p=>`<option value="${p.id}"${r.preceptor_id===p.id?' selected':''}>${p.apellido} ${p.nombre}</option>`).join('')}</select></td>
-            <td><button class="btn btn-red" style="font-size:.7rem;padding:.25rem .5rem" onclick="deleteRoom('${r.id}')">Eliminar</button></td></tr>`;
-    }).join('')}</tbody></table>`;
+    if(!S.rooms.length){document.getElementById('rooms-tbl').innerHTML='<div class="empty">Sin aulas registradas.</div>';return;}
+    document.getElementById('rooms-tbl').innerHTML=`<div class="cards">${S.rooms.map(r=>`
+        <div class="card">
+            <h3>${r.nombre}</h3>
+            <div class="card-meta">
+                ${r.ubicacion?`<span class="tag">${r.ubicacion}</span>`:''}
+                ${r.capacidad?`<span class="tag tag-blue">Cap. ${r.capacidad}</span>`:''}
+            </div>
+            <div style="margin-top:.75rem;display:flex;flex-direction:column;gap:.5rem">
+                <div>
+                    <label style="font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Curso asignado</label>
+                    <select onchange="assignRC('${r.id}',this.value)" style="width:100%;font-family:var(--font);font-size:.75rem;padding:.28rem .4rem;border:1px solid var(--border);border-radius:var(--radius)">
+                        <option value="">Sin asignar</option>
+                        ${S.courses.map(c=>`<option value="${c.id}"${r.curso_id===c.id?' selected':''}>${c.anio}° ${c.division} — ${c.nombre}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Preceptor</label>
+                    <select onchange="assignRP('${r.id}',this.value)" style="width:100%;font-family:var(--font);font-size:.75rem;padding:.28rem .4rem;border:1px solid var(--border);border-radius:var(--radius)">
+                        <option value="">Sin asignar</option>
+                        ${precs.map(p=>`<option value="${p.id}"${r.preceptor_id===p.id?' selected':''}>${p.apellido} ${p.nombre}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
+            <div class="card-actions">
+                <button class="btn btn-red" style="font-size:.7rem;padding:.28rem .5rem" onclick="deleteRoom('${r.id}')">Eliminar</button>
+            </div>
+        </div>
+    `).join('')}</div>`;
 }
 function openRoomModal(){modal(`<h3>Nueva aula</h3><div class="fgrid"><div class="field"><label>Nombre</label><input id="rm-n" placeholder="Aula 101"></div><div class="field"><label>Capacidad</label><input id="rm-c" type="number" placeholder="30"></div><div class="field ffull"><label>Ubicación</label><input id="rm-u" placeholder="Planta baja, ala norte"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-navy" onclick="saveRoom()">Crear</button></div>`);}
 async function saveRoom(){const b={nombre:document.getElementById('rm-n').value.trim(),capacidad:document.getElementById('rm-c').value,ubicacion:document.getElementById('rm-u').value.trim()};if(!b.nombre)return;const r=await api('api/rooms/rooms.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();closeModal();if(d.success)loadRooms();else alert('Error: '+d.error);}
