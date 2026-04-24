@@ -134,27 +134,26 @@ async function loadWorks(){
 function renderWorksList(works){
     const el=document.getElementById('works-list');
     if(!works.length){el.innerHTML='<div class="empty">Sin trabajos creados.</div>';return;}
-    el.innerHTML=works.map(w=>{
+    el.innerHTML=`<div class="cards">${works.map(w=>{
         const curso=S.courses.find(c=>c.id===w.curso_id);
         const mat=curso?.materias?.find(m=>m.id===w.materia_id);
-        const stBadge=w.estado==='activo'?'badge-green':'badge-gray';
-        return `<div class="work-card">
-            <div class="work-card-header">
-                <div><div class="work-title">${w.titulo}</div><div class="work-desc">${w.descripcion||'Sin descripción'}</div></div>
-                <div class="btn-group">
-                    <button class="btn btn-outline" onclick="openWorkDetail('${w.id}')">Ver entregas</button>
-                    <button class="btn btn-red" onclick="deleteWork('${w.id}')">Eliminar</button>
-                </div>
+        const stClass=w.estado==='activo'?'tag-green':'';
+        return `<div class="card">
+            <h3>${esc(w.titulo)}</h3>
+            <p>${esc(w.descripcion||'Sin descripción')}</p>
+            <div class="card-meta">
+                <span class="tag ${stClass}">${w.estado}</span>
+                ${curso?`<span class="tag tag-blue">${curso.anio}° ${curso.division}</span>`:''}
+                ${mat?`<span class="tag">${esc(mat.nombre)}</span>`:''}
+                ${w.fecha_entrega?`<span class="tag tag-amber">📅 ${w.fecha_entrega}</span>`:''}
+                <span class="tag">${w.submissions_count} alumnos</span>
             </div>
-            <div class="work-meta">
-                <span class="badge ${stBadge}">${w.estado}</span>
-                ${curso?`<span class="badge badge-blue">${curso.anio}° ${curso.division}</span>`:''}
-                ${mat?`<span class="badge badge-gray">${mat.nombre}</span>`:''}
-                ${w.fecha_entrega?`<span class="badge badge-amber">Entrega: ${w.fecha_entrega}</span>`:''}
-                <span class="badge badge-gray">${w.submissions_count} alumnos</span>
+            <div class="card-actions">
+                <button class="btn btn-outline" style="font-size:.7rem;padding:.28rem .6rem" onclick="openWorkDetail('${w.id}')">Ver entregas</button>
+                <button class="btn btn-red" style="font-size:.7rem;padding:.28rem .6rem" onclick="deleteWork('${w.id}')">Eliminar</button>
             </div>
         </div>`;
-    }).join('');
+    }).join('')}</div>`;
 }
 function openCreateWorkModal(){
     if(!S.courses.length){alert('Primero creá al menos un curso.');return;}
@@ -188,25 +187,34 @@ async function openWorkDetail(workId){
     const curso=S.courses.find(c=>c.id===work.curso_id);
     const submissions=work.submissions||[];
     const rows=submissions.map(s=>{
-        const alumno=S.users.find(u=>u.id===s.alumno_id);
+        const alumno=S.users.find(u=>String(u.id)===String(s.alumno_id));
         const aName=alumno?`${alumno.apellido} ${alumno.nombre}`:s.alumno_id;
         const avg=s.nota_promedio;
-        const avgColor=avg===null?'nota-pending':avg>=6?'nota-ok':'nota-fail';
+        const avgClass=avg===null?'tag-amber':avg>=6?'tag-green':'tag-red';
         const estBadge=s.estado_calificacion==='aprobado'?'badge-green':s.estado_calificacion==='desaprobado'?'badge-red':'badge-amber';
-        const profGrades=(s.notas_profesores||[]).map(g=>{const p=S.users.find(u=>u.id===g.profesor_id);return `<div style="font-size:.75rem;margin-top:.3rem;padding:.4rem .6rem;background:#f8f9fc;border-radius:0.208vw"><strong>${p?p.apellido+' '+p.nombre:'Profesor'}</strong>: <span class="nota-val ${g.nota>=6?'nota-ok':'nota-fail'}">${g.nota??'—'}</span>${g.devolucion?`<div class="devolucion-box">${esc(g.devolucion)}</div>`:''}</div>`}).join('');
-        return `<div class="sub-row" style="flex-direction:column;align-items:flex-start;gap:.35rem;padding:.75rem 0">
-            <div style="display:flex;align-items:center;gap:.75rem;width:100%">
-                <span class="sub-name">${aName}</span>
-                ${s.entregado?'<span class="badge badge-green">Entregado</span>':'<span class="badge badge-gray">Sin entregar</span>'}
-                ${avg!==null?`<span class="nota-val ${avgColor}">Promedio: ${avg}</span>`:''}
-                <span class="badge ${estBadge}">${s.estado_calificacion.replace('_',' ')}</span>
-                <button class="btn btn-outline" style="margin-left:auto;font-size:.7rem;padding:.25rem .6rem" onclick="openGradeForm('${workId}','${s.alumno_id}','${aName.replace(/'/g,"\\'")}')">Calificar</button>
+        const profGrades=(s.notas_profesores||[]).map(g=>{
+            const p=S.users.find(u=>String(u.id)===String(g.profesor_id));
+            return `<div style="margin-top:.4rem;padding:.4rem .6rem;background:#f8f9fc;border-radius:4px;font-size:.75rem">
+                <strong>${p?p.apellido+' '+p.nombre:'Profesor'}</strong>:
+                <span class="nota-val ${g.nota>=6?'nota-ok':'nota-fail'}">${g.nota??'—'}</span>
+                ${g.devolucion?`<div class="devolucion-box" style="margin-top:.3rem">${esc(g.devolucion)}</div>`:''}
+            </div>`;
+        }).join('');
+        return `<div class="card" style="padding:1rem">
+            <h3 style="font-size:.85rem">${esc(aName)}</h3>
+            <div class="card-meta">
+                ${s.entregado?'<span class="tag tag-green">Entregado</span>':'<span class="tag">Sin entregar</span>'}
+                ${avg!==null?`<span class="tag ${avgClass}" style="font-weight:700">Nota: ${avg}</span>`:''}
+                <span class="badge ${estBadge}" style="font-size:.65rem">${s.estado_calificacion.replace('_',' ')}</span>
             </div>
-            ${s.entregado&&s.contenido?`<div style="font-size:.75rem;color:var(--muted)">Entregado: ${s.fecha_entrega||''}</div><div class="devolucion-box" style="width:100%">${esc(s.contenido)}</div>`:''}
+            ${s.entregado&&s.contenido?`<div style="font-size:.72rem;color:var(--muted);margin-top:.4rem">📅 ${s.fecha_entrega||''}</div><div class="devolucion-box" style="margin-top:.3rem;font-size:.75rem">${esc(s.contenido)}</div>`:''}
             ${profGrades}
+            <div class="card-actions">
+                <button class="btn btn-outline" style="font-size:.7rem;padding:.25rem .6rem" onclick="openGradeForm('${workId}','${s.alumno_id}','${aName.replace(/'/g,"\'")}')">Calificar</button>
+            </div>
         </div>`;
     }).join('');
-    modal(`<h3>${work.titulo}</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">${work.descripcion||''}</p><div class="submissions-list">${rows||'<div class="empty">Sin alumnos asignados</div>'}</div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cerrar</button></div>`,'33.333vw');
+    modal(`<h3>${esc(work.titulo)}</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">${esc(work.descripcion||'')}</p><div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${rows||'<div class="empty" style="grid-column:1/-1">Sin alumnos asignados</div>'}</div><div class="modal-footer" style="margin-top:1rem"><button class="btn btn-outline" onclick="closeModal()">Cerrar</button></div>`,'min(960px,94vw)');
 }
 function openGradeForm(workId,alumnoId,alumnoName){
     modal(`<h3>Calificar entrega</h3><p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">Alumno: <strong>${alumnoName}</strong></p>
@@ -246,23 +254,24 @@ async function loadMyWorks(){
         const avg=sub?.nota_promedio;
         const avgColor=avg===null?'nota-pending':avg>=6?'nota-ok':'nota-fail';
         const profDevs=(sub?.notas_profesores||[]).filter(g=>g.devolucion).map(g=>`<div style="font-size:.78rem;margin-top:.5rem"><strong>Devolución del profesor:</strong><div class="devolucion-box">${esc(g.devolucion)}</div></div>`).join('');
-        return `<div class="work-card">
-            <div class="work-card-header">
-                <div><div class="work-title">${w.titulo}</div><div class="work-desc">${w.descripcion||''}</div></div>
-                <div>${avg!==null?`<span class="nota-val ${avgColor}" style="font-size:1.3rem">${avg}</span><br><span style="font-size:.7rem;color:var(--muted)">promedio</span>`:''}</div>
-            </div>
-            <div class="work-meta">
-                ${curso?`<span class="badge badge-blue">${curso.anio}° ${curso.division}</span>`:''}
-                ${mat?`<span class="badge badge-gray">${mat.nombre}</span>`:''}
-                ${w.fecha_entrega?`<span class="badge badge-amber">Entrega: ${w.fecha_entrega}</span>`:''}
-                ${sub?.entregado?'<span class="badge badge-green">Entregado</span>':'<span class="badge badge-gray">Sin entregar</span>'}
-                ${sub?.estado_calificacion?`<span class="badge ${sub.estado_calificacion==='aprobado'?'badge-green':sub.estado_calificacion==='desaprobado'?'badge-red':'badge-amber'}">${sub.estado_calificacion.replace('_',' ')}</span>`:''}
+        const ncClass=avg===null?'tag-amber':avg>=6?'tag-green':'tag-red';
+        const estClass=sub?.estado_calificacion==='aprobado'?'badge-green':sub?.estado_calificacion==='desaprobado'?'badge-red':'badge-amber';
+        return `<div class="card">
+            <h3>${esc(w.titulo)}</h3>
+            <p>${esc(w.descripcion||'')}</p>
+            <div class="card-meta">
+                ${curso?`<span class="tag tag-blue">${curso.anio}° ${curso.division}</span>`:''}
+                ${mat?`<span class="tag">${esc(mat.nombre)}</span>`:''}
+                ${w.fecha_entrega?`<span class="tag tag-amber">📅 ${w.fecha_entrega}</span>`:''}
+                ${sub?.entregado?'<span class="tag tag-green">Entregado</span>':'<span class="tag">Sin entregar</span>'}
+                ${avg!==null?`<span class="tag ${ncClass}" style="font-weight:700">Nota: ${avg}</span>`:''}
+                ${sub?.estado_calificacion?`<span class="badge ${estClass}" style="font-size:.65rem">${sub.estado_calificacion.replace('_',' ')}</span>`:''}
             </div>
             ${profDevs}
-            ${!sub?.entregado?`<div style="margin-top:.75rem"><div class="field"><label>Tu entrega</label><textarea id="sub-${w.id}" rows="3" placeholder="Pegá tu código, respuesta o link..."></textarea></div><button class="btn btn-navy" style="margin-top:.5rem" onclick="submitWork('${w.id}')">Entregar</button></div>`:''}
+            ${!sub?.entregado?`<div style="margin-top:.75rem"><div class="field"><label>Tu entrega</label><textarea id="sub-${w.id}" rows="3" placeholder="Pegá tu código, respuesta o link..."></textarea></div><button class="btn btn-navy" style="margin-top:.5rem;width:100%" onclick="submitWork('${w.id}')">Entregar</button></div>`:''}
         </div>`;
     }));
-    el.innerHTML=rows.join('');
+    el.innerHTML=`<div class="cards">${rows.join('')}</div>`;
 }
 async function submitWork(workId){
     const content=document.getElementById('sub-'+workId)?.value.trim();

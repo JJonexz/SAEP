@@ -107,6 +107,9 @@ main { overflow-y: auto; display: flex; flex-direction: column; background: var(
 /* ── Botones en tarjetas de usuarios apilados ── */
 #panel-users .card-actions { flex-direction: column; align-items: stretch; }
 
+/* ── Botones en trabajos apilados ── */
+#panel-works .work-actions { flex-direction: column; align-items: stretch; }
+
 /* ── Cards dentro de tbl-wrap (usuarios) ── */
 .tbl-wrap .card { background: var(--white); }
 #users-tbl { background: transparent; }
