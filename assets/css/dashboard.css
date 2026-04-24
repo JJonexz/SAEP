@@ -83,7 +83,7 @@ main { overflow-y: auto; display: flex; flex-direction: column; background: var(
 }
 .ph h2   { font-size: 1.1rem; font-weight: 700; color: var(--text); }
 .ph .sub { font-size: .75rem; color: var(--muted); margin-top: .15rem; }
-.pb      { padding: 1.25rem 1.5rem; flex: 1; overflow-y: auto; }
+.pb      { padding: 1.25rem 1.5rem; flex: 1; overflow-y: auto; background: var(--bg); }
 
 /* ── Stats ── */
 .stats    { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
@@ -103,6 +103,14 @@ main { overflow-y: auto; display: flex; flex-direction: column; background: var(
 .card p        { font-size: .75rem; color: var(--muted); line-height: 1.5; }
 .card-meta     { display: flex; gap: .4rem; margin-top: .75rem; flex-wrap: wrap; }
 .card-actions  { display: flex; gap: .4rem; margin-top: auto; padding-top: .85rem; flex-wrap: wrap; align-items: center; }
+
+/* ── Botones en tarjetas de usuarios apilados ── */
+#panel-users .card-actions { flex-direction: column; align-items: stretch; }
+
+/* ── Cards dentro de tbl-wrap (usuarios) ── */
+.tbl-wrap .card { background: var(--white); }
+#users-tbl { background: transparent; }
+.tbl-wrap .cards { background: var(--bg); }
 
 
 
