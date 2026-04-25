@@ -54,7 +54,8 @@ const ORIENTACIONES = {
 // ============================================================
 const LS_KEY = 'gestor_eest1_db';
 
-var LABS       = [];
+var ROOMS      = [];   // rooms.json — aulas/labs físicos (id, nombre, capacidad, ubicacion, curso_id, preceptor_id)
+var COURSES    = [];   // courses.json — cursos (solo lectura en este módulo, usado para asignar rooms)
 var PROFESORES = [];
 var RESERVAS   = [];
 var SOLICITUDES= [];
@@ -65,7 +66,8 @@ var RECREOS    = [];
 function saveDB() {
   try {
     var db = {
-      labs:       LABS,
+      rooms:      ROOMS,
+      courses:    COURSES,
       profesores: PROFESORES,
       reservas:   RESERVAS,
       solicitudes:SOLICITUDES,
@@ -86,15 +88,16 @@ function loadFromLocalStorage() {
     var raw = localStorage.getItem(LS_KEY);
     if (!raw) return false;
     var db = JSON.parse(raw);
-    if (!db || !db.labs) return false;
-    LABS        = db.labs       || [];
-    PROFESORES  = db.profesores || [];
-    RESERVAS    = db.reservas   || [];
-    SOLICITUDES = db.solicitudes|| [];
-    LISTA_ESPERA= db.espera     || [];
-    PAUTAS      = db.pautas     || [];
-    RECREOS     = db.recreos    || [];
-    nextId      = db.nextId     || 500;
+    if (!db || !db.rooms) return false;
+    ROOMS       = db.rooms       || [];
+    COURSES     = db.courses     || [];
+    PROFESORES  = db.profesores  || [];
+    RESERVAS    = db.reservas    || [];
+    SOLICITUDES = db.solicitudes || [];
+    LISTA_ESPERA= db.espera      || [];
+    PAUTAS      = db.pautas      || [];
+    RECREOS     = db.recreos     || [];
+    nextId      = db.nextId      || 500;
     return true;
   } catch(e) {
     console.warn('Error al leer localStorage:', e);
@@ -104,7 +107,8 @@ function loadFromLocalStorage() {
 
 function loadFromJSON(callback) {
   var files = [
-    { key:'labs',        url:'data/labs.json'       },
+    { key:'rooms',       url:'data/rooms.json'      },
+    { key:'courses',     url:'data/courses.json'    },
     { key:'profesores',  url:'data/profesores.json' },
     { key:'reservas',    url:'data/reservas.json'   },
     { key:'solicitudes', url:'data/solicitudes.json'},
@@ -122,7 +126,8 @@ function loadFromJSON(callback) {
         results[f.key] = data;
         pending--;
         if (pending === 0) {
-          LABS         = results.labs        || [];
+          ROOMS        = results.rooms       || [];
+          COURSES      = results.courses     || [];
           PROFESORES   = results.profesores  || [];
           RESERVAS     = results.reservas    || [];
           SOLICITUDES  = results.solicitudes || [];
@@ -144,7 +149,8 @@ function loadFromJSON(callback) {
         results[f.key] = [];
         pending--;
         if (pending === 0) {
-          LABS         = results.labs        || [];
+          ROOMS        = results.rooms       || [];
+          COURSES      = results.courses     || [];
           PROFESORES   = results.profesores  || [];
           RESERVAS     = results.reservas    || [];
           SOLICITUDES  = results.solicitudes || [];
@@ -162,9 +168,10 @@ function loadFromJSON(callback) {
 // ============================================================
 function exportarDB() {
   var db = {
-    version: '5',
+    version: '6',
     exportadoEn: new Date().toISOString(),
-    labs:       LABS,
+    rooms:      ROOMS,
+    courses:    COURSES,
     profesores: PROFESORES,
     reservas:   RESERVAS,
     solicitudes:SOLICITUDES,
@@ -193,9 +200,10 @@ function importarDB() {
     reader.onload = function(ev) {
       try {
         var db = JSON.parse(ev.target.result);
-        if (!db.labs || !db.profesores) { toast('Archivo inválido. Debe ser un backup del sistema.', 'err'); return; }
+        if (!db.rooms || !db.profesores) { toast('Archivo inválido. Debe ser un backup del sistema.', 'err'); return; }
         confirmar('¿Importar este backup? Se reemplazarán TODOS los datos actuales.', function(){
-          LABS         = db.labs        || [];
+          ROOMS        = db.rooms       || [];
+          COURSES      = db.courses     || [];
           PROFESORES   = db.profesores  || [];
           RESERVAS     = db.reservas    || [];
           SOLICITUDES  = db.solicitudes || [];
@@ -237,7 +245,9 @@ function resetearDB() {
 // ============================================================
 function getModulo(id){ return MODULOS.find(function(m){ return m.id===id; })||MODULOS[0]; }
 function getProfe(id){ return PROFESORES.find(function(p){ return p.id===id; })||{apellido:'—',nombre:'',orientacion:'bas',materia:'—'}; }
-function getLab(id)  { return LABS.find(function(l){ return l.id===id; })||{nombre:'—',ocupado:false,capacidad:0,notas:''}; }
+function getRoom(id)  { return ROOMS.find(function(r){ return r.id===id; })||{nombre:'—',ocupado:false,capacidad:0,notas:'',curso_id:null,ubicacion:''}; }
+function getLab(id)   { return getRoom(id); } // alias de compatibilidad
+function getCourse(id){ return COURSES.find(function(c){ return c.id===id; })||null; }
 function getCurrentProfId(){ return (window.SESSION&&window.SESSION.id)?window.SESSION.id:1; }
 
 function getSemanaStart(offset){
@@ -354,7 +364,7 @@ function setLabFilter(labId){
 function renderSidebar(){
   // Sidebar removido — solo actualizar lab-filter-btns
   var lfb=document.getElementById('lab-filter-btns');
-  if(lfb) lfb.innerHTML=LABS.map(function(l){ return '<button class="lab-filter-btn '+(filtroLab===l.id?'active':'')+'" data-lab-filter="'+l.id+'" onclick="setLabFilter(\''+l.id+'\')" aria-pressed="'+(filtroLab===l.id)+'">Lab. '+l.id+'</button>'; }).join('');
+  if(lfb) lfb.innerHTML=ROOMS.map(function(r){ return '<button class="lab-filter-btn '+(filtroLab===r.id?'active':'')+'" data-lab-filter="'+r.id+'" onclick="setLabFilter(\''+r.id+'\')" aria-pressed="'+(filtroLab===r.id)+'">'+r.nombre+'</button>'; }).join('');
 }
 // ============================================================
 // CALENDARIO
@@ -386,7 +396,7 @@ function renderCalendario(){
   var solicDia=SOLICITUDES.filter(function(s){ return s.semanaOffset===semanaOffset&&s.dia===diaActual&&s.estado==='pendiente'; });
   var grid=document.getElementById('cal-body');
   if(!grid) return;
-  var labsFiltrados=LABS.filter(function(l){ return filtroLab==='todos'||filtroLab===l.id; });
+  var roomsFiltrados=ROOMS.filter(function(r){ return filtroLab==='todos'||filtroLab===r.id; });
 
   var html='<div class="at-wrap"><table class="at-table" role="grid"><thead>';
   html+='<tr><th class="at-corner" rowspan="2">Espacio</th>';
@@ -413,20 +423,22 @@ function renderCalendario(){
   });
   html+='</tr></thead><tbody>';
 
-  labsFiltrados.forEach(function(lab,labIdx){
-    html+='<tr class="at-row'+(labIdx%2===1?' at-row-alt':'')+'">';
-    html+='<td class="at-lab-cell"><div class="at-lab-name">'+lab.nombre+'</div><div class="at-lab-status '+(lab.ocupado?'at-status-ocup':'at-status-libre')+'">'+(lab.ocupado?'Mantenimiento':'Disponible')+'</div></td>';
+  roomsFiltrados.forEach(function(room,roomIdx){
+    var curso=room.curso_id?getCourse(room.curso_id):null;
+    var roomLabel=room.nombre+(curso?' <span class="at-lab-course">'+curso.nombre+'</span>':'');
+    html+='<tr class="at-row'+(roomIdx%2===1?' at-row-alt':'')+'">';
+    html+='<td class="at-lab-cell"><div class="at-lab-name">'+roomLabel+'</div><div class="at-lab-status '+(room.ocupado?'at-status-ocup':'at-status-libre')+'">'+(room.ocupado?'Mantenimiento':'Disponible')+'</div></td>';
     TURNOS_CONFIG.forEach(function(tc){
       var cols=tc.modulos.filter(function(mid){ return MODULOS_CLASE.find(function(m){ return m.id===mid; }); });
       if(!cols.length) return;
       cols.forEach(function(mid){
-        var r=reservasDia.find(function(x){ return x.modulo===mid&&x.lab===lab.id; });
-        var s=solicDia.find(function(x){ return x.modulo===mid&&x.lab===lab.id; });
+        var r=reservasDia.find(function(x){ return x.modulo===mid&&x.lab===room.id; });
+        var s=solicDia.find(function(x){ return x.modulo===mid&&x.lab===room.id; });
         html+='<td class="at-event-cell">';
         if(r){
           var oriOk=filtroOrient==='all'||r.orient===filtroOrient;
           if(!oriOk){
-            html+='<div class="at-event at-libre" role="button" tabindex="0" onclick="abrirModalReservaSlot('+diaActual+','+mid+',\''+lab.id+'\')" title="Disponible"><span class="at-ev-plus">+</span></div>';
+            html+='<div class="at-event at-libre" role="button" tabindex="0" onclick="abrirModalReservaSlot('+diaActual+','+mid+',\''+room.id+'\')" title="Disponible"><span class="at-ev-plus">+</span></div>';
           } else {
             var ori=ORIENTACIONES[r.orient]; var p=getProfe(r.profeId);
             html+='<div class="at-event '+ori.ev+'" role="button" tabindex="0" onclick="verDetalle('+r.id+')" title="'+r.curso+' — Prof. '+p.apellido+'"><div class="at-ev-curso">'+r.curso+' '+ori.emoji+'</div><div class="at-ev-prof">'+p.apellido+'</div></div>';
@@ -435,7 +447,7 @@ function renderCalendario(){
           var action=modoUsuario==='admin'?'verDetalleSolicitud('+s.id+')':'verDetalle_Pendiente('+s.id+')';
           html+='<div class="at-event ev-pendiente" role="button" tabindex="0" onclick="'+action+'" title="Pendiente: '+s.curso+'"><div class="at-ev-curso">'+s.curso+' ⏳</div></div>';
         } else {
-          html+='<div class="at-event at-libre" role="button" tabindex="0" onclick="abrirModalReservaSlot('+diaActual+','+mid+',\''+lab.id+'\')" title="Disponible — clic para reservar"><span class="at-ev-plus">+</span></div>';
+          html+='<div class="at-event at-libre" role="button" tabindex="0" onclick="abrirModalReservaSlot('+diaActual+','+mid+',\''+room.id+'\')" title="Disponible — clic para reservar"><span class="at-ev-plus">+</span></div>';
         }
         html+='</td>';
       });
@@ -651,7 +663,7 @@ function rechazarSolicitud(solId){
 function poblarSelectsReserva(){
   ['f-lab','espera-lab'].forEach(function(sid){
     var sel=document.getElementById(sid); if(!sel) return;
-    sel.innerHTML='<option value="">Seleccionar laboratorio…</option>'+LABS.filter(function(l){ return !l.ocupado; }).map(function(l){ return '<option value="'+l.id+'">'+l.nombre+'</option>'; }).join('');
+    sel.innerHTML='<option value="">Seleccionar laboratorio…</option>'+ROOMS.filter(function(r){ return !r.ocupado; }).map(function(r){ return '<option value="'+r.id+'">'+r.nombre+'</option>'; }).join('');
   });
   ['f-dia','espera-dia'].forEach(function(sid){
     var sel=document.getElementById(sid); if(!sel) return;
@@ -886,9 +898,9 @@ function renderAdmin(){
   var total=RESERVAS.length;
   var pendientes=SOLICITUDES.filter(function(s){ return s.estado==='pendiente'; }).length;
   var docActivos=new Set(RESERVAS.map(function(r){ return r.profeId; })).size;
-  var labs=LABS.length;
+  var rooms=ROOMS.length;
   ['s-semana','s-pendientes','s-docs','s-labs'].forEach(function(id,i){
-    var el=document.getElementById(id); if(el) el.textContent=[total,pendientes,docActivos,labs][i];
+    var el=document.getElementById(id); if(el) el.textContent=[total,pendientes,docActivos,rooms][i];
   });
   renderSolicitudesAdmin(); renderProfesores(); renderLabsConfig(); renderAdminReservas(); renderPautasAdmin();
 }
@@ -970,29 +982,37 @@ function renderProfesores(){
 
 function renderLabsConfig(){
   var el=document.getElementById('labs-config-list'); if(!el) return;
-  if(!LABS.length){ el.innerHTML='<div class="empty-state" style="padding:1rem;">No hay espacios configurados.</div>'; return; }
-  el.innerHTML='<div class="data-cards-grid">'+LABS.map(function(l){
-    var statusClass=l.ocupado?'ob-err':'ob-ok';
-    var statusTxt=l.ocupado?'Mantenimiento':'Disponible';
-    var statusColor=l.ocupado?'var(--red)':'var(--green)';
+  if(!ROOMS.length){ el.innerHTML='<div class="empty-state" style="padding:1rem;">No hay espacios configurados.</div>'; return; }
+  el.innerHTML='<div class="data-cards-grid">'+ROOMS.map(function(room){
+    var statusClass=room.ocupado?'ob-err':'ob-ok';
+    var statusTxt=room.ocupado?'Mantenimiento':'Disponible';
+    var statusColor=room.ocupado?'var(--red)':'var(--green)';
+    var cursoAsignado=room.curso_id?getCourse(room.curso_id):null;
+    var cursoOpts='<option value="">— Sin curso asignado —</option>'+COURSES.map(function(c){
+      return '<option value="'+c.id+'"'+(room.curso_id===c.id?' selected':'')+'>'+c.nombre+(c.turno?' · '+c.turno:'')+'</option>';
+    }).join('');
     return '<div class="data-card" style="border-top:3px solid '+statusColor+';">'
       +'<div class="dc-body">'
         +'<div class="dc-row dc-row--between">'
           +'<div class="dc-row dc-row--gap">'
-            +'<div class="dc-lab-icon" style="background:'+(l.ocupado?'var(--red-dim)':'var(--navy-faint)')+';color:'+(l.ocupado?'var(--red)':'var(--navy)')+'">🖥️</div>'
+            +'<div class="dc-lab-icon" style="background:'+(room.ocupado?'var(--red-dim)':'var(--navy-faint)')+';color:'+(room.ocupado?'var(--red)':'var(--navy)')+'">🏫</div>'
             +'<div>'
-              +'<div class="dc-title">'+l.nombre+'</div>'
-              +'<div class="dc-sub">'+l.capacidad+' equipos</div>'
+              +'<div class="dc-title">'+room.nombre+'</div>'
+              +'<div class="dc-sub">'+room.capacidad+' equipos'+(room.ubicacion?' · '+room.ubicacion:'')+'</div>'
             +'</div>'
           +'</div>'
           +'<span class="orient-badge '+statusClass+'">'+statusTxt+'</span>'
         +'</div>'
-        +(l.notas?'<div class="dc-secuencia">'+l.notas+'</div>':'')
+        +'<div class="dc-meta" style="margin-top:.5rem;">'
+          +'<label style="font-size:.72rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.25rem;">Curso asignado</label>'
+          +'<select class="form-control" style="font-size:.78rem;" onchange="asignarCursoRoom(\''+room.id+'\',this.value)">'+cursoOpts+'</select>'
+        +'</div>'
+        +(room.notas?'<div class="dc-secuencia">'+room.notas+'</div>':'')
       +'</div>'
       +'<div class="dc-footer">'
-        +'<button class="dc-btn dc-btn--neutral" onclick="editarLab(\''+l.id+'\')">✏️ Editar</button>'
-        +'<button class="dc-btn dc-btn--neutral" onclick="toggleEstadoLab(\''+l.id+'\')">'+(l.ocupado?'🟢 Liberar':'🔴 Ocupar')+'</button>'
-        +'<button class="dc-btn dc-btn--danger" onclick="eliminarLab(\''+l.id+'\')">🗑</button>'
+        +'<button class="dc-btn dc-btn--neutral" onclick="editarLab(\''+room.id+'\')">✏️ Editar</button>'
+        +'<button class="dc-btn dc-btn--neutral" onclick="toggleEstadoLab(\''+room.id+'\')">'+(room.ocupado?'🟢 Liberar':'🔴 Ocupar')+'</button>'
+        +'<button class="dc-btn dc-btn--danger" onclick="eliminarLab(\''+room.id+'\')">🗑</button>'
       +'</div>'
     +'</div>';
   }).join('')+'</div>';
@@ -1091,22 +1111,23 @@ function eliminarDocente(id){
 }
 
 // ============================================================
-// CRUD LABORATORIOS
+// CRUD ESPACIOS (rooms.json)
 // ============================================================
 function abrirModalLab(){
   editLabId=null;
   document.getElementById('modal-lab-title').textContent='+ Agregar espacio';
-  ['lab-nombre','lab-capacidad','lab-notas'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  ['lab-nombre','lab-capacidad','lab-ubicacion','lab-notas'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
   var estado=document.getElementById('lab-estado'); if(estado) estado.value='libre';
   abrirModal('modal-lab');
 }
 function editarLab(id){
-  var l=getLab(id); editLabId=id;
+  var r=getRoom(id); editLabId=id;
   document.getElementById('modal-lab-title').textContent='✏️ Editar espacio';
-  document.getElementById('lab-nombre').value=l.nombre;
-  document.getElementById('lab-capacidad').value=l.capacidad||'';
-  document.getElementById('lab-estado').value=l.ocupado?'ocupado':'libre';
-  document.getElementById('lab-notas').value=l.notas||'';
+  document.getElementById('lab-nombre').value=r.nombre;
+  document.getElementById('lab-capacidad').value=r.capacidad||'';
+  document.getElementById('lab-estado').value=r.ocupado?'ocupado':'libre';
+  document.getElementById('lab-notas').value=r.notas||'';
+  var ubEl=document.getElementById('lab-ubicacion'); if(ubEl) ubEl.value=r.ubicacion||'';
   abrirModal('modal-lab');
 }
 function guardarLab(){
@@ -1114,25 +1135,50 @@ function guardarLab(){
   var capacidad=parseInt(document.getElementById('lab-capacidad').value)||0;
   var estado=document.getElementById('lab-estado').value;
   var notas=document.getElementById('lab-notas').value.trim();
+  var ubicacion=(document.getElementById('lab-ubicacion')||{}).value||'';
   if(!nombre){ toast('Ingresá un nombre para el espacio.','err'); return; }
-  if(editLabId){ var l=LABS.find(function(x){ return x.id===editLabId; }); if(l){ l.nombre=nombre; l.capacidad=capacidad; l.ocupado=estado==='ocupado'; l.notas=notas; } toast('Espacio actualizado.','ok'); }
-  else { var newId=String.fromCharCode(65+LABS.length); LABS.push({id:newId,nombre:nombre,capacidad:capacidad,ocupado:estado==='ocupado',notas:notas}); toast('Espacio "'+nombre+'" agregado.','ok'); }
+  if(editLabId){
+    var r=ROOMS.find(function(x){ return x.id===editLabId; });
+    if(r){ r.nombre=nombre; r.capacidad=capacidad; r.ocupado=estado==='ocupado'; r.notas=notas; r.ubicacion=ubicacion; }
+    toast('Espacio actualizado.','ok');
+  } else {
+    // Generar ID único tipo rooms.json
+    var newId=(Date.now().toString(16))+'.'+Math.floor(Math.random()*1e8);
+    ROOMS.push({id:newId,nombre:nombre,capacidad:capacidad,ubicacion:ubicacion,ocupado:estado==='ocupado',notas:notas,curso_id:null,preceptor_id:null});
+    toast('Espacio "'+nombre+'" agregado.','ok');
+  }
   cerrarModal('modal-lab'); saveDB(); renderAdmin(); renderCalendario();
 }
 function toggleEstadoLab(id){
-  var l=LABS.find(function(x){ return x.id===id; }); if(!l) return;
-  l.ocupado=!l.ocupado;
-  saveDB(); toast('Lab.'+l.id+': '+(l.ocupado?'En mantenimiento':'Disponible')+'.','info');
+  var r=ROOMS.find(function(x){ return x.id===id; }); if(!r) return;
+  r.ocupado=!r.ocupado;
+  saveDB(); toast(r.nombre+': '+(r.ocupado?'En mantenimiento':'Disponible')+'.','info');
   renderAdmin(); renderSidebar();
 }
 function eliminarLab(id){
-  var l=getLab(id);
-  confirmar('¿Eliminar el espacio <strong>'+l.nombre+'</strong>? Se eliminarán sus reservas.',function(){
-    LABS=LABS.filter(function(x){ return x.id!==id; });
-    RESERVAS=RESERVAS.filter(function(r){ return r.lab!==id; });
+  var r=getRoom(id);
+  confirmar('¿Eliminar el espacio <strong>'+r.nombre+'</strong>? Se eliminarán sus reservas.',function(){
+    ROOMS=ROOMS.filter(function(x){ return x.id!==id; });
+    RESERVAS=RESERVAS.filter(function(rv){ return rv.lab!==id; });
     SOLICITUDES=SOLICITUDES.filter(function(s){ return s.lab!==id; });
     saveDB(); toast('Espacio eliminado.','info'); renderAdmin(); renderCalendario();
   });
+}
+// Asignar/desasignar curso a un room — persiste en rooms.php si está disponible
+function asignarCursoRoom(roomId, cursoId){
+  var r=ROOMS.find(function(x){ return x.id===roomId; }); if(!r) return;
+  r.curso_id=cursoId||null;
+  saveDB();
+  // Persistir en servidor via rooms.php PATCH
+  fetch('api/rooms.php',{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({id:roomId,curso_id:r.curso_id})
+  }).catch(function(){ /* silencioso: ya guardado en localStorage */ });
+  var curso=r.curso_id?getCourse(r.curso_id):null;
+  toast(r.nombre+': '+(curso?'asignado a '+curso.nombre:'curso desasignado')+'.','ok');
+  renderLabsConfig();
+  renderCalendario();
 }
 
 // ============================================================

@@ -723,9 +723,12 @@ $role=$user['role'];
       <div class="form-group"><label class="form-label" for="lab-nombre">Nombre del espacio</label><input class="form-control" id="lab-nombre" type="text" placeholder="Ej: Lab. Informático C" required></div>
       <div class="form-row">
         <div class="form-group"><label class="form-label" for="lab-capacidad">Capacidad</label><input class="form-control" id="lab-capacidad" type="number" min="1" placeholder="Ej: 20"></div>
-        <div class="form-group"><label class="form-label" for="lab-estado">Estado</label><select class="form-control" id="lab-estado"><option value="libre">Disponible</option><option value="ocupado">En mantenimiento</option></select></div>
+        <div class="form-group"><label class="form-label" for="lab-ubicacion">Ubicación</label><input class="form-control" id="lab-ubicacion" type="text" placeholder="Ej: a31"></div>
       </div>
-      <div class="form-group"><label class="form-label" for="lab-notas">Equipamiento / notas</label><input class="form-control" id="lab-notas" type="text" placeholder="Ej: Windows 11, Packet Tracer"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label" for="lab-estado">Estado</label><select class="form-control" id="lab-estado"><option value="libre">Disponible</option><option value="ocupado">En mantenimiento</option></select></div>
+        <div class="form-group"><label class="form-label" for="lab-notas">Equipamiento / notas</label><input class="form-control" id="lab-notas" type="text" placeholder="Ej: Windows 11, Packet Tracer"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="cerrarModal('modal-lab')">Cancelar</button>
