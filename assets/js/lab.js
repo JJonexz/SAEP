@@ -330,8 +330,7 @@ function closeSessionMenu(){
 }
 function cerrarSesion(){
   confirmar('¿Cerrar sesión y volver al inicio?',function(){
-    sessionStorage.removeItem('session');
-    window.location.href='login.html';
+    window.location.href='logout.php';
   });
 }
 function selOrient(el,orient){
@@ -1224,53 +1223,84 @@ function aceptarPautas() {
 
 
 
-document.addEventListener('DOMContentLoaded', function() {
+// ============================================================
+// INIT — integrado en dashboard SAEP
+// ============================================================
+var _labIniciado = false;
+
+function initLaboratorios() {
+  if (_labIniciado) {
+    // Ya iniciado: solo re-renderizar
+    renderCalendario();
+    return;
+  }
+  _labIniciado = true;
+
   var dow = new Date().getDay();
   diaActual = dow===0 ? 4 : (dow===6 ? 0 : dow-1);
   diaActual = Math.max(0, Math.min(4, diaActual));
 
+  // Usar sesión ya cargada por dashboard.php (window.ROLE / window.MY_ID)
+  var role = window.ROLE || 'profesor';
+  var isAdmin = ['admin','director','subdirector'].includes(role);
+  modoUsuario = isAdmin ? 'admin' : 'prof';
+
+  // Actualizar UI de pnav con datos del header SAEP
+  var pnavAv   = document.getElementById('pnav-avatar');
+  var pnavName = document.getElementById('pnav-name');
+  var pnavRole = document.getElementById('pnav-role');
+  var sAvatar  = document.getElementById('s-avatar');
+  var sName    = document.getElementById('s-name');
+  var sRole    = document.getElementById('s-role');
+  var smName   = document.getElementById('sm-name');
+  var smRole   = document.getElementById('sm-role');
+
+  var hdrName = document.querySelector('.hdr-name');
+  var displayName = hdrName ? hdrName.textContent.trim() : role;
+
+  if (pnavAv)   pnavAv.textContent  = displayName.substring(0,2).toUpperCase();
+  if (pnavName) pnavName.textContent = displayName;
+  if (pnavRole) { pnavRole.textContent = role; if(isAdmin) pnavRole.classList.add('admin'); }
+  if (sAvatar)  sAvatar.textContent  = displayName.substring(0,2).toUpperCase();
+  if (sName)    sName.textContent    = displayName;
+  if (sRole)    sRole.textContent    = role;
+  if (smName)   smName.textContent   = displayName;
+  if (smRole)   smRole.textContent   = role;
+
+  // Mostrar tab admin si corresponde
+  document.querySelectorAll('.admin-only').forEach(function(el){
+    el.style.display = isAdmin ? '' : 'none';
+  });
+
+  // Registrar listeners una sola vez
   document.addEventListener('click', function(e) {
     if(e.target.classList.contains('modal-overlay') && !e.target.classList.contains('pautas-overlay')) {
       e.target.classList.remove('open');
     }
   });
-  document.addEventListener('keydown', function(e) {
-    if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(function(m){ m.classList.remove('open'); });
+  ['f-lab','f-dia','f-modulo'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.addEventListener('change', checkConflict);
   });
-  ['f-lab','f-dia','f-modulo'].forEach(function(id){ var el=document.getElementById(id); if(el) el.addEventListener('change', checkConflict); });
 
-  // Cargamos la sesión desde SAEP y arrancamos el gestor
-  cargarSesionSAEP()
-    .then(function(sess) {
-      aplicarSesion(sess);
-      // Cargar datos desde localStorage o JSON
-      var fromLS = loadFromLocalStorage();
-      if (fromLS) {
-        renderCalendario();
-        if (!sessionStorage.getItem('pautas_aceptadas')) {
-          setTimeout(mostrarPautasInicio, 300);
-        }
-      } else {
-        loadFromJSON(function(){
-          renderCalendario();
-          if (!sessionStorage.getItem('pautas_aceptadas')) {
-            setTimeout(mostrarPautasInicio, 300);
-          }
-        });
-      }
-    })
-    .catch(function(err) {
-      if(err !== 'no_session' && err !== 'forbidden') {
-        console.error('Error al cargar sesión SAEP:', err);
-        document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;gap:16px;"><p style="font-size:1.1rem;color:#555;">No se pudo conectar con SAEP.</p><a href="/saep/dashboard.php" style="padding:10px 24px;background:#1e3a5f;color:#fff;border-radius:8px;text-decoration:none;">Volver al dashboard</a></div>';
+  // Cargar datos
+  var fromLS = loadFromLocalStorage();
+  if (fromLS) {
+    renderCalendario();
+    if (!sessionStorage.getItem('pautas_aceptadas')) {
+      setTimeout(mostrarPautasInicio, 300);
+    }
+  } else {
+    loadFromJSON(function(){
+      renderCalendario();
+      if (!sessionStorage.getItem('pautas_aceptadas')) {
+        setTimeout(mostrarPautasInicio, 300);
       }
     });
-})
-  // Actualizar pnav user info
-  var pnavAv   = document.getElementById('pnav-avatar');
-  var pnavName = document.getElementById('pnav-name');
-  var pnavRole = document.getElementById('pnav-role');
-  var initials2 = (typeof initials !== 'undefined') ? initials : sess.display.substring(0,2).toUpperCase();
-  if(pnavAv)   { if(sess.avatar){ pnavAv.style.backgroundImage='url('+sess.avatar+')'; pnavAv.style.backgroundSize='cover'; pnavAv.style.backgroundPosition='center'; pnavAv.textContent=''; } else { pnavAv.textContent=initials2; } }
-  if(pnavName) pnavName.textContent = sess.display;
-  if(pnavRole) { pnavRole.textContent = rolDisplay; if(sess.isAdmin) pnavRole.classList.add('admin'); };
+  }
+}
+
+// Compatibilidad: cerrarSesion redirige al logout de SAEP
+function cerrarSesionLab(){
+  window.location.href='logout.php';
+}

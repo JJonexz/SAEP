@@ -7,7 +7,7 @@ function nav(id){
     document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
     document.getElementById('panel-'+id)?.classList.add('visible');
     document.getElementById('nav-'+id)?.classList.add('active');
-    const loaders={repos:loadRepos,users:loadUsers,courses:loadCourses,rooms:loadRooms,grades:initGrades,'my-grades':loadMyGrades,'my-works':loadMyWorks,works:initWorks,inicio:loadInicio,mail:initMail};
+    const loaders={repos:loadRepos,users:loadUsers,courses:loadCourses,rooms:loadRooms,laboratorios:initLaboratorios,grades:initGrades,'my-grades':loadMyGrades,'my-works':loadMyWorks,works:initWorks,inicio:loadInicio,mail:initMail};
     loaders[id]?.();
 }
 
