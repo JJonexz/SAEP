@@ -510,14 +510,6 @@ $role=$user['role'];
     </div>
     <div class="admin-section">
       <div class="admin-section-header">
-        <div class="admin-section-title"><span aria-hidden="true">👥</span> Docentes</div>
-        <button class="cta-btn" style="width:auto;padding:8px 18px;font-size:13px;" onclick="abrirModalDocente()">+ Agregar</button>
-      </div>
-      <div class="search-bar"><input class="search-input" type="search" placeholder="Buscar por nombre o materia…" id="search-prof" oninput="renderProfesores()"></div>
-      <div id="prof-cards-area" style="padding:.75rem 1rem;"></div>
-    </div>
-    <div class="admin-section">
-      <div class="admin-section-header">
         <div class="admin-section-title"><span aria-hidden="true">🏫</span> Espacios / Laboratorios</div>
         <button class="cta-btn" style="width:auto;padding:8px 18px;font-size:13px;" onclick="abrirModalLab()">+ Agregar</button>
       </div>
@@ -617,13 +609,7 @@ $role=$user['role'];
         <div class="form-group">
           <label class="form-label" for="f-curso">Curso</label>
           <select class="form-control" id="f-curso" required>
-            <option value="">Seleccionar…</option>
-            <option>1°A</option><option>1°B</option><option>1°C</option>
-            <option>2°A</option><option>2°B</option><option>2°C</option>
-            <option>3°A</option><option>3°B</option>
-            <option>4°A</option><option>4°B</option><option>4°C</option>
-            <option>5°A</option><option>5°B</option>
-            <option>6°A</option><option>6°B</option>
+            <option value="">Seleccionar curso…</option>
           </select>
         </div>
         <div class="form-group">
