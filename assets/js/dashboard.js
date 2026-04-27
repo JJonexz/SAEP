@@ -281,7 +281,6 @@ async function submitWork(workId){
     if(d.success)loadMyWorks();else alert('Error: '+d.error);
 }
 
-// ── GRADES ─────────────────────────────────────────────────────────────────
 const CUATRI_LABEL={'1':'1° Informe','2':'1°','3':'2° Informe','4':'2°'};
 function cuatriLabel(v){return CUATRI_LABEL[String(v)]||v+'°';}
 function cuatriBase(v){return v?v.replace('_informe',''):'';}
@@ -341,24 +340,35 @@ async function loadGradesTable(){
     // Determinar curso para cada alumno (en caso de búsqueda sin curso fijo)
     const getCurso=u=>cid?S.courses.find(c=>c.id===cid):S.courses.find(c=>c.alumnos?.includes(u.id));
 
-    el.innerHTML=`<div class="cards">${alumnos.map(u=>{
-        const co=getCurso(u);
-        const dni=u.dni||'—';
-        return `<div class="card">
-            <h3>${esc(u.apellido||'')} ${esc(u.nombre||'')}</h3>
-            <div class="card-meta">
-                ${co?`<span class="tag tag-blue">${co.anio}° ${co.division}</span>`:''}
-                ${co?`<span class="tag">${esc(co.nombre)}</span>`:''}
-                <span class="tag">DNI ${esc(String(dni))}</span>
-            </div>
-            <div class="card-actions">
-                <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
-                    onclick="openNotasModal('${u.id}','${esc(u.apellido||'')} ${esc(u.nombre||'')}','${co?.id||''}')">
-                    Ver Notas
-                </button>
-            </div>
-        </div>`;
-    }).join('')}</div>`;
+    el.innerHTML=`
+    <table>
+        <thead>
+            <tr>
+                <th>Alumno</th>
+                <th>Curso</th>
+                <th>DNI</th>
+                <th style="text-align:right"></th>
+            </tr>
+        </thead>
+        <tbody>
+            ${alumnos.map(u=>{
+                const co=getCurso(u);
+                const cursoLabel=co?`${co.anio}° ${co.division} — ${co.nombre}`:'—';
+                const dni=u.dni||'—';
+                return `<tr>
+                    <td style="font-weight:600">${esc(u.apellido||'')} ${esc(u.nombre||'')}</td>
+                    <td>${esc(cursoLabel)}</td>
+                    <td>${esc(String(dni))}</td>
+                    <td style="text-align:right">
+                        <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
+                            onclick="openNotasModal('${u.id}','${esc(u.apellido||'')} ${esc(u.nombre||'')}','${co?.id||''}')">
+                            Ver Notas
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
 }
 
 async function openNotasModal(alumnoId, alumnoNombre, cursoId){
@@ -435,21 +445,34 @@ async function renderNotasTabla(alumnoId, cursoId){
         return cuatriSortKey(a.cuatrimestre)-cuatriSortKey(b.cuatrimestre);
     });
 
-    wrap.innerHTML=`<div class="cards">${grades.map(g=>{
-        const ma=curso?.materias?.find(m=>m.id===g.materia_id);
-        const nc=g.nota!==null?(g.nota>=6?'tag-green':'tag-red'):'tag-amber';
-        const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<div class="card">
-            <h3>${ma?esc(ma.nombre):'—'}</h3>
-            <div class="card-meta">
-                <span class="tag">${cuatriLabel(g.cuatrimestre)}</span>
-                <span class="tag ${nc}" style="font-weight:700">Nota: ${g.nota??'—'}</span>
-                ${g.concepto?`<span class="tag ${g.concepto==='TED'?'tag-red':g.concepto==='TEP'?'tag-amber':'tag-green'}">${g.concepto}</span>`:''}
-                ${g.asistencia!=null?`<span class="tag">Asist. ${g.asistencia}%</span>`:''}
-                <span class="badge ${estB}">${g.estado}</span>
-            </div>
-        </div>`;
-    }).join('')}</div>`;
+    wrap.innerHTML=`
+    <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+        <thead>
+            <tr>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Materia</th>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Cuatrimestre</th>
+                <th style="padding:.45rem .6rem;text-align:center">Nota</th>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Trayectoria</th>
+                <th style="padding:.45rem .6rem;text-align:center">Asistencia</th>
+                <th style="padding:.45rem .6rem;text-align:center">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${grades.map(g=>{
+                const ma=curso?.materias?.find(m=>m.id===g.materia_id);
+                const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
+                const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
+                return `<tr>
+                    <td style="font-weight:600;white-space:nowrap;padding:.4rem .6rem">${ma?esc(ma.nombre):'—'}</td>
+                    <td style="white-space:nowrap;padding:.4rem .6rem">${cuatriLabel(g.cuatrimestre)}</td>
+                    <td style="padding:.4rem .6rem;text-align:center"><span class="nota-val ${nc}" style="font-size:.82rem">${g.nota??'—'}</span></td>
+                    <td style="padding:.4rem .6rem">${g.concepto?`<span class="badge ${g.concepto==='TED'?'badge-red':g.concepto==='TEP'?'badge-amber':'badge-green'}" style="font-size:.68rem">${g.concepto}</span>`:'—'}</td>
+                    <td style="white-space:nowrap;padding:.4rem .6rem;text-align:center">${g.asistencia!=null?g.asistencia+'%':'—'}</td>
+                    <td style="padding:.4rem .6rem;text-align:center"><span class="badge ${estB}" style="font-size:.68rem">${g.estado}</span></td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
 }
 function gcLoadStudents(){
     const cid=document.getElementById('gc-curso').value;
@@ -520,23 +543,13 @@ async function loadMyGrades(){
     if(qua) grades=grades.filter(g=>String(g.cuatrimestre)===qua);
     const el=document.getElementById('my-grades-tbl');
     if(!grades.length){el.innerHTML='<div class="empty" style="padding:1.5rem">Sin calificaciones registradas.</div>';return;}
-    el.innerHTML=`<div class="cards">${grades.map(g=>{
+    el.innerHTML=`<table><thead><tr><th>Materia</th><th>Curso</th><th>Cuatri</th><th>Nota</th><th>Concepto</th><th>Asistencia</th><th>Estado</th></tr></thead><tbody>${grades.map(g=>{
         const co=S.courses.find(c=>c.id===g.curso_id);
         const ma=co?.materias?.find(m=>m.id===g.materia_id);
-        const nc=g.nota!==null?(g.nota>=6?'tag-green':'tag-red'):'tag-amber';
+        const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
         const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<div class="card">
-            <h3>${ma?esc(ma.nombre):'—'}</h3>
-            <p>${co?co.anio+'° '+co.division:'—'}</p>
-            <div class="card-meta">
-                <span class="tag">${cuatriLabel(g.cuatrimestre)}</span>
-                <span class="tag ${nc}" style="font-weight:700">Nota: ${g.nota??'—'}</span>
-                ${g.concepto?`<span class="tag ${g.concepto==='TED'?'tag-red':g.concepto==='TEP'?'tag-amber':'tag-green'}">${g.concepto}</span>`:''}
-                ${g.asistencia!=null?`<span class="tag">Asist. ${g.asistencia}%</span>`:''}
-                <span class="badge ${estB}">${g.estado}</span>
-            </div>
-        </div>`;
-    }).join('')}</div>`;
+        return `<tr><td>${ma?ma.nombre:'—'}</td><td>${co?co.anio+'° '+co.division:'—'}</td><td>${cuatriLabel(g.cuatrimestre)}</td><td><span class="nota-val ${nc}">${g.nota??'—'}</span></td><td>${g.concepto||'—'}</td><td>${g.asistencia!=null?g.asistencia+'%':'—'}</td><td><span class="badge ${estB}">${g.estado}</span></td></tr>`;
+    }).join('')}</tbody></table>`;
 }
 
 // ── USERS ──────────────────────────────────────────────────────────────────
