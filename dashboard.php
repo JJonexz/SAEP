@@ -1,11 +1,9 @@
 <?php
 session_start();
 require_once 'config.php'; require_once 'lib/db.php'; require_once 'lib/auth.php';
-if (!isset($_SESSION['github_id'])) { header('Location: index.php'); exit; }
-$users=db_read(USERS_FILE); $user=db_find($users,'github_id',$_SESSION['github_id']);
+if (!isset($_SESSION['user_id'])) { header('Location: index.php'); exit; }
+$user = db_find_user_by_id($_SESSION['user_id']);
 if (!$user) { header('Location: index.php'); exit; }
-if ($user['status']==='pending_profile')  { header('Location: complete-profile.php'); exit; }
-if ($user['status']==='pending_approval') { header('Location: pending.php'); exit; }
 $role=$user['role'];
 ?>
 <!DOCTYPE html>
@@ -202,9 +200,28 @@ $role=$user['role'];
             <?php if($role==='admin'): ?>
             <button class="btn btn-navy" onclick="openManualUserModal()">+ Crear usuario</button>
             <?php endif; ?>
-            <select id="uf-status" onchange="filterUsers()" style="font-family:var(--font);font-size:.78rem;padding:.4rem .7rem;border:0.052vw solid var(--border);border-radius:var(--radius);color:var(--text2)">
-                <option value="">Todos</option><option value="pending_approval">Pendientes</option><option value="approved">Aprobados</option><option value="rejected">Rechazados</option>
-            </select>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:flex-end">
+                <input id="uf-search" placeholder="Buscar por nombre, apellido o DNI..." 
+                      style="flex:1;min-width:200px;padding:.45rem .75rem;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font);font-size:.82rem"
+                      onkeydown="if(event.key==='Enter')filterUsers()">
+                <select id="uf-role" style="padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font);font-size:.82rem">
+                    <option value="">Todos los roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="director">Director</option>
+                    <option value="subdirector">Subdirector</option>
+                    <option value="profesor">Profesor</option>
+                    <option value="preceptor">Preceptor</option>
+                    <option value="alumno">Alumno</option>
+                </select>
+                <select id="uf-status" style="padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font);font-size:.82rem">
+                    <option value="">Todos los estados</option>
+                    <option value="approved">Aprobado</option>
+                    <option value="pending_approval">Pendiente</option>
+                    <option value="rejected">Rechazado</option>
+                </select>
+                <button class="btn btn-navy" onclick="filterUsers()">Buscar</button>
+            </div>
+            <div id="users-tbl"><div class="empty">Usá los filtros para buscar usuarios.</div></div>
         </div>
     </div>
     <div class="pb"><div class="tbl-wrap" id="users-tbl"></div></div>

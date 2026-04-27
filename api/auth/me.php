@@ -5,5 +5,5 @@ require_once __DIR__.'/../../lib/db.php';
 require_once __DIR__.'/../../lib/auth.php';
 header('Content-Type: application/json');
 $user = require_auth();
-unset($user['github_id']);
+unset($user['password_hash']);
 echo json_encode($user);

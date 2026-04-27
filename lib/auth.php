@@ -3,9 +3,8 @@ require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/db.php';
 
 function session_user(): ?array {
-    if (!isset($_SESSION['github_id'])) return null;
-    $users = db_read(USERS_FILE);
-    return db_find($users, 'github_id', $_SESSION['github_id']);
+    if (!isset($_SESSION['user_id'])) return null;
+    return db_find_user_by_id($_SESSION['user_id']);
 }
 function require_auth(): array {
     $user = session_user();

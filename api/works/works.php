@@ -1,152 +1,143 @@
 <?php
+/**
+ * Trabajos/tareas — ahora usa la tabla `tareas` y `tareas_alumnos`
+ * junto con `informe_periodo` para calificaciones.
+ */
 session_start();
 require_once __DIR__.'/../../config.php';
 require_once __DIR__.'/../../lib/db.php';
 require_once __DIR__.'/../../lib/auth.php';
 header('Content-Type: application/json');
-$me=require_approved();
-$method=$_SERVER['REQUEST_METHOD'];
+$me     = require_approved();
+$method = $_SERVER['REQUEST_METHOD'];
 
-// ── GET ────────────────────────────────────────────────────────────────────
-if ($method==='GET') {
-    $works=db_read(WORKS_FILE);
-    $id=$_GET['id']??null;
+// ── GET ──────────────────────────────────────────────────────────────────────
+if ($method === 'GET') {
+    $id    = $_GET['id']    ?? null;
+    $cupof = isset($_GET['cupof']) ? (int)$_GET['cupof'] : null;
+
     if ($id) {
-        $work=db_find($works,'id',$id);
-        if (!$work) { http_response_code(404); echo json_encode(['error'=>'No encontrado']); exit; }
-        // students see only their own submission
-        if ($me['role']==='alumno') {
-            $work['submissions']=array_values(array_filter($work['submissions']??[],fn($s)=>$s['alumno_id']===$me['id']));
+        $tarea = db_row('SELECT t.*, rv.dni_personal FROM tareas t JOIN revista rv ON rv.id=t.id_revista WHERE t.id=?', [(int)$id]);
+        if (!$tarea) { http_response_code(404); echo json_encode(['error'=>'No encontrado']); exit; }
+        $entregas = db_query(
+            'SELECT ta.*, al.apellido, al.nombre
+             FROM tareas_alumnos ta
+             JOIN asignacionesalumnos aa ON aa.id = ta.id_asignacionesalumnos
+             JOIN alumnos al ON al.dni = aa.dni_alumnos
+             WHERE ta.id_tarea = ? AND ta.borrado_fisico = 0',
+            [(int)$id]
+        );
+        if ($me['role'] === 'alumno') {
+            $dni = (int) explode('_', $me['id'])[1];
+            $entregas = array_filter($entregas, fn($e) => $e['nombre'] && $e['apellido'] &&
+                db_row('SELECT aa.id FROM asignacionesalumnos aa WHERE aa.id=? AND aa.dni_alumnos=?',
+                    [$e['id_asignacionesalumnos'], $dni]) !== null
+            );
         }
-        echo json_encode($work); exit;
+        $tarea['entregas'] = array_values($entregas);
+        echo json_encode($tarea); exit;
     }
 
-    $curso_id=$_GET['curso_id']??null;
-    $materia_id=$_GET['materia_id']??null;
-
-    if ($me['role']==='alumno') {
-        // only works for courses the student belongs to
-        $courses=db_read(COURSES_FILE);
-        $myCourses=array_filter($courses,fn($c)=>in_array($me['id'],$c['alumnos']??[]));
-        $myCourseIds=array_column(array_values($myCourses),'id');
-        $works=array_filter($works,fn($w)=>in_array($w['curso_id'],$myCourseIds));
-    } elseif ($me['role']==='profesor') {
-        $courses=db_read(COURSES_FILE); $myMats=[];
-        foreach ($courses as $c) foreach ($c['materias']??[] as $m) if ($m['profesor_id']===$me['id']) $myMats[]=$m['id'];
-        $works=array_filter($works,fn($w)=>in_array($w['materia_id'],$myMats));
+    // Lista
+    if ($me['role'] === 'alumno') {
+        $dni = (int) explode('_', $me['id'])[1];
+        $tareas = db_query(
+            'SELECT DISTINCT t.id, t.titulo, t.descripcion, t.fecha_entrega, rv.cupof
+             FROM tareas t
+             JOIN revista rv ON rv.id = t.id_revista
+             JOIN asignacionesalumnos aa ON aa.id_cursosciclolectivo IN (
+                 SELECT id_cursosciclolectivo FROM asignacionesalumnos WHERE dni_alumnos=? AND estado != ?
+             )
+             WHERE aa.dni_alumnos = ? AND aa.estado != ?
+             ORDER BY t.fecha_entrega DESC',
+            [$dni, 'E', $dni, 'E']
+        );
+    } elseif ($me['role'] === 'profesor') {
+        $dni_prof = (int) explode('_', $me['id'])[1];
+        $tareas = db_query(
+            'SELECT t.id, t.titulo, t.descripcion, t.fecha_entrega, rv.cupof
+             FROM tareas t
+             JOIN revista rv ON rv.id = t.id_revista AND rv.fh = ?
+             WHERE rv.dni_personal = ?
+             ORDER BY t.fecha_entrega DESC',
+            ['0000-00-00', $dni_prof]
+        );
+    } else {
+        $tareas = db_query(
+            'SELECT t.id, t.titulo, t.descripcion, t.fecha_entrega, rv.cupof, rv.dni_personal
+             FROM tareas t JOIN revista rv ON rv.id = t.id_revista
+             ORDER BY t.fecha_entrega DESC'
+        );
     }
-
-    if ($curso_id)   $works=array_filter($works,fn($w)=>$w['curso_id']===$curso_id);
-    if ($materia_id) $works=array_filter($works,fn($w)=>$w['materia_id']===$materia_id);
-
-    // For list view, don't send all submission content
-    $result=array_map(fn($w)=>[
-        'id'=>$w['id'],'titulo'=>$w['titulo'],'descripcion'=>$w['descripcion'],
-        'curso_id'=>$w['curso_id'],'materia_id'=>$w['materia_id'],
-        'fecha_entrega'=>$w['fecha_entrega'],'estado'=>$w['estado'],
-        'submissions_count'=>count($w['submissions']??[]),
-        'created_by'=>$w['created_by'],'created_at'=>$w['created_at'],
-    ], array_values($works));
-
-    echo json_encode(array_values($result)); exit;
+    if ($cupof) $tareas = array_values(array_filter($tareas, fn($t) => (int)$t['cupof'] === $cupof));
+    echo json_encode(array_values($tareas)); exit;
 }
 
-// ── POST: create work assignment ───────────────────────────────────────────
-if ($method==='POST') {
-    $me=require_role(['admin','director','subdirector','profesor']);
-    $body=json_decode(file_get_contents('php://input'),true);
-    $action=$body['action']??'create';
+// ── POST: crear tarea ────────────────────────────────────────────────────────
+if ($method === 'POST') {
+    $me = require_role(['admin','director','subdirector','profesor']);
+    $body = json_decode(file_get_contents('php://input'), true);
 
-    // Submit grade + feedback for a submission
-    if ($action==='grade_submission') {
-        $work_id=$body['work_id']??null; $alumno_id=$body['alumno_id']??null;
-        $nota=isset($body['nota'])&&$body['nota']!==''?floatval($body['nota']):null;
-        $devolucion=trim($body['devolucion']??'');
-        if (!$work_id||!$alumno_id) { http_response_code(400); echo json_encode(['error'=>'work_id y alumno_id requeridos']); exit; }
-        if ($nota!==null&&($nota<1||$nota>10)) { http_response_code(400); echo json_encode(['error'=>'Nota 1-10']); exit; }
+    $titulo  = trim($body['titulo']      ?? '');
+    $desc    = trim($body['descripcion'] ?? '');
+    $entrega = trim($body['fecha_entrega'] ?? date('Y-m-d'));
+    $cupof   = (int)($body['cupof']      ?? 0);
 
-        $works=db_read(WORKS_FILE);
-        $wIdx=db_find_index($works,'id',$work_id);
-        if ($wIdx===-1) { http_response_code(404); echo json_encode(['error'=>'Trabajo no encontrado']); exit; }
+    if (!$titulo || !$cupof) { http_response_code(400); echo json_encode(['error'=>'Título y cupof requeridos']); exit; }
 
-        $sIdx=null;
-        foreach ($works[$wIdx]['submissions']??[] as $i=>$s) {
-            if ($s['alumno_id']===$alumno_id) { $sIdx=$i; break; }
+    $dni_prof = (int) explode('_', $me['id'])[1];
+    $revista  = db_row('SELECT id FROM revista WHERE cupof=? AND dni_personal=? AND fh=?', [$cupof, $dni_prof, '0000-00-00']);
+    if (!$revista && !is_admin($me)) { http_response_code(403); echo json_encode(['error'=>'No sos docente de esa cátedra']); exit; }
+    // admin puede asignar igual usando cualquier revista del cupof
+    if (!$revista) $revista = db_row('SELECT id FROM revista WHERE cupof=?', [$cupof]);
+    if (!$revista) { http_response_code(404); echo json_encode(['error'=>'Cátedra no encontrada']); exit; }
+
+    $id_tarea = db_execute(
+        'INSERT INTO tareas (titulo, descripcion, tamanio, nombre_archivo, tipo, fecha_subida, fecha_entrega, id_revista)
+         VALUES (?,?,0,?,?,?,?,?)',
+        [$titulo, $desc, '', 'texto', date('Y-m-d'), $entrega, $revista['id']]
+    );
+
+    // Crear registros de entrega para los alumnos del curso
+    $ccl = db_row('SELECT id_cursosciclolectivo FROM revista rv JOIN cupof cu ON cu.cupof=rv.cupof WHERE rv.id=?', [$revista['id']]);
+    if ($ccl) {
+        $asigs = db_query('SELECT id FROM asignacionesalumnos WHERE id_cursosciclolectivo=? AND estado != ?', [$ccl['id_cursosciclolectivo'], 'E']);
+        foreach ($asigs as $a) {
+            db_execute('INSERT INTO tareas_alumnos (id_tarea, id_asignacionesalumnos, fecha, nombre_archivo) VALUES (?,?,?,?)',
+                [$id_tarea, $a['id'], '0000-00-00', '']);
         }
-        if ($sIdx===null) { http_response_code(404); echo json_encode(['error'=>'Entrega no encontrada']); exit; }
-
-        // Add/update this teacher's grade
-        $grades=$works[$wIdx]['submissions'][$sIdx]['notas_profesores']??[];
-        $gIdx=null;
-        foreach ($grades as $i=>$g) { if ($g['profesor_id']===$me['id']) { $gIdx=$i; break; } }
-
-        $gradeEntry=['profesor_id'=>$me['id'],'nota'=>$nota,'devolucion'=>$devolucion,'fecha'=>date('Y-m-d H:i:s')];
-        if ($gIdx!==null) $grades[$gIdx]=$gradeEntry;
-        else $grades[]=$gradeEntry;
-
-        $works[$wIdx]['submissions'][$sIdx]['notas_profesores']=$grades;
-
-        // Calculate average note
-        $notaVals=array_filter(array_column($grades,'nota'),fn($n)=>$n!==null);
-        $works[$wIdx]['submissions'][$sIdx]['nota_promedio']=count($notaVals)>0?round(array_sum($notaVals)/count($notaVals),2):null;
-        $avg=$works[$wIdx]['submissions'][$sIdx]['nota_promedio'];
-        $works[$wIdx]['submissions'][$sIdx]['estado_calificacion']=($avg===null)?'sin_calificar':($avg>=6?'aprobado':'desaprobado');
-
-        db_write(WORKS_FILE,$works);
-        echo json_encode(['success'=>true,'nota_promedio'=>$avg]); exit;
     }
+    echo json_encode(['success'=>true, 'id'=>$id_tarea]); exit;
+}
 
-    // Create new work assignment
-    $titulo=trim($body['titulo']??''); $curso_id=$body['curso_id']??null; $materia_id=$body['materia_id']??null;
-    if (!$titulo||!$curso_id||!$materia_id) { http_response_code(400); echo json_encode(['error'=>'titulo, curso_id y materia_id requeridos']); exit; }
+// ── PUT: alumno entrega tarea ────────────────────────────────────────────────
+if ($method === 'PUT') {
+    $me   = require_role(['alumno']);
+    $body = json_decode(file_get_contents('php://input'), true);
+    $tarea_id = (int)($body['id_tarea'] ?? 0);
+    $archivo  = trim($body['nombre_archivo'] ?? '');
+    $dni      = (int) explode('_', $me['id'])[1];
 
-    // Build empty submissions for each student in the course
-    $courses=db_read(COURSES_FILE);
-    $course=db_find($courses,'id',$curso_id);
-    $submissions=[];
-    foreach ($course['alumnos']??[] as $alumnoId) {
-        $submissions[]=['alumno_id'=>$alumnoId,'entregado'=>false,'contenido'=>null,'archivo_url'=>null,'fecha_entrega'=>null,'notas_profesores'=>[],'nota_promedio'=>null,'estado_calificacion'=>'sin_calificar'];
-    }
+    $asig = db_row(
+        'SELECT aa.id FROM asignacionesalumnos aa
+         JOIN tareas_alumnos ta ON ta.id_asignacionesalumnos = aa.id
+         WHERE ta.id_tarea=? AND aa.dni_alumnos=?',
+        [$tarea_id, $dni]
+    );
+    if (!$asig) { http_response_code(403); echo json_encode(['error'=>'No estás asignado a esta tarea']); exit; }
 
-    $works=db_read(WORKS_FILE);
-    $works[]=['id'=>generate_id(),'titulo'=>$titulo,'descripcion'=>$body['descripcion']??'','curso_id'=>$curso_id,'materia_id'=>$materia_id,'fecha_entrega'=>$body['fecha_entrega']??null,'estado'=>'activo','submissions'=>$submissions,'created_by'=>$me['id'],'created_at'=>date('Y-m-d H:i:s')];
-    db_write(WORKS_FILE,$works);
+    db_execute('UPDATE tareas_alumnos SET fecha=?, nombre_archivo=? WHERE id_tarea=? AND id_asignacionesalumnos=?',
+        [date('Y-m-d'), $archivo, $tarea_id, $asig['id']]);
     echo json_encode(['success'=>true]); exit;
 }
 
-// ── PUT: student submits work ──────────────────────────────────────────────
-if ($method==='PUT') {
-    $me=require_role(['alumno']);
-    $body=json_decode(file_get_contents('php://input'),true);
-    $work_id=$body['work_id']??null; $contenido=trim($body['contenido']??'');
-    if (!$work_id) { http_response_code(400); echo json_encode(['error'=>'work_id requerido']); exit; }
-
-    $works=db_read(WORKS_FILE);
-    $wIdx=db_find_index($works,'id',$work_id);
-    if ($wIdx===-1) { http_response_code(404); echo json_encode(['error'=>'Trabajo no encontrado']); exit; }
-
-    $sIdx=null;
-    foreach ($works[$wIdx]['submissions']??[] as $i=>$s) {
-        if ($s['alumno_id']===$me['id']) { $sIdx=$i; break; }
-    }
-    if ($sIdx===null) { http_response_code(403); echo json_encode(['error'=>'No estás asignado a este trabajo']); exit; }
-
-    $works[$wIdx]['submissions'][$sIdx]['entregado']=true;
-    $works[$wIdx]['submissions'][$sIdx]['contenido']=$contenido;
-    $works[$wIdx]['submissions'][$sIdx]['fecha_entrega']=date('Y-m-d H:i:s');
-
-    db_write(WORKS_FILE,$works);
-    echo json_encode(['success'=>true]); exit;
-}
-
-// ── DELETE ─────────────────────────────────────────────────────────────────
-if ($method==='DELETE') {
-    $me=require_role(['admin','director','subdirector','profesor']);
-    $body=json_decode(file_get_contents('php://input'),true);
-    $id=$body['id']??null;
-    $works=db_read(WORKS_FILE); $idx=db_find_index($works,'id',$id);
-    if ($idx===-1) { http_response_code(404); echo json_encode(['error'=>'No encontrado']); exit; }
-    array_splice($works,$idx,1); db_write(WORKS_FILE,$works);
+// ── DELETE ───────────────────────────────────────────────────────────────────
+if ($method === 'DELETE') {
+    require_role(['admin','director','subdirector','profesor']);
+    $body = json_decode(file_get_contents('php://input'), true);
+    $id   = (int)($body['id'] ?? 0);
+    db_execute('UPDATE tareas_alumnos SET borrado_fisico=1 WHERE id_tarea=?', [$id]);
+    db_execute('DELETE FROM tareas WHERE id=?', [$id]);
     echo json_encode(['success'=>true]); exit;
 }
 

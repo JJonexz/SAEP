@@ -540,34 +540,26 @@ async function loadMyGrades(){
 }
 
 // ── USERS ──────────────────────────────────────────────────────────────────
-async function loadUsers(){const r=await api('api/admin/users.php');S.users=await r.json();renderUsersTable();}
-function filterUsers(){renderUsersTable();}
-function renderUsersTable(){
-    const f=document.getElementById('uf-status')?.value||'';
-    const list=f?S.users.filter(u=>u.status===f):S.users;
-    const stB={pending_profile:'badge-gray',pending_approval:'badge-amber',approved:'badge-green',rejected:'badge-red'};
-    const stL={pending_profile:'Sin perfil',pending_approval:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    if(!list.length){document.getElementById('users-tbl').innerHTML='<div class="empty">Sin usuarios.</div>';return;}
-    document.getElementById('users-tbl').innerHTML=`<div class="cards">${list.map(u=>`
-        <div class="card">
-            <h3>${u.apellido||''} ${u.nombre||''}</h3>
-            <p>@${u.username}</p>
-            <div class="card-meta">
-                <span class="tag ${u.manual?'tag-amber':'tag-blue'}">${u.manual?'Manual':'GitHub'}</span>
-                <span class="badge ${stB[u.status]||'badge-gray'}">${stL[u.status]||u.status}</span>
-                ${u.dni?`<span class="tag">DNI ${u.dni}</span>`:''}
-            </div>
-            <div style="margin-top:.55rem;font-size:.75rem;color:var(--muted)">
-                ${u.email?`<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">✉ ${u.email}</div>`:''}
-                ${u.telefono?`<div>☎ ${u.telefono}</div>`:''}
-            </div>
-            <div class="card-actions">
-                <button class="btn btn-outline" style="font-size:.7rem;padding:.28rem .55rem" onclick="openUserModal('${u.id}')">Ver info</button>
-                ${u.status==='pending_approval'?`<button class="btn btn-green" style="font-size:.7rem;padding:.28rem .55rem" onclick="approveUser('${u.id}')">Aprobar</button><button class="btn btn-red" style="font-size:.7rem;padding:.28rem .55rem" onclick="rejectUser('${u.id}')">Rechazar</button>`:''}
-                ${u.id!==MY_ID?`<button class="btn btn-red" style="font-size:.7rem;padding:.28rem .55rem" onclick="deleteUser('${u.id}')">Eliminar</button>`:''}
-            </div>
-        </div>
-    `).join('')}</div>`;
+async function loadUsers(){
+    S.users=[];
+    renderUsersTable();
+}
+
+function filterUsers(){
+    const status=document.getElementById('uf-status')?.value||'';
+    const role=document.getElementById('uf-role')?.value||'';
+    const q=(document.getElementById('uf-search')?.value||'').trim();
+    if(!status&&!role&&!q){
+        document.getElementById('users-tbl').innerHTML='<div class="empty">Usá los filtros para buscar usuarios.</div>';
+        return;
+    }
+    const params=new URLSearchParams();
+    if(status) params.append('status',status);
+    if(role)   params.append('role',role);
+    if(q)      params.append('q',q);
+    api('api/admin/users.php?'+params.toString())
+        .then(r=>r.json())
+        .then(users=>{ S.users=users; renderUsersTable(); });
 }
 
 function openUserModal(userId){
@@ -594,7 +586,7 @@ function openUserModal(userId){
                     <div style="font-size:.8rem;color:var(--muted);margin-top:.1rem">@${esc(u.username)}</div>
                     <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap">
                         <span class="badge ${stB[u.status]||'badge-gray'}">${stL[u.status]||u.status}</span>
-                        <span class="tag ${u.manual?'tag-amber':'tag-blue'}">${u.manual?'Manual':'GitHub'}</span>
+                        <span class="tag ${u.manual?'tag-amber':'tag-blue'}">${u.manual?'Manual':'Sistema'}</span>
                     </div>
                 </div>
             </div>
@@ -606,13 +598,33 @@ function openUserModal(userId){
                     <div style="font-size:.88rem;font-weight:600;color:var(--text)">${esc(String(u.dni||'—'))}</div>
                 </div>
                 <div>
+                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Fecha de nacimiento</div>
+                    <div style="font-size:.88rem;color:var(--text2)">${esc(u.fechan||'—')}</div>
+                </div>
+                <div>
                     <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Teléfono</div>
                     <div style="font-size:.88rem;color:var(--text2)">${esc(String(u.telefono||'—'))}</div>
+                </div>
+                <div>
+                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Domicilio</div>
+                    <div style="font-size:.88rem;color:var(--text2)">${esc(u.domicilio||'—')}</div>
                 </div>
                 <div style="grid-column:1/-1">
                     <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Email</div>
                     <div style="font-size:.88rem;color:var(--text2);word-break:break-all">${u.email?`<a href="mailto:${esc(u.email)}" style="color:var(--navy)">${esc(u.email)}</a>`:'—'}</div>
                 </div>
+                ${(u.tutores&&u.tutores.length)?`
+                <div style="grid-column:1/-1">
+                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Tutores / Padres</div>
+                    <div style="display:flex;flex-direction:column;gap:.4rem">
+                        ${u.tutores.map(t=>`
+                        <div style="background:var(--white);border:1px solid var(--border);border-radius:6px;padding:.5rem .75rem;font-size:.8rem">
+                            <div style="font-weight:700;color:var(--text)">${esc(t.apellido)}, ${esc(t.nombre)} <span style="font-weight:400;color:var(--muted)">(${esc(t.parentesco)})</span></div>
+                            ${t.telefono&&t.telefono!='0'?`<div style="color:var(--muted)">☎ ${esc(t.telefono)}</div>`:''}
+                            ${t.domicilio&&t.domicilio!='0'?`<div style="color:var(--muted)">📍 ${esc(t.domicilio)}</div>`:''}
+                        </div>`).join('')}
+                    </div>
+                </div>`:''}
             </div>
 
             <!-- Rol -->
@@ -778,7 +790,7 @@ function modal(html,maxW='28.125vw'){document.getElementById('modal-root').inner
 function closeModal(){document.getElementById('modal-root').innerHTML='';}
 
 // ── Utils ──────────────────────────────────────────────────────────────────
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){ s=s==null?'':String(s); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 document.addEventListener('keydown',e=>{
     if(e.key==='Escape')closeModal();
     if((e.ctrlKey||e.metaKey)&&e.key==='s'&&S.editorFile){e.preventDefault();saveFile();}
