@@ -141,44 +141,40 @@ $role=$user['role'];
 <!-- CALIFICACIONES (staff) -->
 <?php if(in_array($role,['admin','director','subdirector','profesor','preceptor'])): ?>
 <div class="panel" id="panel-grades">
-    <div class="ph"><h2>Calificaciones cuatrimestrales</h2></div>
-    <div class="pb">
-        <div class="tabs">
-            <div class="tab active" onclick="gTab('ver')">Ver calificaciones</div>
-            <?php if(in_array($role,['admin','director','subdirector','profesor'])): ?>
-            <div class="tab" onclick="gTab('cargar')">Cargar nota</div>
-            <?php endif; ?>
-        </div>
-        <div class="tab-content visible" id="gtab-ver">
-            <div class="mb1" style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap">
-                <div class="field" style="margin:0;min-width:220px"><label>Curso</label><select id="gv-curso" onchange="gvOnCursoChange()"><option value="">Seleccionar curso...</option></select></div>
-                <div class="field" style="margin:0;min-width:240px"><label>Buscar alumno</label><input type="text" id="gv-search" placeholder="Nombre, apellido o DNI..." oninput="loadGradesTable()"></div>
-            </div>
-            <div class="tbl-wrap" id="grades-tbl"></div>
-        </div>
+    <div class="ph">
+        <h2>Calificaciones cuatrimestrales</h2>
         <?php if(in_array($role,['admin','director','subdirector','profesor'])): ?>
-        <div class="tab-content" id="gtab-cargar">
-            <div class="fgrid" style="max-width:31.25vw">
-                <div class="field"><label>Curso</label><select id="gc-curso" onchange="gcLoadStudents()"><option value="">Seleccionar...</option></select></div>
-                <div class="field"><label>Materia</label><select id="gc-materia"><option value="">Seleccionar...</option></select></div>
-                <div class="field"><label>Alumno</label><select id="gc-alumno"><option value="">Seleccionar...</option></select></div>
-                <div class="field"><label>Cuatrimestre</label><select id="gc-cuatri"><option value="1">1° Informe</option><option value="2">1°</option><option value="3">2° Informe</option><option value="4">2°</option></select></div>
-                <div class="field"><label>Nota (1–10)</label><input type="number" id="gc-nota" min="1" max="10" step="0.1" placeholder="7" oninput="gcAutoFill()"></div>
-                <div class="field"><label>Trayectoria Estudiantil</label>
-                    <select id="gc-concepto" disabled style="background:var(--bg,#f5f6fa);color:var(--text2,#6b7280);cursor:not-allowed"><option value="">—</option><option value="TED">TED</option><option value="TEP">TEP</option><option value="TEA">TEA</option></select>
-                    <div style="font-size:.7rem;color:var(--muted,#9ca3af);margin-top:.25rem">Se asigna automáticamente según la nota</div>
-                </div>
-                <div class="field"><label>Asistencia %</label><input type="number" id="gc-asist" min="0" max="100" placeholder="80"></div>
-                <div class="field"><label>Estado</label>
-                    <select id="gc-estado" disabled style="background:var(--bg,#f5f6fa);color:var(--text2,#6b7280);cursor:not-allowed"><option value="pendiente">Pendiente</option><option value="aprobado">Aprobado</option><option value="desaprobado">Desaprobado</option></select>
-                    <div style="font-size:.7rem;color:var(--muted,#9ca3af);margin-top:.25rem">Se asigna automáticamente según la nota</div>
-                </div>
-            </div>
-            <div class="err-msg" id="gc-err"></div>
-            <button class="btn btn-navy" onclick="saveGrade()" style="margin-top:.75rem">Guardar calificación</button>
-        </div>
+        <button class="btn btn-navy" onclick="openCargarNotaModal()">+ Cargar nota</button>
         <?php endif; ?>
     </div>
+    <div class="pb">
+        <!-- Filtro por orientación igual al de Cursos -->
+        <div class="courses-filter-row" id="grades-filter">
+            <button class="filter-btn filter-btn-active" onclick="filterGradesCourses(null)">Todos</button>
+            <button class="filter-btn filter-btn-prog" onclick="filterGradesCourses('prog')">Programación</button>
+            <button class="filter-btn filter-btn-mmo" onclick="filterGradesCourses('mmo')">MMO</button>
+            <button class="filter-btn filter-btn-turismo" onclick="filterGradesCourses('turismo')">Turismo</button>
+            <button class="filter-btn filter-btn-basico" onclick="filterGradesCourses('basico')">Ciclo Básico</button>
+        </div>
+        <!-- Cards de cursos -->
+        <div class="cards" id="grades-courses-cards"></div>
+    </div>
+</div>
+<!-- Modal cargar nota (campos ocultos reutilizados) -->
+<div id="gc-hidden-fields" style="display:none">
+    <select id="gc-curso"></select>
+    <select id="gc-materia"></select>
+    <select id="gc-alumno"></select>
+    <select id="gc-cuatri"><option value="1">1° Informe</option><option value="2">1°</option><option value="3">2° Informe</option><option value="4">2°</option></select>
+    <input type="number" id="gc-nota">
+    <select id="gc-concepto"><option value="">—</option><option value="TED">TED</option><option value="TEP">TEP</option><option value="TEA">TEA</option></select>
+    <input type="number" id="gc-asist">
+    <select id="gc-estado"><option value="pendiente">Pendiente</option><option value="aprobado">Aprobado</option><option value="desaprobado">Desaprobado</option></select>
+    <div id="gc-err"></div>
+    <!-- campos para gv (ver) que siguen funcionando internamente -->
+    <select id="gv-curso"></select>
+    <input type="text" id="gv-search">
+    <div id="grades-tbl"></div>
 </div>
 <?php endif; ?>
 
