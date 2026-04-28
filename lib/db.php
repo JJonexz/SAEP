@@ -140,24 +140,41 @@ function db_list_users(): array {
 
 // ── Cursos ───────────────────────────────────────────────────────────────────
 
-function db_list_courses(): array {
+function db_list_courses(bool $withDetails = false): array {
+    // Query base optimizada - solo datos esenciales
     $ccl = db_query(
         'SELECT ccl.id, ccl.ciclolectivo, ccl.estado,
                 c.id AS id_curso, c.ano, c.division, c.turno
          FROM cursosciclolectivo ccl
          JOIN cursos c ON c.id = ccl.id_cursos
+         WHERE ccl.estado = "A"
          ORDER BY ccl.ciclolectivo DESC, c.ano, c.division'
     );
+    
+    // Si no necesita detalles, devolver solo datos básicos
+    if (!$withDetails) {
+        return array_map(fn($r) => [
+            'id'           => $r['id'],
+            'id_curso'     => $r['id_curso'],
+            'ano'          => $r['ano'],
+            'division'     => $r['division'],
+            'turno'        => $r['turno'],
+            'ciclolectivo' => $r['ciclolectivo'],
+            'estado'       => $r['estado'],
+            'nombre'       => $r['ano'] . '° ' . $r['division'] . ' - ' . $r['turno'] . ' (' . $r['ciclolectivo'] . ')',
+            'anio'         => $r['ano'],
+        ], $ccl);
+    }
+    
+    // Con detalles - optimizar queries
     $courses = [];
     foreach ($ccl as $r) {
-        // Alumnos asignados
-        $alumnos = db_query(
-            'SELECT a.id AS id_asig, al.dni, al.apellido, al.nombre
-             FROM asignacionesalumnos a
-             JOIN alumnos al ON al.dni = a.dni_alumnos
-             WHERE a.id_cursosciclolectivo = ? AND a.estado != ?',
+        // Contar alumnos en lugar de traer todos
+        $alumCount = db_row(
+            'SELECT COUNT(*) as c FROM asignacionesalumnos WHERE id_cursosciclolectivo = ? AND estado != ?',
             [$r['id'], 'E']
         );
+        
         // Materias del curso con docentes
         $materias = db_query(
             'SELECT cu.cupof, m.id AS id_materia, m.nombre AS materia, m.abreviatura,
@@ -169,6 +186,7 @@ function db_list_courses(): array {
              WHERE cu.id_cursos = ?',
             ['0000-00-00', $r['id_curso']]
         );
+        
         $courses[] = [
             'id'           => $r['id'],
             'id_curso'     => $r['id_curso'],
@@ -179,13 +197,7 @@ function db_list_courses(): array {
             'estado'       => $r['estado'],
             'nombre' => $r['ano'] . '° ' . $r['division'] . ' - ' . $r['turno'] . ' (' . $r['ciclolectivo'] . ')',
             'anio'   => $r['ano'],
-            'alumnos'      => array_map(fn($a) => [
-                'id'       => 'A_' . $a['dni'],
-                'dni'      => $a['dni'],
-                'apellido' => $a['apellido'],
-                'nombre'   => $a['nombre'],
-                'id_asig'  => $a['id_asig'],
-            ], $alumnos),
+            'alumnos'      => $alumCount['c'] ?? 0, // Solo contar, no traer todos
             'materias'     => array_map(fn($m) => [
                 'id'            => $m['cupof'],
                 'id_materia'    => $m['id_materia'],

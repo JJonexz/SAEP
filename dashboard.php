@@ -194,44 +194,49 @@ $role=$user['role'];
 <!-- USUARIOS -->
 <?php if(in_array($role,['admin','director','subdirector'])): ?>
 <div class="panel" id="panel-users">
-    <div class="ph">
-        <div><h2>Gestión de usuarios</h2></div>
-        <div class="btn-group">
-            <?php if($role==='admin'): ?>
-            <button class="btn btn-navy" onclick="openManualUserModal()">+ Crear usuario</button>
-            <?php endif; ?>
-            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:flex-end">
-                <input id="uf-search" placeholder="Buscar por nombre, apellido o DNI..." 
-                      style="flex:1;min-width:200px;padding:.45rem .75rem;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font);font-size:.82rem"
-                      onkeydown="if(event.key==='Enter')filterUsers()">
-                <select id="uf-role" style="padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font);font-size:.82rem">
-                    <option value="">Todos los roles</option>
-                    <option value="admin">Admin</option>
-                    <option value="director">Director</option>
-                    <option value="subdirector">Subdirector</option>
-                    <option value="profesor">Profesor</option>
-                    <option value="preceptor">Preceptor</option>
-                    <option value="alumno">Alumno</option>
-                </select>
-                <select id="uf-status" style="padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font);font-size:.82rem">
-                    <option value="">Todos los estados</option>
-                    <option value="approved">Aprobado</option>
-                    <option value="pending_approval">Pendiente</option>
-                    <option value="rejected">Rechazado</option>
-                </select>
-                <button class="btn btn-navy" onclick="filterUsers()">Buscar</button>
+    <div class="ph users-ph">
+        <div>
+            <h2>Gestión de usuarios</h2>
+            <div class="sub" id="users-count" style="color:var(--muted);font-size:.78rem;margin-top:.15rem"></div>
+        </div>
+        <div class="users-toolbar">
+            <div class="users-search-wrap">
+                <svg class="users-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input id="uf-search" class="users-search-input" type="text"
+                       placeholder="Buscar por nombre, apellido o DNI…"
+                       oninput="filterUsers()" onkeydown="if(event.key==='Enter')filterUsers(true)">
             </div>
-            <div id="users-tbl"><div class="empty">Usá los filtros para buscar usuarios.</div></div>
+            <select id="uf-role" class="uf-ctrl" onchange="filterUsers(true)">
+                <option value="">Todos los roles</option>
+                <option value="admin">Admin</option>
+                <option value="director">Director</option>
+                <option value="subdirector">Subdirector</option>
+                <option value="profesor">Profesor</option>
+                <option value="preceptor">Preceptor</option>
+                <option value="alumno">Alumno</option>
+            </select>
+            <select id="uf-status" class="uf-ctrl" onchange="filterUsers(true)">
+                <option value="">Todos los estados</option>
+                <option value="approved">Aprobado</option>
+                <option value="pending_approval">Pendiente</option>
+                <option value="rejected">Rechazado</option>
+            </select>
+            <?php if($role==='admin'): ?>
+            <button class="btn btn-navy" onclick="openManualUserModal()">+ Crear</button>
+            <?php endif; ?>
         </div>
     </div>
-    <div class="pb"><div class="tbl-wrap" id="users-tbl"></div></div>
+    <div class="pb"><div class="tbl-wrap" id="users-tbl"><div class="empty">Usá los filtros para buscar usuarios.</div></div></div>
 </div>
 <?php endif; ?>
 
 <!-- CURSOS -->
 <?php if(in_array($role,['admin','director','subdirector'])): ?>
 <div class="panel" id="panel-courses">
-    <div class="ph"><h2>Cursos y materias</h2><button class="btn btn-navy" onclick="openCourseModal()">+ Nuevo curso</button></div>
+    <div class="ph">
+        <div><h2>Cursos y materias</h2><div class="sub" id="courses-count" style="color:var(--muted);font-size:.78rem;margin-top:.15rem"></div></div>
+        <button class="btn btn-navy" onclick="openCourseModal()">+ Nuevo curso</button>
+    </div>
     <div class="pb">
         <div class="courses-filter-row" id="courses-filter">
             <button class="filter-btn filter-btn-active" onclick="filterCourses(null)">Todos</button>

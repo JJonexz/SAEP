@@ -9,48 +9,74 @@ $me     = require_role(['admin','director','subdirector']);
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
+    $action = trim($_GET['action'] ?? '');
+    
+    // Endpoint optimizado para contar usuarios (sin cargar todos los datos)
+    if ($action === 'count') {
+        $personalCount = db_row('SELECT COUNT(*) as c FROM personal');
+        $alumnosCount = db_row('SELECT COUNT(*) as c FROM alumnos');
+        echo json_encode([
+            'approved' => ($personalCount['c'] ?? 0) + ($alumnosCount['c'] ?? 0),
+            'pending' => 0
+        ]);
+        exit;
+    }
+    
     $q      = trim($_GET['q']      ?? '');
     $role   = trim($_GET['role']   ?? '');
     $status = trim($_GET['status'] ?? '');
 
-    // Sin ningún filtro: devolver vacío
-    if (!$q && !$role && !$status) { echo json_encode([]); exit; }
-
     $result = [];
 
-    // Personal
+    // Personal - solo campos necesarios
     $where = []; $params = [];
     if ($role && $role !== 'alumno') { $where[] = 'tag = ?'; $params[] = $role; }
     if ($q) { $where[] = '(apellido LIKE ? OR nombre LIKE ? OR dni LIKE ?)'; $params[] = "%$q%"; $params[] = "%$q%"; $params[] = "%$q%"; }
     if ($role !== 'alumno') {
-        $sql = 'SELECT * FROM personal' . ($where ? ' WHERE '.implode(' AND ',$where) : '') . ' ORDER BY apellido LIMIT 50';
+        $sql = 'SELECT dni, nombre, apellido, email, tag FROM personal' . ($where ? ' WHERE '.implode(' AND ',$where) : '') . ' ORDER BY apellido LIMIT 50';
         foreach (db_query($sql, $params) as $r) {
-            $u = _normalize_personal($r); unset($u['password_hash']); $result[] = $u;
+            $tag = strtolower(trim($r['tag'] ?? ''));
+            $userRole = in_array($tag, ['admin','director','subdirector','profesor','preceptor']) ? $tag : 'profesor';
+            $result[] = [
+                'id'       => 'P_' . $r['dni'],
+                'dni'      => (string)$r['dni'],
+                'nombre'   => $r['nombre'],
+                'apellido' => $r['apellido'],
+                'email'    => $r['email'],
+                'role'     => $userRole,
+                'status'   => 'approved',
+            ];
         }
     }
 
-    // Alumnos
+    // Alumnos - optimizado sin queries adicionales
     if (!$role || $role === 'alumno') {
         $where2 = []; $params2 = [];
         if ($q) { $where2[] = '(apellido LIKE ? OR nombre LIKE ? OR dni LIKE ?)'; $params2[] = "%$q%"; $params2[] = "%$q%"; $params2[] = "%$q%"; }
-        $sql2 = 'SELECT * FROM alumnos' . ($where2 ? ' WHERE '.implode(' AND ',$where2) : '') . ' ORDER BY apellido LIMIT 50';
+        $sql2 = 'SELECT dni, nombre, apellido FROM alumnos' . ($where2 ? ' WHERE '.implode(' AND ',$where2) : '') . ' ORDER BY apellido LIMIT 50';
         $rows = db_query($sql2, $params2);
+        
         if ($rows) {
             $dnis = array_column($rows, 'dni');
-            $placeholders = implode(',', array_fill(0, count($dnis), '?'));
-            $emails = db_query("SELECT dni, email FROM email WHERE dni IN ($placeholders)", $dnis);
-            $emailMap = array_column($emails, 'email', 'dni');
-            $tutores = db_query(
-                "SELECT pal.dni_alumnos, pt.nombre, pt.apellido, pt.telefono, pt.domicilio, pa.parentesco
-                 FROM padresalumnos pal
-                 JOIN padrestutores pt ON pt.dni = pal.dni_padrestutores
-                 JOIN parentesco pa ON pa.id = pal.id_parentesco
-                 WHERE pal.dni_alumnos IN ($placeholders)", $dnis
-            );
-            $tutoresMap = [];
-            foreach ($tutores as $t) $tutoresMap[$t['dni_alumnos']][] = $t;
+            // Cargar emails en una sola query
+            if ($dnis) {
+                $placeholders = implode(',', array_fill(0, count($dnis), '?'));
+                $emails = db_query("SELECT dni, email FROM email WHERE dni IN ($placeholders)", $dnis);
+                $emailMap = array_column($emails, 'email', 'dni');
+            } else {
+                $emailMap = [];
+            }
+            
             foreach ($rows as $r) {
-                $u = _normalize_alumno($r, $emailMap, $tutoresMap); unset($u['password_hash']); $result[] = $u;
+                $result[] = [
+                    'id'       => 'A_' . $r['dni'],
+                    'dni'      => (string)$r['dni'],
+                    'nombre'   => $r['nombre'],
+                    'apellido' => $r['apellido'],
+                    'email'    => $emailMap[$r['dni']] ?? null,
+                    'role'     => 'alumno',
+                    'status'   => 'approved',
+                ];
             }
         }
     }

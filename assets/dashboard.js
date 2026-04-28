@@ -7,7 +7,7 @@ function nav(id){
     document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
     document.getElementById('panel-'+id)?.classList.add('visible');
     document.getElementById('nav-'+id)?.classList.add('active');
-    const loaders={repos:loadRepos,users:loadUsers,courses:loadCourses,rooms:loadRooms,laboratorios:initLaboratorios,grades:initGrades,'my-grades':loadMyGrades,'my-works':loadMyWorks,works:initWorks,inicio:loadInicio,mail:initMail};
+    const loaders={repos:loadRepos,users:loadUsers,courses:loadCourses,rooms:loadRooms,grades:initGrades,'my-grades':loadMyGrades,'my-works':loadMyWorks,inicio:loadInicio,mail:initMail};
     loaders[id]?.();
 }
 
@@ -22,23 +22,18 @@ async function api(url,opts={}){
 async function loadInicio(){
     const [cRes,rRes]=await Promise.all([api('api/courses/courses.php'),api('api/rooms/rooms.php')]);
     S.courses=await cRes.json(); S.rooms=await rRes.json();
-    
-    // Solo contar pendientes con query específica - no cargar todos los usuarios
-    let pendingCount=0,approvedCount=0;
-    if(['admin','director','subdirector'].includes(ROLE)){
-        const counts=await api('api/admin/users.php?action=count').then(r=>r.json());
-        pendingCount=counts.pending||0;
-        approvedCount=counts.approved||0;
-    }
-    
+    let usersData=[];
+    if(['admin','director','subdirector'].includes(ROLE)){const uRes=await api('api/admin/users.php');usersData=await uRes.json();S.users=usersData;}
+    const pending=usersData.filter(u=>u.status==='pending_approval');
+    const approved=usersData.filter(u=>u.status==='approved');
     document.getElementById('stats-row').innerHTML=`
-        <div class="stat"><div class="stat-val">${approvedCount||'—'}</div><div class="stat-lbl">Usuarios activos</div></div>
-        <div class="stat"><div class="stat-val" style="color:${pendingCount>0?'var(--amber)':'var(--navy)'}">${pendingCount}</div><div class="stat-lbl">Pendientes aprobación</div></div>
+        <div class="stat"><div class="stat-val">${approved.length||'—'}</div><div class="stat-lbl">Usuarios activos</div></div>
+        <div class="stat"><div class="stat-val" style="color:${pending.length>0?'var(--amber)':'var(--navy)'}">${pending.length}</div><div class="stat-lbl">Pendientes aprobación</div></div>
         <div class="stat"><div class="stat-val">${S.courses.length}</div><div class="stat-lbl">Cursos</div></div>
         <div class="stat"><div class="stat-val">${S.rooms.length}</div><div class="stat-lbl">Aulas</div></div>`;
     const alertsEl=document.getElementById('pending-alerts');
-    if(pendingCount>0&&['admin','director','subdirector'].includes(ROLE)){
-        alertsEl.innerHTML=`<div class="alert alert-amber">Hay <strong>${pendingCount}</strong> usuario(s) pendientes de aprobación. <a href="#" onclick="nav('users');document.getElementById('uf-status').value='pending_approval';filterUsers()" style="color:var(--amber);font-weight:600">Revisar →</a></div>`;
+    if(pending.length>0&&['admin','director','subdirector'].includes(ROLE)){
+        alertsEl.innerHTML=`<div class="alert alert-amber">Hay <strong>${pending.length}</strong> usuario(s) pendientes de aprobación. <a href="#" onclick="nav('users');document.getElementById('uf-status').value='pending_approval';filterUsers()" style="color:var(--amber);font-weight:600">Revisar →</a></div>`;
     } else alertsEl.innerHTML='';
 }
 
@@ -122,11 +117,7 @@ async function doDelRepo(){if(document.getElementById('drc').value.trim()!==S.ac
 // ── WORKS (staff) ──────────────────────────────────────────────────────────
 async function initWorks(){
     if(!S.courses.length){const r=await api('api/courses/courses.php');S.courses=await r.json();}
-    // Cargar solo profesores para works
-    const params=new URLSearchParams();
-    params.append('role','profesor');
-    const r=await api('api/admin/users.php?'+params.toString());
-    S.users=await r.json();
+    if(!S.users.length&&['admin','director','subdirector'].includes(ROLE)){const r=await api('api/admin/users.php');S.users=await r.json();}
     const sel=document.getElementById('wf-curso');
     if(sel){sel.innerHTML='<option value="">Todos</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');}
     loadWorks();
@@ -143,26 +134,27 @@ async function loadWorks(){
 function renderWorksList(works){
     const el=document.getElementById('works-list');
     if(!works.length){el.innerHTML='<div class="empty">Sin trabajos creados.</div>';return;}
-    el.innerHTML=`<div class="cards">${works.map(w=>{
+    el.innerHTML=works.map(w=>{
         const curso=S.courses.find(c=>c.id===w.curso_id);
         const mat=curso?.materias?.find(m=>m.id===w.materia_id);
-        const stClass=w.estado==='activo'?'tag-green':'';
-        return `<div class="card">
-            <h3>${esc(w.titulo)}</h3>
-            <p>${esc(w.descripcion||'Sin descripción')}</p>
-            <div class="card-meta">
-                <span class="tag ${stClass}">${w.estado}</span>
-                ${curso?`<span class="tag tag-blue">${curso.anio}° ${curso.division}</span>`:''}
-                ${mat?`<span class="tag">${esc(mat.nombre)}</span>`:''}
-                ${w.fecha_entrega?`<span class="tag tag-amber">📅 ${w.fecha_entrega}</span>`:''}
-                <span class="tag">${w.submissions_count} alumnos</span>
+        const stBadge=w.estado==='activo'?'badge-green':'badge-gray';
+        return `<div class="work-card">
+            <div class="work-card-header">
+                <div><div class="work-title">${w.titulo}</div><div class="work-desc">${w.descripcion||'Sin descripción'}</div></div>
+                <div class="btn-group">
+                    <button class="btn btn-outline" onclick="openWorkDetail('${w.id}')">Ver entregas</button>
+                    <button class="btn btn-red" onclick="deleteWork('${w.id}')">Eliminar</button>
+                </div>
             </div>
-            <div class="card-actions">
-                <button class="btn btn-outline" style="font-size:.7rem;padding:.28rem .6rem" onclick="openWorkDetail('${w.id}')">Ver entregas</button>
-                <button class="btn btn-red" style="font-size:.7rem;padding:.28rem .6rem" onclick="deleteWork('${w.id}')">Eliminar</button>
+            <div class="work-meta">
+                <span class="badge ${stBadge}">${w.estado}</span>
+                ${curso?`<span class="badge badge-blue">${curso.anio}° ${curso.division}</span>`:''}
+                ${mat?`<span class="badge badge-gray">${mat.nombre}</span>`:''}
+                ${w.fecha_entrega?`<span class="badge badge-amber">Entrega: ${w.fecha_entrega}</span>`:''}
+                <span class="badge badge-gray">${w.submissions_count} alumnos</span>
             </div>
         </div>`;
-    }).join('')}</div>`;
+    }).join('');
 }
 function openCreateWorkModal(){
     if(!S.courses.length){alert('Primero creá al menos un curso.');return;}
@@ -196,34 +188,25 @@ async function openWorkDetail(workId){
     const curso=S.courses.find(c=>c.id===work.curso_id);
     const submissions=work.submissions||[];
     const rows=submissions.map(s=>{
-        const alumno=S.users.find(u=>String(u.id)===String(s.alumno_id));
+        const alumno=S.users.find(u=>u.id===s.alumno_id);
         const aName=alumno?`${alumno.apellido} ${alumno.nombre}`:s.alumno_id;
         const avg=s.nota_promedio;
-        const avgClass=avg===null?'tag-amber':avg>=6?'tag-green':'tag-red';
+        const avgColor=avg===null?'nota-pending':avg>=6?'nota-ok':'nota-fail';
         const estBadge=s.estado_calificacion==='aprobado'?'badge-green':s.estado_calificacion==='desaprobado'?'badge-red':'badge-amber';
-        const profGrades=(s.notas_profesores||[]).map(g=>{
-            const p=S.users.find(u=>String(u.id)===String(g.profesor_id));
-            return `<div style="margin-top:.4rem;padding:.4rem .6rem;background:#f8f9fc;border-radius:4px;font-size:.75rem">
-                <strong>${p?p.apellido+' '+p.nombre:'Profesor'}</strong>:
-                <span class="nota-val ${g.nota>=6?'nota-ok':'nota-fail'}">${g.nota??'—'}</span>
-                ${g.devolucion?`<div class="devolucion-box" style="margin-top:.3rem">${esc(g.devolucion)}</div>`:''}
-            </div>`;
-        }).join('');
-        return `<div class="card" style="padding:1rem">
-            <h3 style="font-size:.85rem">${esc(aName)}</h3>
-            <div class="card-meta">
-                ${s.entregado?'<span class="tag tag-green">Entregado</span>':'<span class="tag">Sin entregar</span>'}
-                ${avg!==null?`<span class="tag ${avgClass}" style="font-weight:700">Nota: ${avg}</span>`:''}
-                <span class="badge ${estBadge}" style="font-size:.65rem">${s.estado_calificacion.replace('_',' ')}</span>
+        const profGrades=(s.notas_profesores||[]).map(g=>{const p=S.users.find(u=>u.id===g.profesor_id);return `<div style="font-size:.75rem;margin-top:.3rem;padding:.4rem .6rem;background:#f8f9fc;border-radius:0.208vw"><strong>${p?p.apellido+' '+p.nombre:'Profesor'}</strong>: <span class="nota-val ${g.nota>=6?'nota-ok':'nota-fail'}">${g.nota??'—'}</span>${g.devolucion?`<div class="devolucion-box">${esc(g.devolucion)}</div>`:''}</div>`}).join('');
+        return `<div class="sub-row" style="flex-direction:column;align-items:flex-start;gap:.35rem;padding:.75rem 0">
+            <div style="display:flex;align-items:center;gap:.75rem;width:100%">
+                <span class="sub-name">${aName}</span>
+                ${s.entregado?'<span class="badge badge-green">Entregado</span>':'<span class="badge badge-gray">Sin entregar</span>'}
+                ${avg!==null?`<span class="nota-val ${avgColor}">Promedio: ${avg}</span>`:''}
+                <span class="badge ${estBadge}">${s.estado_calificacion.replace('_',' ')}</span>
+                <button class="btn btn-outline" style="margin-left:auto;font-size:.7rem;padding:.25rem .6rem" onclick="openGradeForm('${workId}','${s.alumno_id}','${aName.replace(/'/g,"\\'")}')">Calificar</button>
             </div>
-            ${s.entregado&&s.contenido?`<div style="font-size:.72rem;color:var(--muted);margin-top:.4rem">📅 ${s.fecha_entrega||''}</div><div class="devolucion-box" style="margin-top:.3rem;font-size:.75rem">${esc(s.contenido)}</div>`:''}
+            ${s.entregado&&s.contenido?`<div style="font-size:.75rem;color:var(--muted)">Entregado: ${s.fecha_entrega||''}</div><div class="devolucion-box" style="width:100%">${esc(s.contenido)}</div>`:''}
             ${profGrades}
-            <div class="card-actions">
-                <button class="btn btn-outline" style="font-size:.7rem;padding:.25rem .6rem" onclick="openGradeForm('${workId}','${s.alumno_id}','${aName.replace(/'/g,"\'")}')">Calificar</button>
-            </div>
         </div>`;
     }).join('');
-    modal(`<h3>${esc(work.titulo)}</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">${esc(work.descripcion||'')}</p><div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">${rows||'<div class="empty" style="grid-column:1/-1">Sin alumnos asignados</div>'}</div><div class="modal-footer" style="margin-top:1rem"><button class="btn btn-outline" onclick="closeModal()">Cerrar</button></div>`,'min(960px,94vw)');
+    modal(`<h3>${work.titulo}</h3><p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">${work.descripcion||''}</p><div class="submissions-list">${rows||'<div class="empty">Sin alumnos asignados</div>'}</div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cerrar</button></div>`,'33.333vw');
 }
 function openGradeForm(workId,alumnoId,alumnoName){
     modal(`<h3>Calificar entrega</h3><p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">Alumno: <strong>${alumnoName}</strong></p>
@@ -263,24 +246,23 @@ async function loadMyWorks(){
         const avg=sub?.nota_promedio;
         const avgColor=avg===null?'nota-pending':avg>=6?'nota-ok':'nota-fail';
         const profDevs=(sub?.notas_profesores||[]).filter(g=>g.devolucion).map(g=>`<div style="font-size:.78rem;margin-top:.5rem"><strong>Devolución del profesor:</strong><div class="devolucion-box">${esc(g.devolucion)}</div></div>`).join('');
-        const ncClass=avg===null?'tag-amber':avg>=6?'tag-green':'tag-red';
-        const estClass=sub?.estado_calificacion==='aprobado'?'badge-green':sub?.estado_calificacion==='desaprobado'?'badge-red':'badge-amber';
-        return `<div class="card">
-            <h3>${esc(w.titulo)}</h3>
-            <p>${esc(w.descripcion||'')}</p>
-            <div class="card-meta">
-                ${curso?`<span class="tag tag-blue">${curso.anio}° ${curso.division}</span>`:''}
-                ${mat?`<span class="tag">${esc(mat.nombre)}</span>`:''}
-                ${w.fecha_entrega?`<span class="tag tag-amber">📅 ${w.fecha_entrega}</span>`:''}
-                ${sub?.entregado?'<span class="tag tag-green">Entregado</span>':'<span class="tag">Sin entregar</span>'}
-                ${avg!==null?`<span class="tag ${ncClass}" style="font-weight:700">Nota: ${avg}</span>`:''}
-                ${sub?.estado_calificacion?`<span class="badge ${estClass}" style="font-size:.65rem">${sub.estado_calificacion.replace('_',' ')}</span>`:''}
+        return `<div class="work-card">
+            <div class="work-card-header">
+                <div><div class="work-title">${w.titulo}</div><div class="work-desc">${w.descripcion||''}</div></div>
+                <div>${avg!==null?`<span class="nota-val ${avgColor}" style="font-size:1.3rem">${avg}</span><br><span style="font-size:.7rem;color:var(--muted)">promedio</span>`:''}</div>
+            </div>
+            <div class="work-meta">
+                ${curso?`<span class="badge badge-blue">${curso.anio}° ${curso.division}</span>`:''}
+                ${mat?`<span class="badge badge-gray">${mat.nombre}</span>`:''}
+                ${w.fecha_entrega?`<span class="badge badge-amber">Entrega: ${w.fecha_entrega}</span>`:''}
+                ${sub?.entregado?'<span class="badge badge-green">Entregado</span>':'<span class="badge badge-gray">Sin entregar</span>'}
+                ${sub?.estado_calificacion?`<span class="badge ${sub.estado_calificacion==='aprobado'?'badge-green':sub.estado_calificacion==='desaprobado'?'badge-red':'badge-amber'}">${sub.estado_calificacion.replace('_',' ')}</span>`:''}
             </div>
             ${profDevs}
-            ${!sub?.entregado?`<div style="margin-top:.75rem"><div class="field"><label>Tu entrega</label><textarea id="sub-${w.id}" rows="3" placeholder="Pegá tu código, respuesta o link..."></textarea></div><button class="btn btn-navy" style="margin-top:.5rem;width:100%" onclick="submitWork('${w.id}')">Entregar</button></div>`:''}
+            ${!sub?.entregado?`<div style="margin-top:.75rem"><div class="field"><label>Tu entrega</label><textarea id="sub-${w.id}" rows="3" placeholder="Pegá tu código, respuesta o link..."></textarea></div><button class="btn btn-navy" style="margin-top:.5rem" onclick="submitWork('${w.id}')">Entregar</button></div>`:''}
         </div>`;
     }));
-    el.innerHTML=`<div class="cards">${rows.join('')}</div>`;
+    el.innerHTML=rows.join('');
 }
 async function submitWork(workId){
     const content=document.getElementById('sub-'+workId)?.value.trim();
@@ -296,11 +278,7 @@ function cuatriLabel(v){return CUATRI_LABEL[String(v)]||v+'°';}
 function cuatriBase(v){return v?v.replace('_informe',''):'';}
 async function initGrades(){
     if(!S.courses.length){const r=await api('api/courses/courses.php');S.courses=await r.json();}
-    // Cargar solo alumnos para grades
-    const params=new URLSearchParams();
-    params.append('role','alumno');
-    const r=await api('api/admin/users.php?'+params.toString());
-    S.users=await r.json();
+    if(!S.users.length&&['admin','director','subdirector'].includes(ROLE)){const r=await api('api/admin/users.php');S.users=await r.json();}
     const gvC=document.getElementById('gv-curso'),gcC=document.getElementById('gc-curso');
     const opts='<option value="">Seleccionar curso...</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
     if(gvC)gvC.innerHTML=opts;
@@ -354,24 +332,35 @@ async function loadGradesTable(){
     // Determinar curso para cada alumno (en caso de búsqueda sin curso fijo)
     const getCurso=u=>cid?S.courses.find(c=>c.id===cid):S.courses.find(c=>c.alumnos?.includes(u.id));
 
-    el.innerHTML=`<div class="cards">${alumnos.map(u=>{
-        const co=getCurso(u);
-        const dni=u.dni||'—';
-        return `<div class="card">
-            <h3>${esc(u.apellido||'')} ${esc(u.nombre||'')}</h3>
-            <div class="card-meta">
-                ${co?`<span class="tag tag-blue">${co.anio}° ${co.division}</span>`:''}
-                ${co?`<span class="tag">${esc(co.nombre)}</span>`:''}
-                <span class="tag">DNI ${esc(String(dni))}</span>
-            </div>
-            <div class="card-actions">
-                <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
-                    onclick="openNotasModal('${u.id}','${esc(u.apellido||'')} ${esc(u.nombre||'')}','${co?.id||''}')">
-                    Ver Notas
-                </button>
-            </div>
-        </div>`;
-    }).join('')}</div>`;
+    el.innerHTML=`
+    <table>
+        <thead>
+            <tr>
+                <th>Alumno</th>
+                <th>Curso</th>
+                <th>DNI</th>
+                <th style="text-align:right"></th>
+            </tr>
+        </thead>
+        <tbody>
+            ${alumnos.map(u=>{
+                const co=getCurso(u);
+                const cursoLabel=co?`${co.anio}° ${co.division} — ${co.nombre}`:'—';
+                const dni=u.dni||'—';
+                return `<tr>
+                    <td style="font-weight:600">${esc(u.apellido||'')} ${esc(u.nombre||'')}</td>
+                    <td>${esc(cursoLabel)}</td>
+                    <td>${esc(String(dni))}</td>
+                    <td style="text-align:right">
+                        <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
+                            onclick="openNotasModal('${u.id}','${esc(u.apellido||'')} ${esc(u.nombre||'')}','${co?.id||''}')">
+                            Ver Notas
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
 }
 
 async function openNotasModal(alumnoId, alumnoNombre, cursoId){
@@ -448,21 +437,34 @@ async function renderNotasTabla(alumnoId, cursoId){
         return cuatriSortKey(a.cuatrimestre)-cuatriSortKey(b.cuatrimestre);
     });
 
-    wrap.innerHTML=`<div class="cards">${grades.map(g=>{
-        const ma=curso?.materias?.find(m=>m.id===g.materia_id);
-        const nc=g.nota!==null?(g.nota>=6?'tag-green':'tag-red'):'tag-amber';
-        const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<div class="card">
-            <h3>${ma?esc(ma.nombre):'—'}</h3>
-            <div class="card-meta">
-                <span class="tag">${cuatriLabel(g.cuatrimestre)}</span>
-                <span class="tag ${nc}" style="font-weight:700">Nota: ${g.nota??'—'}</span>
-                ${g.concepto?`<span class="tag ${g.concepto==='TED'?'tag-red':g.concepto==='TEP'?'tag-amber':'tag-green'}">${g.concepto}</span>`:''}
-                ${g.asistencia!=null?`<span class="tag">Asist. ${g.asistencia}%</span>`:''}
-                <span class="badge ${estB}">${g.estado}</span>
-            </div>
-        </div>`;
-    }).join('')}</div>`;
+    wrap.innerHTML=`
+    <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+        <thead>
+            <tr>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Materia</th>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Cuatrimestre</th>
+                <th style="padding:.45rem .6rem;text-align:center">Nota</th>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Trayectoria</th>
+                <th style="padding:.45rem .6rem;text-align:center">Asistencia</th>
+                <th style="padding:.45rem .6rem;text-align:center">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${grades.map(g=>{
+                const ma=curso?.materias?.find(m=>m.id===g.materia_id);
+                const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
+                const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
+                return `<tr>
+                    <td style="font-weight:600;white-space:nowrap;padding:.4rem .6rem">${ma?esc(ma.nombre):'—'}</td>
+                    <td style="white-space:nowrap;padding:.4rem .6rem">${cuatriLabel(g.cuatrimestre)}</td>
+                    <td style="padding:.4rem .6rem;text-align:center"><span class="nota-val ${nc}" style="font-size:.82rem">${g.nota??'—'}</span></td>
+                    <td style="padding:.4rem .6rem">${g.concepto?`<span class="badge ${g.concepto==='TED'?'badge-red':g.concepto==='TEP'?'badge-amber':'badge-green'}" style="font-size:.68rem">${g.concepto}</span>`:'—'}</td>
+                    <td style="white-space:nowrap;padding:.4rem .6rem;text-align:center">${g.asistencia!=null?g.asistencia+'%':'—'}</td>
+                    <td style="padding:.4rem .6rem;text-align:center"><span class="badge ${estB}" style="font-size:.68rem">${g.estado}</span></td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
 }
 function gcLoadStudents(){
     const cid=document.getElementById('gc-curso').value;
@@ -533,182 +535,42 @@ async function loadMyGrades(){
     if(qua) grades=grades.filter(g=>String(g.cuatrimestre)===qua);
     const el=document.getElementById('my-grades-tbl');
     if(!grades.length){el.innerHTML='<div class="empty" style="padding:1.5rem">Sin calificaciones registradas.</div>';return;}
-    el.innerHTML=`<div class="cards">${grades.map(g=>{
+    el.innerHTML=`<table><thead><tr><th>Materia</th><th>Curso</th><th>Cuatri</th><th>Nota</th><th>Concepto</th><th>Asistencia</th><th>Estado</th></tr></thead><tbody>${grades.map(g=>{
         const co=S.courses.find(c=>c.id===g.curso_id);
         const ma=co?.materias?.find(m=>m.id===g.materia_id);
-        const nc=g.nota!==null?(g.nota>=6?'tag-green':'tag-red'):'tag-amber';
+        const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
         const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<div class="card">
-            <h3>${ma?esc(ma.nombre):'—'}</h3>
-            <p>${co?co.anio+'° '+co.division:'—'}</p>
-            <div class="card-meta">
-                <span class="tag">${cuatriLabel(g.cuatrimestre)}</span>
-                <span class="tag ${nc}" style="font-weight:700">Nota: ${g.nota??'—'}</span>
-                ${g.concepto?`<span class="tag ${g.concepto==='TED'?'tag-red':g.concepto==='TEP'?'tag-amber':'tag-green'}">${g.concepto}</span>`:''}
-                ${g.asistencia!=null?`<span class="tag">Asist. ${g.asistencia}%</span>`:''}
-                <span class="badge ${estB}">${g.estado}</span>
-            </div>
-        </div>`;
-    }).join('')}</div>`;
+        return `<tr><td>${ma?ma.nombre:'—'}</td><td>${co?co.anio+'° '+co.division:'—'}</td><td>${cuatriLabel(g.cuatrimestre)}</td><td><span class="nota-val ${nc}">${g.nota??'—'}</span></td><td>${g.concepto||'—'}</td><td>${g.asistencia!=null?g.asistencia+'%':'—'}</td><td><span class="badge ${estB}">${g.estado}</span></td></tr>`;
+    }).join('')}</tbody></table>`;
 }
 
 // ── USERS ──────────────────────────────────────────────────────────────────
-async function loadUsers(){
-    const el=document.getElementById('users-tbl');
-    el.innerHTML='<div class="empty">Ingresá un nombre, apellido o DNI para buscar.</div>';
-}
-
-let _userSearchTimer=null;
-function filterUsers(instant=false){
-    clearTimeout(_userSearchTimer);
-    const run=()=>{
-        const status=document.getElementById('uf-status')?.value||'';
-        const role=document.getElementById('uf-role')?.value||'';
-        const q=(document.getElementById('uf-search')?.value||'').trim();
-        const params=new URLSearchParams();
-        if(status) params.append('status',status);
-        if(role)   params.append('role',role);
-        if(q)     params.append('q',q);
-        const tbl=document.getElementById('users-tbl');
-        if(tbl)tbl.innerHTML='<div class="empty">Cargando...</div>';
-        api('api/admin/users.php?'+params.toString())
-            .then(r=>r.json())
-            .then(users=>{ S.users=Array.isArray(users)?users:[]; renderUsersTable(); })
-            .catch(()=>{ if(tbl)tbl.innerHTML='<div class="empty">Error al cargar usuarios.</div>'; });
-    };
-    if(instant){run();}else{_userSearchTimer=setTimeout(run,350);}
-}
-
+async function loadUsers(){const r=await api('api/admin/users.php');const d=await r.json();S.users=Array.isArray(d)?d:[];renderUsersTable();}
+function filterUsers(){renderUsersTable();}
 function renderUsersTable(){
-    const el=document.getElementById('users-tbl');
-    if(!el)return;
+    const f=document.getElementById('uf-status')?.value||'';
+    const q=(document.getElementById('uf-search')?.value||'').toLowerCase().trim();
+    let list=f?S.users.filter(u=>u.status===f):S.users;
+    if(q){list=list.filter(u=>[u.nombre,u.apellido,u.username,u.dni,u.email].some(v=>v&&v.toLowerCase().includes(q)));}
     const countEl=document.getElementById('users-count');
-    if(countEl){
-        const n=S.users.length;
-        countEl.textContent=n+' usuario'+(n!==1?'s':'')+' encontrado'+(n!==1?'s':'');
-    }
-    if(!S.users.length){
-        el.innerHTML='<div class="empty">No se encontraron usuarios con esos criterios.</div>';
-        return;
-    }
+    if(countEl){countEl.textContent=list.length+' usuario'+(list.length!==1?'s':'')+(q||f?' encontrado'+(list.length!==1?'s':''):'');}
     const stB={pending_profile:'badge-gray',pending_approval:'badge-amber',approved:'badge-green',rejected:'badge-red'};
     const stL={pending_profile:'Sin perfil',pending_approval:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    const roleColors={admin:'#7c3aed',director:'#2563eb',subdirector:'#2563eb',profesor:'#059669',preceptor:'#d97706',alumno:'#6b7280'};
-    
-    el.innerHTML=`<table><thead><tr><th>Usuario</th><th>DNI</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-    ${S.users.map(u=>{
-        const roleColor=roleColors[u.role]||'#6b7280';
-        const initials=((u.apellido||'').charAt(0)+(u.nombre||'').charAt(0)).toUpperCase();
-        return `<tr>
-            <td><div style="display:flex;align-items:center;gap:.5rem">
-                <div style="width:32px;height:32px;border-radius:50%;background:${roleColor}22;border:2px solid ${roleColor}44;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:${roleColor}">${initials||'?'}</div>
-                <div><div style="font-weight:600">${esc(u.apellido||'')} ${esc(u.nombre||'')}</div><div style="font-size:.7rem;color:var(--muted)">${esc(u.email||u.username||'')}</div></div>
-            </div></td>
-            <td>${u.dni||'—'}</td>
-            <td><span class="tag" style="background:${roleColor}11;color:${roleColor}">${u.role}</span></td>
-            <td><span class="badge ${stB[u.status]||'badge-gray'}">${stL[u.status]||u.status||'—'}</span></td>
-            <td><div style="display:flex;gap:.25rem">
-                ${u.status==='pending_approval'?`<button class="btn btn-navy" style="font-size:.65rem;padding:.2rem .4rem" onclick="approveUser('${u.id}')">Aprobar</button>`:''}
-                ${u.status==='pending_approval'?`<button class="btn btn-red" style="font-size:.65rem;padding:.2rem .4rem" onclick="rejectUser('${u.id}')">Rechazar</button>`:''}
-                <button class="btn btn-outline" style="font-size:.65rem;padding:.2rem .4rem" onclick="openUserModal('${u.id}')">Ver</button>
-            </div></td>
-        </tr>`;
-    }).join('')}
-    </tbody></table>`;
-}
-
-function openUserModal(userId){
-    const u=S.users.find(x=>String(x.id)===String(userId));
-    if(!u) return;
-    const stB={pending_profile:'badge-gray',pending_approval:'badge-amber',approved:'badge-green',rejected:'badge-red'};
-    const stL={pending_profile:'Sin perfil',pending_approval:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    const roleColors={admin:'#7c3aed',director:'#2563eb',subdirector:'#2563eb',profesor:'#059669',preceptor:'#d97706',alumno:'#6b7280'};
-    const roleColor=roleColors[u.role]||'#6b7280';
-    const initials=((u.apellido||'').charAt(0)+(u.nombre||'').charAt(0)).toUpperCase();
-
-    // Cursos donde figura este usuario
-    const cursosAlumno=S.courses.filter(c=>c.alumnos?.includes(u.id));
-    const cursosProfesor=S.courses.filter(c=>c.profesores?.includes(u.id));
-
-    modal(`
-        <div style="display:flex;flex-direction:column;gap:1.25rem">
-
-            <!-- Avatar + nombre -->
-            <div style="display:flex;align-items:center;gap:1rem">
-                <div style="width:56px;height:56px;flex-shrink:0;border-radius:50%;background:${roleColor}22;border:2px solid ${roleColor}44;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:${roleColor}">${initials||'?'}</div>
-                <div>
-                    <div style="font-size:1.15rem;font-weight:800;color:var(--text)">${esc(u.apellido||'')} ${esc(u.nombre||'')}</div>
-                    <div style="font-size:.8rem;color:var(--muted);margin-top:.1rem">@${esc(u.username)}</div>
-                    <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap">
-                        <span class="badge ${stB[u.status]||'badge-gray'}">${stL[u.status]||u.status}</span>
-                        <span class="tag ${u.manual?'tag-amber':'tag-blue'}">${u.manual?'Manual':'Sistema'}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Info personal -->
-            <div style="background:var(--bg);border-radius:6px;padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
-                <div>
-                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">DNI</div>
-                    <div style="font-size:.88rem;font-weight:600;color:var(--text)">${esc(String(u.dni||'—'))}</div>
-                </div>
-                <div>
-                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Fecha de nacimiento</div>
-                    <div style="font-size:.88rem;color:var(--text2)">${esc(u.fechan||'—')}</div>
-                </div>
-                <div>
-                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Teléfono</div>
-                    <div style="font-size:.88rem;color:var(--text2)">${esc(String(u.telefono||'—'))}</div>
-                </div>
-                <div>
-                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Domicilio</div>
-                    <div style="font-size:.88rem;color:var(--text2)">${esc(u.domicilio||'—')}</div>
-                </div>
-                <div style="grid-column:1/-1">
-                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Email</div>
-                    <div style="font-size:.88rem;color:var(--text2);word-break:break-all">${u.email?`<a href="mailto:${esc(u.email)}" style="color:var(--navy)">${esc(u.email)}</a>`:'—'}</div>
-                </div>
-                ${(u.tutores&&u.tutores.length)?`
-                <div style="grid-column:1/-1">
-                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Tutores / Padres</div>
-                    <div style="display:flex;flex-direction:column;gap:.4rem">
-                        ${u.tutores.map(t=>`
-                        <div style="background:var(--white);border:1px solid var(--border);border-radius:6px;padding:.5rem .75rem;font-size:.8rem">
-                            <div style="font-weight:700;color:var(--text)">${esc(t.apellido)}, ${esc(t.nombre)} <span style="font-weight:400;color:var(--muted)">(${esc(t.parentesco)})</span></div>
-                            ${t.telefono&&t.telefono!='0'?`<div style="color:var(--muted)">☎ ${esc(t.telefono)}</div>`:''}
-                            ${t.domicilio&&t.domicilio!='0'?`<div style="color:var(--muted)">📍 ${esc(t.domicilio)}</div>`:''}
-                        </div>`).join('')}
-                    </div>
-                </div>`:''}
-            </div>
-
-            <!-- Rol -->
-            <div>
-                <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Rol del sistema</div>
-                <select onchange="changeRole('${u.id}',this.value);S.users.find(x=>x.id==='${u.id}').role=this.value" ${u.id===MY_ID?'disabled':''} style="width:100%;font-family:var(--font);font-size:.88rem;padding:.5rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
-                    ${['admin','director','subdirector','profesor','preceptor','alumno'].map(r=>`<option value="${r}"${u.role===r?' selected':''}>${r}</option>`).join('')}
-                    ${!u.role?'<option value="" selected>Sin rol</option>':''}
-                </select>
-            </div>
-
-            <!-- Cursos -->
-            ${cursosAlumno.length||cursosProfesor.length?`
-            <div>
-                <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Cursos vinculados</div>
-                <div style="display:flex;gap:.4rem;flex-wrap:wrap">
-                    ${cursosAlumno.map(c=>`<span class="tag tag-blue">${c.anio}° ${c.division} — ${esc(c.nombre)}</span>`).join('')}
-                    ${cursosProfesor.map(c=>`<span class="tag tag-green">${c.anio}° ${c.division} — ${esc(c.nombre)}</span>`).join('')}
-                </div>
-            </div>`:''}
-
-            <!-- Acciones -->
-            <div class="modal-footer" style="padding-top:.5rem">
-                ${u.status==='pending_approval'?`<button class="btn btn-green" onclick="approveUser('${u.id}');closeModal()">Aprobar</button><button class="btn btn-red" onclick="rejectUser('${u.id}');closeModal()">Rechazar</button>`:''}
-                ${u.id!==MY_ID?`<button class="btn btn-red" onclick="deleteUser('${u.id}');closeModal()">Eliminar usuario</button>`:''}
-                <button class="btn btn-outline" onclick="closeModal()">Cerrar</button>
-            </div>
-        </div>
-    `);
+    document.getElementById('users-tbl').innerHTML=`<table><thead><tr><th>Nombre</th><th>Username</th><th>DNI</th><th>Email</th><th>Tel.</th><th>Tipo</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${list.map(u=>`<tr>
+        <td style="font-weight:500">${u.apellido||''} ${u.nombre||''}</td>
+        <td style="color:var(--muted)">${u.username}</td>
+        <td>${u.dni||'—'}</td><td>${u.email||'—'}</td><td>${u.telefono||'—'}</td>
+        <td><span class="badge ${u.manual?'badge-amber':'badge-blue'}">${u.manual?'Manual':'GitHub'}</span></td>
+        <td><select onchange="changeRole('${u.id}',this.value)" ${u.id===MY_ID?'disabled':''} style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:0.052vw solid var(--border);border-radius:0.208vw">
+            ${['admin','director','subdirector','profesor','preceptor','alumno'].map(r=>`<option value="${r}"${u.role===r?' selected':''}>${r}</option>`).join('')}
+            ${!u.role?'<option value="" selected>Sin rol</option>':''}
+        </select></td>
+        <td><span class="badge ${stB[u.status]||'badge-gray'}">${stL[u.status]||u.status}</span></td>
+        <td><div class="td-act">
+            ${u.status==='pending_approval'?`<button class="btn btn-green" style="font-size:.7rem;padding:.25rem .55rem" onclick="approveUser('${u.id}')">Aprobar</button><button class="btn btn-red" style="font-size:.7rem;padding:.25rem .55rem" onclick="rejectUser('${u.id}')">Rechazar</button>`:''}
+            ${u.id!==MY_ID?`<button class="btn btn-red" style="font-size:.7rem;padding:.25rem .55rem" onclick="deleteUser('${u.id}')">Eliminar</button>`:''}
+        </div></td>
+    </tr>`).join('')}</tbody></table>`;
 }
 async function approveUser(id){await api('api/admin/users.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status:'approved'})});loadUsers();loadInicio();}
 async function rejectUser(id){await api('api/admin/users.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status:'rejected'})});loadUsers();loadInicio();}
@@ -744,19 +606,9 @@ async function loadCourses(){
         const r=await api('api/courses/courses.php');
         const data=await r.json();
         S.courses=Array.isArray(data)?data:[];
-    }catch(e){
-        S.courses=[];
-        console.error('Error cargando cursos:',e);
-    }
+        if(!S.users.length){const ur=await api('api/admin/users.php');const ud=await ur.json();S.users=Array.isArray(ud)?ud:[];}
+    }catch(e){S.courses=[];}
     renderCoursesCards();
-}
-
-// Cargar solo profesores para modal de cursos
-async function loadProfesForCourse(){
-    const params=new URLSearchParams();
-    params.append('role','profesor');
-    const r=await api('api/admin/users.php?'+params.toString());
-    return await r.json();
 }
 function filterCourses(orientation){
     S.courseFilter=orientation;
@@ -773,37 +625,22 @@ function renderCoursesCards(){
     if(S.courseFilter){filtered=filtered.filter(c=>orientColors[c.orientacion]===S.courseFilter);}
     const countEl=document.getElementById('courses-count');
     if(countEl)countEl.textContent=filtered.length+' curso'+(filtered.length!==1?'s':'');
-    if(!filtered.length){
-        el.innerHTML='<div class="empty" style="grid-column:1/-1">'+(S.courseFilter?'No hay cursos en esta orientación.':'No hay cursos activos.')+'</div>';
-        return;
-    }
-    el.innerHTML=filtered.map(c=>{
-        const oClass=orientColors[c.orientacion]||'';
-        // Manejar tanto array como número
-        const alumCount=typeof c.alumnos==='number'?c.alumnos:(c.alumnos?.length||0);
-        const matCount=c.materias?.length||0;
-        return `<div class="card card-${oClass}">
+    if(!filtered.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Sin cursos'+(S.courseFilter?' en esta orientación':' creados')+'.</div>';return;}
+    el.innerHTML=filtered.map(c=>{const oClass=orientColors[c.orientacion]||'';return `<div class="card card-${oClass}">
         <h3>${c.anio}° ${c.division}</h3>
         <p>${c.nombre}<br><span style="color:var(--muted)">Turno: ${c.turno}</span><br><span style="color:var(--muted);font-size:.7rem">${c.orientacion||''}</span></p>
-        <div class="card-meta"><span class="badge badge-blue">${alumCount} alumnos</span><span class="badge badge-gray">${matCount} materias</span></div>
+        <div class="card-meta"><span class="badge badge-blue">${c.alumnos?.length||0} alumnos</span><span class="badge badge-gray">${c.materias?.length||0} materias</span></div>
         <div class="card-actions"><button class="btn btn-outline" onclick='openCourseDetail(${JSON.stringify(c)})'>Gestionar</button><button class="btn btn-red" onclick="deleteCourse('${c.id}')">Eliminar</button></div>
     </div>`}).join('');
 }
 function openCourseModal(){modal(`<h3>Nuevo curso</h3><div class="fgrid"><div class="field ffull"><label>Nombre</label><input id="cc-n" placeholder="3° Técnico Informática"></div><div class="field"><label>Año</label><input id="cc-a" type="number" min="1" max="7" placeholder="3"></div><div class="field"><label>División</label><input id="cc-d" placeholder="A"></div><div class="field ffull"><label>Turno</label><select id="cc-t"><option>Mañana</option><option>Tarde</option><option>Noche</option></select></div><div class="field ffull"><label>Orientación</label><select id="cc-o"><option>Ciclo Básico</option><option>MMO</option><option>Programación</option><option>Turismo</option></select></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-navy" onclick="saveCourse()">Crear</button></div>`);}
-async function saveCourse(){const b={ano:document.getElementById('cc-a').value,division:document.getElementById('cc-d').value.trim(),turno:document.getElementById('cc-t').value,orientacion:document.getElementById('cc-o').value,ciclolectivo:new Date().getFullYear()};if(!b.ano||!b.division||!b.turno)return;const r=await api('api/courses/courses.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();closeModal();if(d.success)loadCourses();else alert('Error: '+d.error);}
+async function saveCourse(){const b={nombre:document.getElementById('cc-n').value.trim(),anio:document.getElementById('cc-a').value,division:document.getElementById('cc-d').value.trim(),turno:document.getElementById('cc-t').value,orientacion:document.getElementById('cc-o').value};if(!b.nombre||!b.anio||!b.division)return;const r=await api('api/courses/courses.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();closeModal();if(d.success)loadCourses();else alert('Error: '+d.error);}
 async function deleteCourse(id){if(!confirm('¿Eliminar este curso?'))return;await api('api/courses/courses.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});loadCourses();}
-async function openCourseDetail(course){
-    // Cargar solo los usuarios necesarios para este curso
-    const [alumRes, profRes] = await Promise.all([
-        api('api/admin/users.php?role=alumno'),
-        api('api/admin/users.php?role=profesor')
-    ]);
-    const allUsers = [...(await alumRes.json()), ...(await profRes.json())];
-    
-    const alumnos=allUsers.filter(u=>u.role==='alumno'&&course.alumnos?.includes(u.id));
-    const profes=allUsers.filter(u=>u.role==='profesor'&&course.profesores?.includes(u.id));
-    const allAlum=allUsers.filter(u=>u.role==='alumno'&&!course.alumnos?.includes(u.id));
-    const allProf=allUsers.filter(u=>u.role==='profesor'&&!course.profesores?.includes(u.id));
+function openCourseDetail(course){
+    const alumnos=S.users.filter(u=>course.alumnos?.includes(u.id));
+    const profes=S.users.filter(u=>course.profesores?.includes(u.id));
+    const allAlum=S.users.filter(u=>u.role==='alumno'&&u.status==='approved'&&!course.alumnos?.includes(u.id));
+    const allProf=S.users.filter(u=>u.role==='profesor'&&u.status==='approved'&&!course.profesores?.includes(u.id));
     modal(`<h3>${course.anio}° ${course.division} — ${course.nombre}</h3>
         <div class="tabs"><div class="tab active" onclick="cdTab('alumnos')">Alumnos</div><div class="tab" onclick="cdTab('materias')">Materias</div><div class="tab" onclick="cdTab('profesores')">Profesores</div></div>
         <div class="tab-content visible" id="cd-alumnos">
@@ -813,10 +650,10 @@ async function openCourseDetail(course){
         <div class="tab-content" id="cd-materias">
             <div class="inline-form mb1">
                 <div class="field"><label>Materia</label><input id="cd-mn" placeholder="Matemática"></div>
-                <div class="field"><label>Profesor</label><select id="cd-mp"><option value="">Sin asignar</option>${allProf.map(p=>`<option value="${p.id}">${p.apellido} ${p.nombre}</option>`).join('')}</select></div>
+                <div class="field"><label>Profesor</label><select id="cd-mp"><option value="">Sin asignar</option>${S.users.filter(u=>u.role==='profesor'&&u.status==='approved').map(p=>`<option value="${p.id}">${p.apellido} ${p.nombre}</option>`).join('')}</select></div>
                 <button class="btn btn-navy" onclick="addMateria('${course.id}')">Agregar</button>
             </div>
-            <table><thead><tr><th>Materia</th><th>Profesor</th><th></th></tr></thead><tbody>${(course.materias||[]).map(m=>{const p=allUsers.find(u=>u.id===m.profesor_id);return `<tr><td>${m.nombre}</td><td>${p?p.apellido+' '+p.nombre:'—'}</td><td><button class="btn btn-red" style="font-size:.7rem;padding:.2rem .5rem" onclick="removeMateria('${course.id}','${m.id}')">Quitar</button></td></tr>`}).join('')}</tbody></table>
+            <table><thead><tr><th>Materia</th><th>Profesor</th><th></th></tr></thead><tbody>${(course.materias||[]).map(m=>{const p=S.users.find(u=>u.id===m.profesor_id);return `<tr><td>${m.nombre}</td><td>${p?p.apellido+' '+p.nombre:'—'}</td><td><button class="btn btn-red" style="font-size:.7rem;padding:.2rem .5rem" onclick="removeMateria('${course.id}','${m.id}')">Quitar</button></td></tr>`}).join('')}</tbody></table>
         </div>
         <div class="tab-content" id="cd-profesores">
             <div class="inline-form mb1"><div class="field"><label>Agregar profesor</label><select id="cd-ps"><option value="">Seleccionar...</option>${allProf.map(p=>`<option value="${p.id}">${p.apellido} ${p.nombre}</option>`).join('')}</select></div><button class="btn btn-navy" onclick="addToGroup('${course.id}','add_profesor','cd-ps','user_id')">Agregar</button></div>
@@ -834,42 +671,14 @@ async function removeMateria(cid,mid){await api('api/courses/courses.php',{metho
 async function loadRooms(){
     const[rRes,cRes]=await Promise.all([api('api/rooms/rooms.php'),api('api/courses/courses.php')]);
     S.rooms=await rRes.json();S.courses=await cRes.json();
-    if(!S.rooms.length){document.getElementById('rooms-tbl').innerHTML='<div class="empty">Sin aulas registradas.</div>';return;}
-    
-    // Cargar solo preceptores para el dropdown
-    const params=new URLSearchParams();
-    params.append('role','preceptor');
-    const pRes=await api('api/admin/users.php?'+params.toString());
-    const precs=await pRes.json();
-    
-    document.getElementById('rooms-tbl').innerHTML=`<div class="cards">${S.rooms.map(r=>`
-        <div class="card">
-            <h3>${r.nombre}</h3>
-            <div class="card-meta">
-                ${r.ubicacion?`<span class="tag">${r.ubicacion}</span>`:''}
-                ${r.capacidad?`<span class="tag tag-blue">Cap. ${r.capacidad}</span>`:''}
-            </div>
-            <div style="margin-top:.75rem;display:flex;flex-direction:column;gap:.5rem">
-                <div>
-                    <label style="font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Curso asignado</label>
-                    <select onchange="assignRC('${r.id}',this.value)" style="width:100%;font-family:var(--font);font-size:.75rem;padding:.28rem .4rem;border:1px solid var(--border);border-radius:var(--radius)">
-                        <option value="">Sin asignar</option>
-                        ${S.courses.map(c=>`<option value="${c.id}"${r.curso_id===c.id?' selected':''}>${c.anio}° ${c.division} — ${c.nombre}</option>`).join('')}
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Preceptor</label>
-                    <select onchange="assignRP('${r.id}',this.value)" style="width:100%;font-family:var(--font);font-size:.75rem;padding:.28rem .4rem;border:1px solid var(--border);border-radius:var(--radius)">
-                        <option value="">Sin asignar</option>
-                        ${precs.map(p=>`<option value="${p.id}"${r.preceptor_id===p.id?' selected':''}>${p.apellido} ${p.nombre}</option>`).join('')}
-                    </select>
-                </div>
-            </div>
-            <div class="card-actions">
-                <button class="btn btn-red" style="font-size:.7rem;padding:.28rem .5rem" onclick="deleteRoom('${r.id}')">Eliminar</button>
-            </div>
-        </div>
-    `).join('')}</div>`;
+    if(!S.users.length){const ur=await api('api/admin/users.php');S.users=await ur.json();}
+    const precs=S.users.filter(u=>u.role==='preceptor'&&u.status==='approved');
+    document.getElementById('rooms-tbl').innerHTML=`<table><thead><tr><th>Aula</th><th>Ubicación</th><th>Cap.</th><th>Curso asignado</th><th>Preceptor</th><th></th></tr></thead><tbody>${S.rooms.map(r=>{
+        return `<tr><td style="font-weight:600">${r.nombre}</td><td>${r.ubicacion||'—'}</td><td>${r.capacidad||'—'}</td>
+            <td><select onchange="assignRC('${r.id}',this.value)" style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:0.052vw solid var(--border);border-radius:0.208vw"><option value="">Sin asignar</option>${S.courses.map(c=>`<option value="${c.id}"${r.curso_id===c.id?' selected':''}>${c.anio}° ${c.division} — ${c.nombre}</option>`).join('')}</select></td>
+            <td><select onchange="assignRP('${r.id}',this.value)" style="font-family:var(--font);font-size:.75rem;padding:.25rem .4rem;border:0.052vw solid var(--border);border-radius:0.208vw"><option value="">Sin asignar</option>${precs.map(p=>`<option value="${p.id}"${r.preceptor_id===p.id?' selected':''}>${p.apellido} ${p.nombre}</option>`).join('')}</select></td>
+            <td><button class="btn btn-red" style="font-size:.7rem;padding:.25rem .5rem" onclick="deleteRoom('${r.id}')">Eliminar</button></td></tr>`;
+    }).join('')}</tbody></table>`;
 }
 function openRoomModal(){modal(`<h3>Nueva aula</h3><div class="fgrid"><div class="field"><label>Nombre</label><input id="rm-n" placeholder="Aula 101"></div><div class="field"><label>Capacidad</label><input id="rm-c" type="number" placeholder="30"></div><div class="field ffull"><label>Ubicación</label><input id="rm-u" placeholder="Planta baja, ala norte"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-navy" onclick="saveRoom()">Crear</button></div>`);}
 async function saveRoom(){const b={nombre:document.getElementById('rm-n').value.trim(),capacidad:document.getElementById('rm-c').value,ubicacion:document.getElementById('rm-u').value.trim()};if(!b.nombre)return;const r=await api('api/rooms/rooms.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();closeModal();if(d.success)loadRooms();else alert('Error: '+d.error);}
@@ -882,18 +691,23 @@ function modal(html,maxW='28.125vw'){document.getElementById('modal-root').inner
 function closeModal(){document.getElementById('modal-root').innerHTML='';}
 
 // ── Utils ──────────────────────────────────────────────────────────────────
-function esc(s){ s=s==null?'':String(s); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 document.addEventListener('keydown',e=>{
     if(e.key==='Escape')closeModal();
     if((e.ctrlKey||e.metaKey)&&e.key==='s'&&S.editorFile){e.preventDefault();saveFile();}
 });
 
 // ── CORREOS ────────────────────────────────────────────────────────────────
+// Pegá este bloque completo al final de assets/dashboard.js
+
 const ML = { selected: new Set(), filtered: [] };
 
 function initMail() {
-    // Cargar todos los roles para correo
-    api('api/admin/users.php').then(r => r.json()).then(u => { S.users = u; mlBuildList(); });
+    if (!S.users.length) {
+        api('api/admin/users.php').then(r => r.json()).then(u => { S.users = u; mlBuildList(); });
+    } else {
+        mlBuildList();
+    }
 }
 
 function mlBuildList() {
@@ -1068,7 +882,11 @@ async function sendMail() {
     }
 }
 
+// En la función nav(), agregá 'mail' al objeto loaders:
+// mail: () => { if(!S.users.length && ['admin','director','subdirector'].includes(ROLE)){api('api/admin/users.php').then(r=>r.json()).then(u=>S.users=u);} }
+// O simplemente no hace falta porque los users ya se cargan al init.
+
 // ── Init ───────────────────────────────────────────────────────────────────
-// Solo cargar datos esenciales al inicio - el resto bajo demanda
 loadInicio();
+if(['admin','director','subdirector'].includes(ROLE)){api('api/admin/users.php').then(r=>r.json()).then(u=>S.users=u);}
 api('api/courses/courses.php').then(r=>r.json()).then(c=>S.courses=c);
