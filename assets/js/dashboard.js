@@ -704,7 +704,7 @@ function renderUsersTable(){
     `).join('')}</div>`;
 }
 
-function openUserModal(userId){
+async function openUserModal(userId){
     const u=S.users.find(x=>String(x.id)===String(userId));
     if(!u) return;
     const stB={pending_profile:'badge-gray',pending_approval:'badge-amber',approved:'badge-green',rejected:'badge-red'};
@@ -716,6 +716,28 @@ function openUserModal(userId){
     // Cursos donde figura este usuario
     const cursosAlumno=S.courses.filter(c=>c.alumnos?.includes(u.id));
     const cursosProfesor=S.courses.filter(c=>c.profesores?.includes(u.id));
+
+    // Contactos (solo para alumnos)
+    let contactosHtml='';
+    if(u.role==='alumno'){
+        try{
+            const cr=await api(`api/contacts/contacts.php?alumno_id=${encodeURIComponent(u.id)}`);
+            const contactos=await cr.json();
+            const parentescoIcon={'MADRE':'👩','PADRE':'👨','TUTOR/RESPONSABLE':'🧑','TUTORA/RESPONSABLE':'🧑','OTRA PERSONA AUTORIZADA':'🧑','HERMANO/A':'👦'};
+            if(contactos.length){
+                const cards=contactos.map(c=>{
+                    const icon=parentescoIcon[c.parentesco]||'👤';
+                    const nombre=`${esc(c.nombre||'')} ${esc(c.apellido||'')}`.trim();
+                    return `<div style="background:var(--white);border:1px solid var(--border);border-radius:6px;padding:.75rem;display:flex;gap:.75rem;align-items:flex-start"><div style="font-size:1.4rem;line-height:1;flex-shrink:0">${icon}</div><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700;color:var(--text)">${nombre||'—'}</div><div style="font-size:.7rem;color:var(--navy);font-weight:600;margin-top:.1rem">${esc(c.parentesco||'—')}</div><div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.35rem">${c.ocupacion?`<span class="tag" style="font-size:.65rem">${esc(c.ocupacion)}</span>`:''} ${c.telefono?`<span class="tag tag-blue" style="font-size:.65rem">☎ ${esc(String(c.telefono))}</span>`:''} ${c.domicilio?`<span class="tag" style="font-size:.65rem">📍 ${esc(c.domicilio)}</span>`:''} ${c.sexo?`<span class="tag tag-amber" style="font-size:.65rem">${c.sexo==='M'?'Masc.':'Fem.'}</span>`:''}</div></div></div>`;
+                }).join('');
+                contactosHtml=`<div><div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Contactos familiares / tutores</div><div style="display:flex;flex-direction:column;gap:.5rem">${cards}</div></div>`;
+            } else {
+                contactosHtml=`<div><div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem">Contactos familiares / tutores</div><div style="font-size:.78rem;color:var(--muted);padding:.5rem 0">Sin contactos registrados.</div></div>`;
+            }
+        }catch(e){
+            contactosHtml=`<div style="font-size:.75rem;color:var(--muted)">No se pudieron cargar los contactos.</div>`;
+        }
+    }
 
     modal(`
         <div style="display:flex;flex-direction:column;gap:1.25rem">
@@ -767,6 +789,9 @@ function openUserModal(userId){
                     ${cursosProfesor.map(c=>`<span class="tag tag-green">${c.anio}° ${c.division} — ${esc(c.nombre)}</span>`).join('')}
                 </div>
             </div>`:''}
+
+            <!-- Contactos -->
+            ${contactosHtml}
 
             <!-- Acciones -->
             <div class="modal-footer" style="padding-top:.5rem">
