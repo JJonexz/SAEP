@@ -1,5 +1,5 @@
 const ROLE = window.ROLE, MY_ID = window.MY_ID;
-const S={repos:[],activeRepo:null,repoPath:[],editorFile:null,editorSha:null,users:[],courses:[],rooms:[],isPrivate:false,courseFilter:null};
+const S={repos:[],activeRepo:null,repoPath:[],editorFile:null,editorSha:null,users:[],courses:[],rooms:[],isPrivate:false,courseFilter:null,lastOpenedCourse:null};
 
 // ── Nav ────────────────────────────────────────────────────────────────────
 function nav(id){
@@ -402,9 +402,9 @@ async function openNotasDesdeAlumnos(alumnoId, alumnoNombre, cursoId){
 }
 
 // Modal "Cargar nota" (mismo contenido que antes, ahora como modal)
-function openCargarNotaModal(){
+function openCargarNotaModal(preselectedCursoId){
     if(!S.courses.length){alert('No hay cursos cargados.');return;}
-    const cursoOpts='<option value="">Seleccionar...</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
+    const cursoOpts='<option value="">Seleccionar...</option>'+S.courses.map(c=>`<option value="${c.id}"${c.id===preselectedCursoId?' selected':''}>${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
     modal(`
         <h3>Cargar nota</h3>
         <div class="fgrid">
@@ -451,10 +451,11 @@ function openCargarNotaModal(){
         </div>
         <div class="err-msg" id="gcm-err"></div>
         <div class="modal-footer">
-            <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-outline" onclick="volverAGestion()">← Volver</button>
             <button class="btn btn-navy" onclick="saveGradeModal()">Guardar calificación</button>
         </div>
     `);
+    if(preselectedCursoId){setTimeout(()=>{const sel=document.getElementById('gcm-curso');if(sel){sel.value=preselectedCursoId;gcmLoadStudents();}},50);}
 }
 function gcmLoadStudents(){
     const cid=document.getElementById('gcm-curso').value;
@@ -532,6 +533,7 @@ async function openNotasModal(alumnoId, alumnoNombre, cursoId){
             </div>
 
             <div class="modal-footer" style="padding-top:.25rem">
+                <button class="btn btn-outline" onclick="volverAGestion()">← Volver</button>
                 <button class="btn btn-outline" onclick="closeModal()">Cerrar</button>
             </div>
         </div>
@@ -827,15 +829,21 @@ function openCourseModal(){modal(`<h3>Nuevo curso</h3><div class="fgrid"><div cl
 async function saveCourse(){const b={nombre:document.getElementById('cc-n').value.trim(),anio:document.getElementById('cc-a').value,division:document.getElementById('cc-d').value.trim(),turno:document.getElementById('cc-t').value,orientacion:document.getElementById('cc-o').value};if(!b.nombre||!b.anio||!b.division)return;const r=await api('api/courses/courses.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();closeModal();if(d.success)loadCourses();else alert('Error: '+d.error);}
 async function deleteCourse(id){if(!confirm('¿Eliminar este curso?'))return;await api('api/courses/courses.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});loadCourses();}
 function openCourseDetail(course){
+    S.lastOpenedCourse=course;
     const alumnos=S.users.filter(u=>course.alumnos?.includes(u.id));
     const profes=S.users.filter(u=>course.profesores?.includes(u.id));
     const allAlum=S.users.filter(u=>u.role==='alumno'&&u.status==='approved'&&!course.alumnos?.includes(u.id));
     const allProf=S.users.filter(u=>u.role==='profesor'&&u.status==='approved'&&!course.profesores?.includes(u.id));
-    modal(`<h3>${course.anio}° ${course.division} — ${course.nombre}</h3>
+    const canLoadGrades=['admin','director','subdirector','profesor'].includes(ROLE);
+    modal(`
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+            <h3 style="margin:0;padding:0;border:none;font-size:1rem;font-weight:700;color:var(--text)">${course.anio}° ${course.division} — ${course.nombre}</h3>
+            ${canLoadGrades?`<button class="btn btn-navy" style="font-size:.75rem;white-space:nowrap;flex-shrink:0" onclick="openCargarNotaModal('${course.id}')">+ Cargar nota</button>`:''}
+        </div>
         <div class="tabs"><div class="tab active" onclick="cdTab('alumnos')">Alumnos</div><div class="tab" onclick="cdTab('materias')">Materias</div><div class="tab" onclick="cdTab('profesores')">Profesores</div></div>
         <div class="tab-content visible" id="cd-alumnos">
             <div class="inline-form mb1"><div class="field"><label>Agregar alumno</label><select id="cd-as"><option value="">Seleccionar...</option>${allAlum.map(a=>`<option value="${a.id}">${a.apellido} ${a.nombre}</option>`).join('')}</select></div><button class="btn btn-navy" onclick="addToGroup('${course.id}','add_alumno','cd-as','user_id')">Agregar</button></div>
-            <table><thead><tr><th>Alumno</th><th>DNI</th><th></th></tr></thead><tbody>${alumnos.map(a=>`<tr><td>${a.apellido} ${a.nombre}</td><td>${a.dni||'—'}</td><td><button class="btn btn-red" style="font-size:.7rem;padding:.2rem .5rem" onclick="removeFromGroup('${course.id}','remove_alumno','${a.id}')">Quitar</button></td></tr>`).join('')}</tbody></table>
+            <table><thead><tr><th>Alumno</th><th>DNI</th><th></th></tr></thead><tbody>${alumnos.map(a=>`<tr><td>${a.apellido} ${a.nombre}</td><td>${a.dni||'—'}</td><td><button class="btn btn-navy" style="font-size:.7rem;padding:.2rem .5rem" onclick="openNotasModal('${a.id}','${esc((a.apellido||'')+' '+(a.nombre||''))}','${course.id}')">Ver notas</button></td></tr>`).join('')}</tbody></table>
         </div>
         <div class="tab-content" id="cd-materias">
             <div class="inline-form mb1">
@@ -898,6 +906,15 @@ async function saveRoom(){const b={nombre:document.getElementById('rm-n').value.
 async function assignRC(id,cid){await api('api/rooms/rooms.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,curso_id:cid||null})});}
 async function assignRP(id,pid){await api('api/rooms/rooms.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,preceptor_id:pid||null})});}
 async function deleteRoom(id){if(!confirm('¿Eliminar esta aula?'))return;await api('api/rooms/rooms.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});loadRooms();}
+
+// ── Volver a gestión de curso ──────────────────────────────────────────────
+function volverAGestion(){
+    const c=S.lastOpenedCourse;
+    if(!c){closeModal();return;}
+    // Refrescar datos del curso desde S.courses por si cambió
+    const fresh=S.courses.find(x=>x.id===c.id)||c;
+    openCourseDetail(fresh);
+}
 
 // ── Modal helpers ──────────────────────────────────────────────────────────
 function modal(html,maxW='28.125vw'){document.getElementById('modal-root').innerHTML=`<div class="overlay" style="z-index:1200" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:${maxW}">${html}</div></div>`;}

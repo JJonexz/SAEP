@@ -59,9 +59,6 @@ $role=$user['role'];
         <div class="nav-item" onclick="nav('works')" id="nav-works">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Trabajos
         </div>
-        <div class="nav-item" onclick="nav('grades')" id="nav-grades">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>Calificaciones
-        </div>
         <?php endif; ?>
         <?php if($role==='alumno'): ?>
         <div class="nav-item" onclick="nav('my-works')" id="nav-my-works">
@@ -138,28 +135,6 @@ $role=$user['role'];
 </div>
 <?php endif; ?>
 
-<!-- CALIFICACIONES (staff) -->
-<?php if(in_array($role,['admin','director','subdirector','profesor','preceptor'])): ?>
-<div class="panel" id="panel-grades">
-    <div class="ph">
-        <h2>Calificaciones cuatrimestrales</h2>
-        <?php if(in_array($role,['admin','director','subdirector','profesor'])): ?>
-        <button class="btn btn-navy" onclick="openCargarNotaModal()">+ Cargar nota</button>
-        <?php endif; ?>
-    </div>
-    <div class="pb">
-        <!-- Filtro por orientación igual al de Cursos -->
-        <div class="courses-filter-row" id="grades-filter">
-            <button class="filter-btn filter-btn-active" onclick="filterGradesCourses(null)">Todos</button>
-            <button class="filter-btn filter-btn-prog" onclick="filterGradesCourses('prog')">Programación</button>
-            <button class="filter-btn filter-btn-mmo" onclick="filterGradesCourses('mmo')">MMO</button>
-            <button class="filter-btn filter-btn-turismo" onclick="filterGradesCourses('turismo')">Turismo</button>
-            <button class="filter-btn filter-btn-basico" onclick="filterGradesCourses('basico')">Ciclo Básico</button>
-        </div>
-        <!-- Cards de cursos -->
-        <div class="cards" id="grades-courses-cards"></div>
-    </div>
-</div>
 <!-- Modal cargar nota (campos ocultos reutilizados) -->
 <div id="gc-hidden-fields" style="display:none">
     <select id="gc-curso"></select>
@@ -176,7 +151,6 @@ $role=$user['role'];
     <input type="text" id="gv-search">
     <div id="grades-tbl"></div>
 </div>
-<?php endif; ?>
 
 <!-- MIS NOTAS (alumno) -->
 <?php if($role==='alumno'): ?>
