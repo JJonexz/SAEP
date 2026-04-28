@@ -281,84 +281,183 @@ async function submitWork(workId){
     if(d.success)loadMyWorks();else alert('Error: '+d.error);
 }
 
-// ── GRADES ─────────────────────────────────────────────────────────────────
 const CUATRI_LABEL={'1':'1° Informe','2':'1°','3':'2° Informe','4':'2°'};
 function cuatriLabel(v){return CUATRI_LABEL[String(v)]||v+'°';}
 function cuatriBase(v){return v?v.replace('_informe',''):'';}
+
+// ── GRADES (nuevo diseño tipo Cursos) ──────────────────────────────────────
+const GS={filter:null,activeCurso:null};
 async function initGrades(){
     if(!S.courses.length){const r=await api('api/courses/courses.php');S.courses=await r.json();}
     if(!S.users.length&&['admin','director','subdirector'].includes(ROLE)){const r=await api('api/admin/users.php');S.users=await r.json();}
-    const gvC=document.getElementById('gv-curso'),gcC=document.getElementById('gc-curso');
-    const opts='<option value="">Seleccionar curso...</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
-    if(gvC)gvC.innerHTML=opts;
+    // Sincronizar selects ocultos para saveGrade
+    const gcC=document.getElementById('gc-curso');
     if(gcC)gcC.innerHTML='<option value="">Seleccionar...</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
-    // No cargar tabla hasta que se elija un curso
-    const el=document.getElementById('grades-tbl');
-    if(el)el.innerHTML='<div class="empty" style="padding:1.5rem">Seleccioná un curso para ver las calificaciones.</div>';
+    const gvC=document.getElementById('gv-curso');
+    if(gvC)gvC.innerHTML='<option value="">Seleccionar curso...</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
+    GS.filter=null;
+    renderGradesCards();
 }
-function gvOnCursoChange(){
-    loadGradesTable();
+function filterGradesCourses(orientation){
+    GS.filter=orientation;
+    document.querySelectorAll('#grades-filter .filter-btn').forEach(b=>b.classList.remove('filter-btn-active'));
+    if(orientation===null){document.querySelector('#grades-filter [onclick="filterGradesCourses(null)"]').classList.add('filter-btn-active');}
+    else{document.querySelector(`#grades-filter [onclick="filterGradesCourses('${orientation}')"]`).classList.add('filter-btn-active');}
+    renderGradesCards();
 }
-async function loadGradesTable(){
-    const cid=document.getElementById('gv-curso')?.value||'';
-    const search=(document.getElementById('gv-search')?.value||'').toLowerCase().trim();
-    const el=document.getElementById('grades-tbl');
-
-    // Sin curso seleccionado: mostrar mensaje
-    if(!cid&&!search){
-        el.innerHTML='<div class="empty" style="padding:1.5rem">Seleccioná un curso para ver los alumnos.</div>';
-        return;
-    }
-
-    // Obtener alumnos del curso seleccionado
-    let alumnos=[];
-    if(cid){
-        const curso=S.courses.find(c=>c.id===cid);
-        if(curso&&curso.alumnos?.length){
-            alumnos=S.users.filter(u=>curso.alumnos.includes(u.id));
-        }
-    } else {
-        // Sin curso pero con búsqueda: buscar en todos los cursos
-        const idsEnCursos=new Set(S.courses.flatMap(c=>c.alumnos||[]));
-        alumnos=S.users.filter(u=>idsEnCursos.has(u.id));
-    }
-
-    // Filtro por nombre, apellido o DNI
-    if(search){
-        alumnos=alumnos.filter(u=>{
-            const fullName=((u.apellido||'')+' '+(u.nombre||'')).toLowerCase();
-            const fullName2=((u.nombre||'')+' '+(u.apellido||'')).toLowerCase();
-            const dni=String(u.dni||'').toLowerCase();
-            return fullName.includes(search)||fullName2.includes(search)||dni.includes(search);
-        });
-    }
-
-    if(!alumnos.length){
-        el.innerHTML='<div class="empty" style="padding:1.5rem">No se encontraron alumnos.</div>';
-        return;
-    }
-
-    // Determinar curso para cada alumno (en caso de búsqueda sin curso fijo)
-    const getCurso=u=>cid?S.courses.find(c=>c.id===cid):S.courses.find(c=>c.alumnos?.includes(u.id));
-
-    el.innerHTML=`<div class="cards">${alumnos.map(u=>{
-        const co=getCurso(u);
-        const dni=u.dni||'—';
-        return `<div class="card">
-            <h3>${esc(u.apellido||'')} ${esc(u.nombre||'')}</h3>
-            <div class="card-meta">
-                ${co?`<span class="tag tag-blue">${co.anio}° ${co.division}</span>`:''}
-                ${co?`<span class="tag">${esc(co.nombre)}</span>`:''}
-                <span class="tag">DNI ${esc(String(dni))}</span>
-            </div>
-            <div class="card-actions">
-                <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
-                    onclick="openNotasModal('${u.id}','${esc(u.apellido||'')} ${esc(u.nombre||'')}','${co?.id||''}')">
-                    Ver Notas
-                </button>
-            </div>
+function renderGradesCards(){
+    const el=document.getElementById('grades-courses-cards');
+    const orientColors={"Programación":"prog","MMO":"mmo","Ciclo Básico":"basico","Turismo":"turismo"};
+    let filtered=S.courses;
+    if(GS.filter){filtered=S.courses.filter(c=>orientColors[c.orientacion]===GS.filter);}
+    if(!filtered.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Sin cursos.</div>';return;}
+    el.innerHTML=filtered.map(c=>{
+        const oClass=orientColors[c.orientacion]||'';
+        return `<div class="card card-${oClass}">
+            <h3>${c.anio}° ${c.division}</h3>
+            <p>${esc(c.nombre)}<br><span style="color:var(--muted)">Turno: ${c.turno}</span><br><span style="color:var(--muted);font-size:.7rem">${c.orientacion||''}</span></p>
+            <div class="card-meta"><span class="badge badge-blue">${c.alumnos?.length||0} alumnos</span><span class="badge badge-gray">${c.materias?.length||0} materias</span></div>
+            <div class="card-actions"><button class="btn btn-outline" onclick='openGradesCurso(${JSON.stringify(c)})'>Ver alumnos</button></div>
         </div>`;
-    }).join('')}</div>`;
+    }).join('');
+}
+function openGradesCurso(curso){
+    GS.activeCurso=curso;
+    const alumnos=S.users.filter(u=>curso.alumnos?.includes(u.id));
+    const rows=alumnos.length
+        ? alumnos.map(u=>`<tr>
+                <td style="font-weight:600">${esc(u.apellido||'')} ${esc(u.nombre||'')}</td>
+                <td>${esc(curso.anio+'° '+curso.division+' — '+curso.nombre)}</td>
+                <td>${esc(String(u.dni||'—'))}</td>
+                <td style="text-align:right">
+                    <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
+                        onclick="openNotasModalStacked('${u.id}','${esc((u.apellido||'')+' '+(u.nombre||''))}','${curso.id}')">
+                        Ver Notas
+                    </button>
+                </td>
+            </tr>`).join('')
+        : '<tr><td colspan="4"><div class="empty" style="padding:1rem">Sin alumnos en este curso.</div></td></tr>';
+
+    // Crear modal propio apilable en modal-root-2
+    let root2=document.getElementById('modal-root-2');
+    if(!root2){root2=document.createElement('div');root2.id='modal-root-2';document.body.appendChild(root2);}
+    root2.innerHTML=`<div class="overlay" style="z-index:1100" onclick="if(event.target===this)closeModal2()">
+        <div class="modal" style="max-width:min(860px,94vw)">
+            <h3>${esc(curso.anio)}° ${esc(curso.division)} — ${esc(curso.nombre)}</h3>
+            <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Turno: ${esc(curso.turno)} · ${esc(curso.orientacion||'')}</p>
+            <div class="tbl-wrap">
+                <table>
+                    <thead><tr><th>Alumno</th><th>Curso</th><th>DNI</th><th style="text-align:right"></th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal2()">Cerrar</button></div>
+        </div>
+    </div>`;
+}
+function closeModal2(){const r=document.getElementById('modal-root-2');if(r)r.innerHTML='';}
+
+// openNotasModal apilado: usa modal() normal (z-index:1200 por defecto overlay) encima del modal2
+function openNotasModalStacked(alumnoId, alumnoNombre, cursoId){
+    // modal() normal abre en modal-root con z-index superior al overlay de modal-root-2
+    openNotasModal(alumnoId, alumnoNombre, cursoId);
+}
+
+// Modal "Cargar nota" (mismo contenido que antes, ahora como modal)
+function openCargarNotaModal(){
+    if(!S.courses.length){alert('No hay cursos cargados.');return;}
+    const cursoOpts='<option value="">Seleccionar...</option>'+S.courses.map(c=>`<option value="${c.id}">${c.anio}° ${c.division} — ${c.nombre}</option>`).join('');
+    modal(`
+        <h3>Cargar nota</h3>
+        <div class="fgrid">
+            <div class="field"><label>Curso</label>
+                <select id="gcm-curso" onchange="gcmLoadStudents()" style="width:100%;font-family:var(--font);font-size:.82rem;padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
+                    ${cursoOpts}
+                </select>
+            </div>
+            <div class="field"><label>Materia</label>
+                <select id="gcm-materia" style="width:100%;font-family:var(--font);font-size:.82rem;padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
+                    <option value="">Seleccionar...</option>
+                </select>
+            </div>
+            <div class="field"><label>Alumno</label>
+                <select id="gcm-alumno" style="width:100%;font-family:var(--font);font-size:.82rem;padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
+                    <option value="">Seleccionar...</option>
+                </select>
+            </div>
+            <div class="field"><label>Cuatrimestre</label>
+                <select id="gcm-cuatri" style="width:100%;font-family:var(--font);font-size:.82rem;padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
+                    <option value="1">1° Informe</option><option value="2">1°</option><option value="3">2° Informe</option><option value="4">2°</option>
+                </select>
+            </div>
+            <div class="field"><label>Nota (1–10)</label>
+                <input type="number" id="gcm-nota" min="1" max="10" step="0.1" placeholder="7" oninput="gcmAutoFill()"
+                    style="width:100%;font-family:var(--font);font-size:.82rem;padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
+            </div>
+            <div class="field"><label>Trayectoria Estudiantil</label>
+                <select id="gcm-concepto" disabled style="width:100%;font-family:var(--font);font-size:.82rem;padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text2);cursor:not-allowed">
+                    <option value="">—</option><option value="TED">TED</option><option value="TEP">TEP</option><option value="TEA">TEA</option>
+                </select>
+                <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">Se asigna automáticamente según la nota</div>
+            </div>
+            <div class="field"><label>Asistencia %</label>
+                <input type="number" id="gcm-asist" min="0" max="100" placeholder="80"
+                    style="width:100%;font-family:var(--font);font-size:.82rem;padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text)">
+            </div>
+            <div class="field"><label>Estado</label>
+                <select id="gcm-estado" disabled style="width:100%;font-family:var(--font);font-size:.82rem;padding:.45rem .65rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text2);cursor:not-allowed">
+                    <option value="pendiente">Pendiente</option><option value="aprobado">Aprobado</option><option value="desaprobado">Desaprobado</option>
+                </select>
+                <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">Se asigna automáticamente según la nota</div>
+            </div>
+        </div>
+        <div class="err-msg" id="gcm-err"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-navy" onclick="saveGradeModal()">Guardar calificación</button>
+        </div>
+    `);
+}
+function gcmLoadStudents(){
+    const cid=document.getElementById('gcm-curso').value;
+    const c=S.courses.find(x=>x.id===cid);
+    const asel=document.getElementById('gcm-alumno'),msel=document.getElementById('gcm-materia');
+    if(!c){asel.innerHTML='<option>—</option>';msel.innerHTML='<option>—</option>';return;}
+    const alumnos=S.users.filter(u=>c.alumnos?.includes(u.id));
+    asel.innerHTML='<option value="">Seleccionar...</option>'+alumnos.map(a=>`<option value="${a.id}">${a.apellido} ${a.nombre}</option>`).join('');
+    msel.innerHTML='<option value="">Seleccionar...</option>'+(c.materias||[]).map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
+}
+function gcmAutoFill(){
+    const nota=parseFloat(document.getElementById('gcm-nota').value);
+    const concEl=document.getElementById('gcm-concepto');
+    const estEl=document.getElementById('gcm-estado');
+    if(isNaN(nota)||nota<1||nota>10){concEl.value='';estEl.value='pendiente';return;}
+    concEl.value=nota<=3?'TED':nota<=6?'TEP':'TEA';
+    estEl.value=nota<=3?'desaprobado':nota<=6?'pendiente':'aprobado';
+}
+async function saveGradeModal(){
+    gcmAutoFill();
+    const body={alumno_id:document.getElementById('gcm-alumno').value,curso_id:document.getElementById('gcm-curso').value,materia_id:document.getElementById('gcm-materia').value,cuatrimestre:document.getElementById('gcm-cuatri').value,nota:document.getElementById('gcm-nota').value||null,concepto:document.getElementById('gcm-concepto').value||null,asistencia:document.getElementById('gcm-asist').value||null,estado:document.getElementById('gcm-estado').value};
+    const err=document.getElementById('gcm-err');err.style.display='none';
+    if(!body.alumno_id||!body.curso_id||!body.materia_id){err.textContent='Seleccioná curso, materia y alumno.';err.style.display='block';return;}
+    const r=await api('api/grades/grades.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(d.success){closeModal();}
+    else{err.textContent=d.error||'Error';err.style.display='block';}
+}
+
+// Mantener compatibilidad con funciones existentes
+function gvOnCursoChange(){loadGradesTable();}
+async function loadGradesTable(){}
+function gTab(name){}
+function gcLoadStudents(){
+    const cid=document.getElementById('gc-curso')?.value;
+    const c=S.courses.find(x=>x.id===cid);
+    const asel=document.getElementById('gc-alumno'),msel=document.getElementById('gc-materia');
+    if(!c||!asel||!msel)return;
+    const alumnos=S.users.filter(u=>c.alumnos?.includes(u.id));
+    asel.innerHTML='<option value="">Seleccionar...</option>'+alumnos.map(a=>`<option value="${a.id}">${a.apellido} ${a.nombre}</option>`).join('');
+    msel.innerHTML='<option value="">Seleccionar...</option>'+(c.materias||[]).map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
 }
 
 async function openNotasModal(alumnoId, alumnoNombre, cursoId){
@@ -435,53 +534,52 @@ async function renderNotasTabla(alumnoId, cursoId){
         return cuatriSortKey(a.cuatrimestre)-cuatriSortKey(b.cuatrimestre);
     });
 
-    wrap.innerHTML=`<div class="cards">${grades.map(g=>{
-        const ma=curso?.materias?.find(m=>m.id===g.materia_id);
-        const nc=g.nota!==null?(g.nota>=6?'tag-green':'tag-red'):'tag-amber';
-        const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<div class="card">
-            <h3>${ma?esc(ma.nombre):'—'}</h3>
-            <div class="card-meta">
-                <span class="tag">${cuatriLabel(g.cuatrimestre)}</span>
-                <span class="tag ${nc}" style="font-weight:700">Nota: ${g.nota??'—'}</span>
-                ${g.concepto?`<span class="tag ${g.concepto==='TED'?'tag-red':g.concepto==='TEP'?'tag-amber':'tag-green'}">${g.concepto}</span>`:''}
-                ${g.asistencia!=null?`<span class="tag">Asist. ${g.asistencia}%</span>`:''}
-                <span class="badge ${estB}">${g.estado}</span>
-            </div>
-        </div>`;
-    }).join('')}</div>`;
-}
-function gcLoadStudents(){
-    const cid=document.getElementById('gc-curso').value;
-    const c=S.courses.find(x=>x.id===cid);
-    const asel=document.getElementById('gc-alumno'),msel=document.getElementById('gc-materia');
-    if(!c){asel.innerHTML='<option>—</option>';msel.innerHTML='<option>—</option>';return;}
-    const alumnos=S.users.filter(u=>c.alumnos?.includes(u.id));
-    asel.innerHTML='<option value="">Seleccionar...</option>'+alumnos.map(a=>`<option value="${a.id}">${a.apellido} ${a.nombre}</option>`).join('');
-    msel.innerHTML='<option value="">Seleccionar...</option>'+(c.materias||[]).map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');
+    wrap.innerHTML=`
+    <table style="width:100%;font-size:.78rem;border-collapse:collapse">
+        <thead>
+            <tr>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Materia</th>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Cuatrimestre</th>
+                <th style="padding:.45rem .6rem;text-align:center">Nota</th>
+                <th style="white-space:nowrap;padding:.45rem .6rem">Trayectoria</th>
+                <th style="padding:.45rem .6rem;text-align:center">Asistencia</th>
+                <th style="padding:.45rem .6rem;text-align:center">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${grades.map(g=>{
+                const ma=curso?.materias?.find(m=>m.id===g.materia_id);
+                const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
+                const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
+                return `<tr>
+                    <td style="font-weight:600;white-space:nowrap;padding:.4rem .6rem">${ma?esc(ma.nombre):'—'}</td>
+                    <td style="white-space:nowrap;padding:.4rem .6rem">${cuatriLabel(g.cuatrimestre)}</td>
+                    <td style="padding:.4rem .6rem;text-align:center"><span class="nota-val ${nc}" style="font-size:.82rem">${g.nota??'—'}</span></td>
+                    <td style="padding:.4rem .6rem">${g.concepto?`<span class="badge ${g.concepto==='TED'?'badge-red':g.concepto==='TEP'?'badge-amber':'badge-green'}" style="font-size:.68rem">${g.concepto}</span>`:'—'}</td>
+                    <td style="white-space:nowrap;padding:.4rem .6rem;text-align:center">${g.asistencia!=null?g.asistencia+'%':'—'}</td>
+                    <td style="padding:.4rem .6rem;text-align:center"><span class="badge ${estB}" style="font-size:.68rem">${g.estado}</span></td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+    </table>`;
 }
 function gcAutoFill(){
-    const nota=parseFloat(document.getElementById('gc-nota').value);
+    const nota=parseFloat(document.getElementById('gc-nota')?.value||'');
     const concEl=document.getElementById('gc-concepto');
     const estEl=document.getElementById('gc-estado');
-    if(isNaN(nota)||nota<1||nota>10){
-        concEl.value=''; estEl.value='pendiente'; return;
-    }
-    // Trayectoria: 1-3 → TED, 4-6 → TEP, 7-10 → TEA
-    concEl.value = nota<=3 ? 'TED' : nota<=6 ? 'TEP' : 'TEA';
-    // Estado: 1-3 → desaprobado, 4-6 → pendiente, 7-10 → aprobado
-    estEl.value  = nota<=3 ? 'desaprobado' : nota<=6 ? 'pendiente' : 'aprobado';
+    if(!concEl||!estEl)return;
+    if(isNaN(nota)||nota<1||nota>10){concEl.value='';estEl.value='pendiente';return;}
+    concEl.value=nota<=3?'TED':nota<=6?'TEP':'TEA';
+    estEl.value=nota<=3?'desaprobado':nota<=6?'pendiente':'aprobado';
 }
 async function saveGrade(){
-    // Asegurar que concepto y estado estén al día antes de guardar
     gcAutoFill();
-    const body={alumno_id:document.getElementById('gc-alumno').value,curso_id:document.getElementById('gc-curso').value,materia_id:document.getElementById('gc-materia').value,cuatrimestre:document.getElementById('gc-cuatri').value,nota:document.getElementById('gc-nota').value||null,concepto:document.getElementById('gc-concepto').value||null,asistencia:document.getElementById('gc-asist').value||null,estado:document.getElementById('gc-estado').value};
-    const err=document.getElementById('gc-err'); err.style.display='none';
-    if(!body.alumno_id||!body.curso_id||!body.materia_id){err.textContent='Seleccioná curso, materia y alumno.';err.style.display='block';return;}
+    const body={alumno_id:document.getElementById('gc-alumno')?.value,curso_id:document.getElementById('gc-curso')?.value,materia_id:document.getElementById('gc-materia')?.value,cuatrimestre:document.getElementById('gc-cuatri')?.value,nota:document.getElementById('gc-nota')?.value||null,concepto:document.getElementById('gc-concepto')?.value||null,asistencia:document.getElementById('gc-asist')?.value||null,estado:document.getElementById('gc-estado')?.value};
+    const err=document.getElementById('gc-err');if(err)err.style.display='none';
+    if(!body.alumno_id||!body.curso_id||!body.materia_id){if(err){err.textContent='Seleccioná curso, materia y alumno.';err.style.display='block';}return;}
     const r=await api('api/grades/grades.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const d=await r.json();
-    if(d.success){loadGradesTable();document.getElementById('gc-nota').value='';document.getElementById('gc-asist').value='';}
-    else{err.textContent=d.error||'Error';err.style.display='block';}
+    if(!d.success&&err){err.textContent=d.error||'Error';err.style.display='block';}
 }
 async function sendGradeEmail(alumnoId,nota,concepto,estado){
     const alumno=S.users.find(u=>u.id===alumnoId);
@@ -520,23 +618,13 @@ async function loadMyGrades(){
     if(qua) grades=grades.filter(g=>String(g.cuatrimestre)===qua);
     const el=document.getElementById('my-grades-tbl');
     if(!grades.length){el.innerHTML='<div class="empty" style="padding:1.5rem">Sin calificaciones registradas.</div>';return;}
-    el.innerHTML=`<div class="cards">${grades.map(g=>{
+    el.innerHTML=`<table><thead><tr><th>Materia</th><th>Curso</th><th>Cuatri</th><th>Nota</th><th>Concepto</th><th>Asistencia</th><th>Estado</th></tr></thead><tbody>${grades.map(g=>{
         const co=S.courses.find(c=>c.id===g.curso_id);
         const ma=co?.materias?.find(m=>m.id===g.materia_id);
-        const nc=g.nota!==null?(g.nota>=6?'tag-green':'tag-red'):'tag-amber';
+        const nc=g.nota!==null?(g.nota>=6?'nota-ok':'nota-fail'):'nota-pending';
         const estB=g.estado==='aprobado'?'badge-green':g.estado==='desaprobado'?'badge-red':'badge-amber';
-        return `<div class="card">
-            <h3>${ma?esc(ma.nombre):'—'}</h3>
-            <p>${co?co.anio+'° '+co.division:'—'}</p>
-            <div class="card-meta">
-                <span class="tag">${cuatriLabel(g.cuatrimestre)}</span>
-                <span class="tag ${nc}" style="font-weight:700">Nota: ${g.nota??'—'}</span>
-                ${g.concepto?`<span class="tag ${g.concepto==='TED'?'tag-red':g.concepto==='TEP'?'tag-amber':'tag-green'}">${g.concepto}</span>`:''}
-                ${g.asistencia!=null?`<span class="tag">Asist. ${g.asistencia}%</span>`:''}
-                <span class="badge ${estB}">${g.estado}</span>
-            </div>
-        </div>`;
-    }).join('')}</div>`;
+        return `<tr><td>${ma?ma.nombre:'—'}</td><td>${co?co.anio+'° '+co.division:'—'}</td><td>${cuatriLabel(g.cuatrimestre)}</td><td><span class="nota-val ${nc}">${g.nota??'—'}</span></td><td>${g.concepto||'—'}</td><td>${g.asistencia!=null?g.asistencia+'%':'—'}</td><td><span class="badge ${estB}">${g.estado}</span></td></tr>`;
+    }).join('')}</tbody></table>`;
 }
 
 // ── USERS ──────────────────────────────────────────────────────────────────
@@ -774,7 +862,7 @@ async function assignRP(id,pid){await api('api/rooms/rooms.php',{method:'PATCH',
 async function deleteRoom(id){if(!confirm('¿Eliminar esta aula?'))return;await api('api/rooms/rooms.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});loadRooms();}
 
 // ── Modal helpers ──────────────────────────────────────────────────────────
-function modal(html,maxW='28.125vw'){document.getElementById('modal-root').innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:${maxW}">${html}</div></div>`;}
+function modal(html,maxW='28.125vw'){document.getElementById('modal-root').innerHTML=`<div class="overlay" style="z-index:1200" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:${maxW}">${html}</div></div>`;}
 function closeModal(){document.getElementById('modal-root').innerHTML='';}
 
 // ── Utils ──────────────────────────────────────────────────────────────────
