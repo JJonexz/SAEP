@@ -1,1 +1,914 @@
-[]
+[
+    {
+        "id": "69f1321175c5b.64221019",
+        "sql_id": 1,
+        "nombre": "ANALISIS MATEMATICO",
+        "abreviatura": "ANMAT",
+        "resumen": "ANAL. MAT.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c77.61103753",
+        "sql_id": 2,
+        "nombre": "EDUCACIÓN ARTÍSTICA",
+        "abreviatura": "ART",
+        "resumen": "ED. ARTISTICA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c80.36853671",
+        "sql_id": 3,
+        "nombre": "ARTE",
+        "abreviatura": "ARTE",
+        "resumen": "ARTE",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c84.90455354",
+        "sql_id": 4,
+        "nombre": "BASE DE DATOS",
+        "abreviatura": "BADA",
+        "resumen": "BASE DE DATOS",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c85.33998441",
+        "sql_id": 5,
+        "nombre": "BIOLOGÍA",
+        "abreviatura": "BIO",
+        "resumen": "BIOLOGIA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c87.40905340",
+        "sql_id": 6,
+        "nombre": "CONSTRUCCIÓN CIUDADANA",
+        "abreviatura": "CDC",
+        "resumen": "CONST. CIUD.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c8c.43343887",
+        "sql_id": 7,
+        "nombre": "COMERCIALIZACION DE EMPRESAS TURISTICAS Y HOTELERA",
+        "abreviatura": "CETH",
+        "resumen": "COM. E. T. H.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c8d.27883760",
+        "sql_id": 8,
+        "nombre": "CONOCIMIENTO DE LOS MATERIALES",
+        "abreviatura": "COMA",
+        "resumen": "CON. DE MAT.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c8f.21620366",
+        "sql_id": 9,
+        "nombre": "DIRECCION DE EMPRESAS TURISTICAS Y HOTELERAS",
+        "abreviatura": "DEMTH",
+        "resumen": "DIR. E. T. Y H.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c91.43708917",
+        "sql_id": 10,
+        "nombre": "DIRECCION DE LA EJECUCION DE INSTALACIONES",
+        "abreviatura": "DEREI",
+        "resumen": "DIR. EJ. INST.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c92.61414460",
+        "sql_id": 11,
+        "nombre": "DERECHO DE TRABAJO",
+        "abreviatura": "DETRA",
+        "resumen": "DER. TRAB.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c95.81244461",
+        "sql_id": 12,
+        "nombre": "SISTEMA DIGITALES",
+        "abreviatura": "DIGI5",
+        "resumen": "SIST. DIG.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c96.82293578",
+        "sql_id": 13,
+        "nombre": "SISTEMA DIGITALES",
+        "abreviatura": "DIGI6",
+        "resumen": "SIST. DIG.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c98.22057623",
+        "sql_id": 14,
+        "nombre": "DIRECCION DE OBRA",
+        "abreviatura": "DIROB",
+        "resumen": "DIR. DE OBRA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c99.93741078",
+        "sql_id": 15,
+        "nombre": "ECONOMIA",
+        "abreviatura": "ECON",
+        "resumen": "ECONOMIA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c9b.75669373",
+        "sql_id": 16,
+        "nombre": "EDUCACIÓN FÍSICA",
+        "abreviatura": "EFI",
+        "resumen": "ED. FISICA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c9c.36772158",
+        "sql_id": 17,
+        "nombre": "EDUCACION FISICA",
+        "abreviatura": "EFIS",
+        "resumen": "ED. FISICA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c9e.66591467",
+        "sql_id": 18,
+        "nombre": "EMPRESAS HOTELERAS",
+        "abreviatura": "EMPHO",
+        "resumen": "EMP. HOT.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175c9f.92304466",
+        "sql_id": 19,
+        "nombre": "EJERCICIO PROFESIONAL DE LA CONSTRUCCION",
+        "abreviatura": "EPCON",
+        "resumen": "EJ. PR. CONS.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ca1.88974673",
+        "sql_id": 20,
+        "nombre": "ESTRUCTURAS",
+        "abreviatura": "EST6",
+        "resumen": "ESTRUCTURAS",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ca2.39083949",
+        "sql_id": 21,
+        "nombre": "ESTRUCTURAS",
+        "abreviatura": "EST7",
+        "resumen": "ESTRUCTURAS",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ca6.60194716",
+        "sql_id": 22,
+        "nombre": "ESPACIOS TURISTICOS DE LA ARGENTINA",
+        "abreviatura": "ESTA",
+        "resumen": "ESP. TUR. ARG.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ca8.62091490",
+        "sql_id": 23,
+        "nombre": "EVALUACION DE PROYECTOS",
+        "abreviatura": "EVPRO",
+        "resumen": "EV. DE PROY.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175caa.38533462",
+        "sql_id": 24,
+        "nombre": "FILOSOFIA",
+        "abreviatura": "FILO",
+        "resumen": "FILOSOFIA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cab.30438210",
+        "sql_id": 25,
+        "nombre": "FISICA",
+        "abreviatura": "FIS",
+        "resumen": "FISICA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cad.71939238",
+        "sql_id": 26,
+        "nombre": "DESARROLLO DE APLICACIONES WEB DINAMICAS",
+        "abreviatura": "FTDD6",
+        "resumen": "DES. A. W. D.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cae.98659922",
+        "sql_id": 27,
+        "nombre": "DESARROLLO DE APLICACIONES WEB ESTATICAS",
+        "abreviatura": "FTDE6",
+        "resumen": "DES. A. W. E.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cb0.34025102",
+        "sql_id": 28,
+        "nombre": "DIBUJO TECNOLOGICO",
+        "abreviatura": "FTDT4",
+        "resumen": "DIB. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cb1.86090044",
+        "sql_id": 29,
+        "nombre": "DOCUMENTACION TECNICA",
+        "abreviatura": "FTDT5",
+        "resumen": "DOC. TEC.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cb3.55473870",
+        "sql_id": 30,
+        "nombre": "INTERPRETACION DE ANTEPROYECTOS",
+        "abreviatura": "FTIA4",
+        "resumen": "INT. ANTEP.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cb5.21135441",
+        "sql_id": 31,
+        "nombre": "INTRODUCCION AL TURISMO Y OFERTA TURISTICA",
+        "abreviatura": "FTIT4",
+        "resumen": "INT. T. Y O. T.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cb6.80963082",
+        "sql_id": 32,
+        "nombre": "LABORATORIO DE APLICACIONES",
+        "abreviatura": "FTLA4",
+        "resumen": "LAB. DE AP.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cb8.21784614",
+        "sql_id": 33,
+        "nombre": "LABORATORIO DE DISEÑO DE DATOS",
+        "abreviatura": "FTLD5",
+        "resumen": "LAB. DIS. BD.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cb9.72953355",
+        "sql_id": 34,
+        "nombre": "LABORATORIO DE HARDWARE",
+        "abreviatura": "FTLH4",
+        "resumen": "LAB. HARD.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cba.52463636",
+        "sql_id": 35,
+        "nombre": "LABORATORIO DE PROGRAMACION",
+        "abreviatura": "FTLP4",
+        "resumen": "LAB. PROG.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cbc.64039108",
+        "sql_id": 36,
+        "nombre": "LABORATORIO DE PROGRAMACION",
+        "abreviatura": "FTLP5",
+        "resumen": "LAB. PROG.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cbd.15724583",
+        "sql_id": 37,
+        "nombre": "LABORATORIO DE PROGRAMACION III",
+        "abreviatura": "FTLP6",
+        "resumen": "LAB. PROG. III",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cbf.46158150",
+        "sql_id": 38,
+        "nombre": "LABORATORIO DE REDES INFORMATICAS",
+        "abreviatura": "FTLR5",
+        "resumen": "LAB. RED. INF.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cc0.84887041",
+        "sql_id": 39,
+        "nombre": "LABORATORIO DE SISTEMAS OPERATIVOS",
+        "abreviatura": "FTLS4",
+        "resumen": "LAB. SIST. OP.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cc2.11022711",
+        "sql_id": 40,
+        "nombre": "LABORATORIO DE DISEÑO WEB",
+        "abreviatura": "FTLW5",
+        "resumen": "LAB. DIS. WEB",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cc6.67070182",
+        "sql_id": 41,
+        "nombre": "MATERIALES DE OBRA",
+        "abreviatura": "FTMO5",
+        "resumen": "MAT. DE OBRA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cca.37348796",
+        "sql_id": 42,
+        "nombre": "LABORATORIO DE PROCESOS INDUSTRIALES",
+        "abreviatura": "FTPI6",
+        "resumen": "LAB. PROC. IND.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ccb.58658147",
+        "sql_id": 43,
+        "nombre": "PLANIFICACION DE OBRA",
+        "abreviatura": "FTPO4",
+        "resumen": "PLAN. OBRA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ccd.81713878",
+        "sql_id": 44,
+        "nombre": "PROYECTO",
+        "abreviatura": "FTPR4",
+        "resumen": "PROYECTO",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cce.20846997",
+        "sql_id": 45,
+        "nombre": "PROYECTO",
+        "abreviatura": "FTPR5",
+        "resumen": "PROYECTO",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cd0.72020224",
+        "sql_id": 46,
+        "nombre": "PROYECTO",
+        "abreviatura": "FTPR6",
+        "resumen": "PROYECTO",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cd1.79612692",
+        "sql_id": 47,
+        "nombre": "PROGRAMACION DE CIRCUITOS TURISTICOS",
+        "abreviatura": "FTPT5",
+        "resumen": "PRO. C. T.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cd3.36585833",
+        "sql_id": 48,
+        "nombre": "INVESTIGACION DE MERCADOS",
+        "abreviatura": "FTPT6",
+        "resumen": "INV. MERCADOS",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cd4.91270059",
+        "sql_id": 49,
+        "nombre": "RECURSOS LINGUISTICOS",
+        "abreviatura": "FTRL5",
+        "resumen": "REC. LING.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cd6.72102603",
+        "sql_id": 50,
+        "nombre": "RECURSOS LINGUISTICOS",
+        "abreviatura": "FTRL6",
+        "resumen": "REC. LING.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cd7.16887758",
+        "sql_id": 51,
+        "nombre": "RECURSOS LINGUISTICOS",
+        "abreviatura": "FTRL7",
+        "resumen": "REC. LING.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cd9.57986183",
+        "sql_id": 52,
+        "nombre": "SISTEMAS CONSTRUCTIVOS",
+        "abreviatura": "FTSC4",
+        "resumen": "SIST. CONST.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cda.27332840",
+        "sql_id": 53,
+        "nombre": "SISTEMAS CONSTRUCTIVOS",
+        "abreviatura": "FTSC5",
+        "resumen": "SIST. CONST.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cdc.38967313",
+        "sql_id": 54,
+        "nombre": "SISTEMAS CONSTRUCTIVOS",
+        "abreviatura": "FTSC6",
+        "resumen": "SIST. CONST.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cdd.31583815",
+        "sql_id": 55,
+        "nombre": "SISTEMAS DE INFORMACION CONTABLE",
+        "abreviatura": "FTSI4",
+        "resumen": "SIST. INF. CONT.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cdf.69285932",
+        "sql_id": 56,
+        "nombre": "SISTEMA DE INFORMACION CONTABLE",
+        "abreviatura": "FTSI5",
+        "resumen": "SIST. INF. CONT.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ce0.89915586",
+        "sql_id": 57,
+        "nombre": "TECNOLOGIA DE LA INFORMACION TURISTICA",
+        "abreviatura": "FTTT4",
+        "resumen": "TEC. INF. TUR.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ce2.33840482",
+        "sql_id": 58,
+        "nombre": "TECNOLOGIA DE LA INFORMACION TURISTICA",
+        "abreviatura": "FTTT5",
+        "resumen": "TEC. INF. TUR.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ce3.77537749",
+        "sql_id": 59,
+        "nombre": "PROGRAMACION DE CIRCUITOS TURISTICOS",
+        "abreviatura": "FTTT6",
+        "resumen": "PROG. CIR. TUR.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ce5.98623919",
+        "sql_id": 60,
+        "nombre": "SERVICIOS TURISTICOS",
+        "abreviatura": "FTTV4",
+        "resumen": "SERV. TUR.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ce8.33625398",
+        "sql_id": 61,
+        "nombre": "GEOGRAFÍA",
+        "abreviatura": "GEO",
+        "resumen": "GEOGRAFIA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cea.14974400",
+        "sql_id": 62,
+        "nombre": "GEOGRAFIA",
+        "abreviatura": "GEOS",
+        "resumen": "GEOGRAFIA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cec.24736089",
+        "sql_id": 63,
+        "nombre": "GEOGRAFIA",
+        "abreviatura": "GEOS5",
+        "resumen": "GEOGRAFIA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175ced.13127789",
+        "sql_id": 64,
+        "nombre": "HISTORIA",
+        "abreviatura": "HIS",
+        "resumen": "HISTORIA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cee.32976360",
+        "sql_id": 65,
+        "nombre": "HISTORIA",
+        "abreviatura": "HIS5",
+        "resumen": "HISTORIA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cf0.73582545",
+        "sql_id": 66,
+        "nombre": "INGLES",
+        "abreviatura": "ING",
+        "resumen": "INGLES",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cf1.66240329",
+        "sql_id": 67,
+        "nombre": "INGLES",
+        "abreviatura": "INGS",
+        "resumen": "INGLES",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cf3.20893130",
+        "sql_id": 68,
+        "nombre": "INSTALACIONES DE ACONDICIONAMIENTO DE AIRE",
+        "abreviatura": "INSAA",
+        "resumen": "INST. A.A.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cf7.67098936",
+        "sql_id": 69,
+        "nombre": "INSTALACIONES ELECTRICAS",
+        "abreviatura": "INSE",
+        "resumen": "INST. ELEC.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cf9.94827577",
+        "sql_id": 70,
+        "nombre": "INSTALACIONES SANITARIAS Y DE GAS",
+        "abreviatura": "INSG",
+        "resumen": "INST. S. Y G.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cfa.21545260",
+        "sql_id": 71,
+        "nombre": "INTRODUCCION AL PORTUGUES",
+        "abreviatura": "INTP",
+        "resumen": "INT. PORT.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cfc.29181264",
+        "sql_id": 72,
+        "nombre": "LITERATURA",
+        "abreviatura": "LITS",
+        "resumen": "LITERATURA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cfd.51581581",
+        "sql_id": 73,
+        "nombre": "MATEMÁTICA",
+        "abreviatura": "MAT",
+        "resumen": "MATEMATICA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175cfe.92864801",
+        "sql_id": 75,
+        "nombre": "MATEMATICA APLICADA",
+        "abreviatura": "MATAP",
+        "resumen": "MAT. APL.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d00.10760738",
+        "sql_id": 76,
+        "nombre": "MATEMATICA DISCRETA",
+        "abreviatura": "MATDI",
+        "resumen": "MAT. DISC.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d02.61145210",
+        "sql_id": 77,
+        "nombre": "MATEMATICA-CICLO SUPERIOR",
+        "abreviatura": "MATES",
+        "resumen": "MAT. CICLO SUP.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d03.54251274",
+        "sql_id": 78,
+        "nombre": "MODELOS Y SISTEMAS",
+        "abreviatura": "MOSI7",
+        "resumen": "MOD. Y SIST.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d05.28228930",
+        "sql_id": 79,
+        "nombre": "MODELOS Y SISTEMAS",
+        "abreviatura": "MOSIS",
+        "resumen": "MOD. Y SIST.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d06.80249838",
+        "sql_id": 80,
+        "nombre": "CIENCIAS NATURALES",
+        "abreviatura": "NAT",
+        "resumen": "CS. NAT.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d08.64402511",
+        "sql_id": 81,
+        "nombre": "ORGANIZACION Y METODOS",
+        "abreviatura": "ORMET",
+        "resumen": "ORG. Y MET.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d7d.36950169",
+        "sql_id": 82,
+        "nombre": "PATRIMONIO TURISTICO NACIONAL E INTERNACIONAL",
+        "abreviatura": "PATNI",
+        "resumen": "PAT. T. N. I.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d80.17435649",
+        "sql_id": 83,
+        "nombre": "PROYECTO, DISEÑO E IMPLEMENTACION DE SISTEMAS COMPUTACIONALES",
+        "abreviatura": "PDISC",
+        "resumen": "PROY. D. I. S. C.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d82.95957552",
+        "sql_id": 84,
+        "nombre": "PROYECTO DE DESARROLLO SOFTWARE PARA PLATAFORMAS MOVILES",
+        "abreviatura": "PDSPM",
+        "resumen": "PROY. D. S. P. M.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d84.38378349",
+        "sql_id": 85,
+        "nombre": "PROYECTO DE IMPLEMENTACION DE SITIOS WEB DINAMICOS",
+        "abreviatura": "PISWD",
+        "resumen": "PROY. I. S. W. D.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d85.69454799",
+        "sql_id": 86,
+        "nombre": "PRÁCTICAS DE LENGUAJE",
+        "abreviatura": "PLG",
+        "resumen": "PRAC. LENG.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d87.44571342",
+        "sql_id": 87,
+        "nombre": "EMPRENDIMIENTOS PRODUCTIVOS Y DESARROLLO LOCAL",
+        "abreviatura": "PPDLO",
+        "resumen": "EMP. P. D. L.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d89.83211868",
+        "sql_id": 88,
+        "nombre": "PRACTICAS PROFESIONALIZANTES DEL SECTOR CONSTRUCTIVO",
+        "abreviatura": "PPSCE",
+        "resumen": "PRAC. P. C.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d8a.64233043",
+        "sql_id": 89,
+        "nombre": "PRACTICAS PROFESIONALIZANTES DEL SECTOR INFORMATICO",
+        "abreviatura": "PPSIN",
+        "resumen": "PRAC. P. I.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d8c.26958530",
+        "sql_id": 90,
+        "nombre": "PRACTICAS PROFESIONALIZANTES DEL SECTOR SERVICIOS",
+        "abreviatura": "PPSST",
+        "resumen": "PRAC. P. T.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d8e.57487375",
+        "sql_id": 91,
+        "nombre": "PROYECTO FINAL",
+        "abreviatura": "PROFI",
+        "resumen": "PROY. FINAL",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d8f.73906881",
+        "sql_id": 92,
+        "nombre": "PROYECTO DE INSTALACIONES",
+        "abreviatura": "PROIN",
+        "resumen": "PROY. INST.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d90.17491723",
+        "sql_id": 93,
+        "nombre": "PSICOLOGIA",
+        "abreviatura": "PSIC",
+        "resumen": "PSICOLOGIA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d92.27572716",
+        "sql_id": 94,
+        "nombre": "POLITICA Y CIUDADANIA",
+        "abreviatura": "PYCS",
+        "resumen": "POL. Y CIUD.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d94.90486080",
+        "sql_id": 95,
+        "nombre": "QUIMICA",
+        "abreviatura": "QUI",
+        "resumen": "QUIMICA",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d98.30191718",
+        "sql_id": 96,
+        "nombre": "RESISTENCIA Y ENSAYOS DE MATERIALES",
+        "abreviatura": "REMAT",
+        "resumen": "RES. Y E. M.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d9a.91609017",
+        "sql_id": 97,
+        "nombre": "RELACIONES PUBLICAS, PROTOCOLO Y CEREMONIAL",
+        "abreviatura": "REPC",
+        "resumen": "REL. P. P. C.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d9b.64801026",
+        "sql_id": 98,
+        "nombre": "SALUD Y ADOLESCENCIA",
+        "abreviatura": "SADS",
+        "resumen": "SAL. Y AD.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d9d.26692249",
+        "sql_id": 99,
+        "nombre": "SEGURIDAD INFORMATICA",
+        "abreviatura": "SEINF",
+        "resumen": "SEG. INF.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175d9e.22949762",
+        "sql_id": 100,
+        "nombre": "SISTEMA DE GESTION Y AUTOGESTION",
+        "abreviatura": "SGEAU",
+        "resumen": "SIST. G. Y A.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175da2.25933627",
+        "sql_id": 101,
+        "nombre": "CIENCIAS SOCIALES",
+        "abreviatura": "SOC",
+        "resumen": "CS. SOCIALES",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175da4.29282042",
+        "sql_id": 102,
+        "nombre": "TECNOLOGIAS ELECTRONICAS",
+        "abreviatura": "TECEL",
+        "resumen": "TEC. ELEC.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175da5.49724933",
+        "sql_id": 103,
+        "nombre": "LENGUAJES TECNOLÓGICOS",
+        "abreviatura": "TLT1",
+        "resumen": "LENG. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175da7.33372013",
+        "sql_id": 104,
+        "nombre": "LENGUAJES TECNOLÓGICOS",
+        "abreviatura": "TLT2",
+        "resumen": "LENG. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175da8.33843176",
+        "sql_id": 105,
+        "nombre": "LENGUAJES TECNOLÓGICOS",
+        "abreviatura": "TLT3",
+        "resumen": "LENG. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175daa.65012433",
+        "sql_id": 106,
+        "nombre": "PROCEDIMIENTOS TECNICOS",
+        "abreviatura": "TPT1",
+        "resumen": "PROC. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175dab.29530215",
+        "sql_id": 107,
+        "nombre": "PROCEDIMIENTOS TECNICOS",
+        "abreviatura": "TPT2",
+        "resumen": "PROC. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175dad.37860824",
+        "sql_id": 108,
+        "nombre": "PROCEDIMIENTOS TECNICOS",
+        "abreviatura": "TPT3",
+        "resumen": "PROC. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175dae.85291546",
+        "sql_id": 109,
+        "nombre": "SISTEMAS TECNOLÓGICOS",
+        "abreviatura": "TST1",
+        "resumen": "SIST. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175db0.52829744",
+        "sql_id": 110,
+        "nombre": "SISTEMAS TECNOLÓGICOS",
+        "abreviatura": "TST2",
+        "resumen": "SIST. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175db2.76992568",
+        "sql_id": 111,
+        "nombre": "SISTEMAS TECNOLÓGICOS",
+        "abreviatura": "TST3",
+        "resumen": "SIST. TECN.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175db3.41394339",
+        "sql_id": 112,
+        "nombre": "FISICO-QUIMICA",
+        "abreviatura": "FIQUI",
+        "resumen": "FIS-QUIM.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175db5.44574305",
+        "sql_id": 113,
+        "nombre": "BASE DE DATOS",
+        "abreviatura": "BADA5",
+        "resumen": "BASE DE DATOS",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175db6.25732098",
+        "sql_id": 114,
+        "nombre": "SISTEMAS DIGITALES",
+        "abreviatura": "SIDI5",
+        "resumen": "SIST. DIG.",
+        "estado": "H"
+    },
+    {
+        "id": "69f1321175db8.58546900",
+        "sql_id": 116,
+        "nombre": "Preceptor",
+        "abreviatura": "PR",
+        "resumen": "",
+        "estado": "H"
+    }
+]
