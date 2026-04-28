@@ -15,4 +15,10 @@ function db_find_index(array $records, string $field, $value): int {
     foreach ($records as $i => $r) { if (isset($r[$field]) && $r[$field] === $value) return $i; }
     return -1;
 }
-function generate_id(): string { return uniqid('', true); }
+function generate_id(): int {
+    static $lastId = 0;
+    if ($lastId === 0) {
+        $id = 1000; // o leer máximo de JSONs
+    }
+    return ++$lastId;
+}
