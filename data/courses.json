@@ -1,121 +1,440 @@
 [
     {
-        "id": "69decefd951746.30670855",
+        "id": 1,
+        "nombre": "1°a",
+        "anio": 1,
+        "division": "A",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 2,
+        "nombre": "1°b",
+        "anio": 1,
+        "division": "B",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 3,
+        "nombre": "1°c",
+        "anio": 1,
+        "division": "C",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 4,
+        "nombre": "1°d",
+        "anio": 1,
+        "division": "D",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 5,
+        "nombre": "1°e",
+        "anio": 1,
+        "division": "E",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 6,
+        "nombre": "1°f",
+        "anio": 1,
+        "division": "F",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 7,
         "nombre": "2°a",
         "anio": 2,
-        "division": "a",
+        "division": "A",
         "turno": "Mañana",
-        "orientacion": "Ciclo Básico",
-        "materias": [
-            {
-                "id": "69decf0e36bd11.89893847",
-                "nombre": "Mate",
-                "profesor_id": "69dd9f8a7i1j2k.77889900"
-            },
-            {
-                "id": "69dffafda7ceb4.38701186",
-                "nombre": "Ingles",
-                "profesor_id": "69dd9f8a8j2k3l.88990011"
-            }
-        ],
-        "alumnos": [
-            "69dd9f8a9e3f4g.99001122",
-            "69dd9f8a8d2e3f.88990011"
-        ],
-        "profesores": [
-            "69dd9f8a8j2k3l.88990011"
-        ]
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
     },
     {
-        "id": "69decf09321e69.91034466",
+        "id": 8,
+        "nombre": "2°b",
+        "anio": 2,
+        "division": "B",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 9,
+        "nombre": "2°c",
+        "anio": 2,
+        "division": "C",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 10,
+        "nombre": "2°d",
+        "anio": 2,
+        "division": "D",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 11,
+        "nombre": "2°e",
+        "anio": 2,
+        "division": "E",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 12,
+        "nombre": "2°f",
+        "anio": 2,
+        "division": "F",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 13,
+        "nombre": "3°a",
+        "anio": 3,
+        "division": "A",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 14,
+        "nombre": "3°b",
+        "anio": 3,
+        "division": "B",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 15,
         "nombre": "3°c",
         "anio": 3,
-        "division": "c",
-        "turno": "Mañana",
-        "materias": [
-            {
-                "id": "69decf164ad7a3.54192330",
-                "nombre": "Ingles",
-                "profesor_id": "69dd9f8a7i1j2k.77889900"
-            },
-            {
-                "id": "69e020e0840ea9.10401214",
-                "nombre": "mete",
-                "profesor_id": null
-            }
-        ],
-        "alumnos": [
-            "69dd9f8a1w5x6y.11223344"
-        ],
-        "profesores": []
-    },
-    {
-        "id": "69debaa5a427e5.75618697",
-        "nombre": "7 C Prog",
-        "anio": 7,
-        "division": "c",
-        "turno": "Noche",
-        "orientacion": "Programación",
-        "materias": [
-            {
-                "id": "69e0211eb8f052.17157417",
-                "nombre": "mete",
-                "profesor_id": "69dd9f8a8j2k3l.88990011"
-            }
-        ],
-        "alumnos": [
-            "69dd9f8a5a9b0c.55667788",
-            "69dd9f8a7s1t2u.77889900",
-            "69dd9f8a3y7z8a.33445566",
-            "69dd9f8a7c1d2e.77889900",
-            "69dd9f8a9e3f4g.99001122",
-            "69dd9f8a0f4g5h.00112233"
-        ],
-        "profesores": [
-            "69dd9f8a8j2k3l.88990011",
-            "69dd9f8a3o7p8q.33445566"
-        ]
-    },
-    {
-        "id": "69debb5ebfcb34.71382345",
-        "nombre": "7 B prog",
-        "anio": 7,
-        "division": "B",
-        "turno": "Noche",
-        "orientacion": "Programación",
+        "division": "C",
+        "turno": "Tarde",
         "materias": [],
         "alumnos": [],
         "profesores": []
     },
     {
-        "id": "69debb8aef1b54.40366566",
-        "nombre": "2",
-        "anio": 2,
-        "division": "a",
+        "id": 16,
+        "nombre": "3°e",
+        "anio": 3,
+        "division": "E",
         "turno": "Mañana",
-        "orientacion": "Ciclo Básico",
         "materias": [],
         "alumnos": [],
         "profesores": []
     },
     {
-        "id": "69debef5be03a0.34008186",
-        "nombre": "5 a mmo",
-        "anio": 5,
+        "id": 17,
+        "nombre": "4°a",
+        "anio": 4,
         "division": "A",
         "turno": "Tarde",
-        "orientacion": "MMO",
         "materias": [],
         "alumnos": [],
         "profesores": []
     },
     {
-        "id": "69debf038ee9d3.01175061",
-        "nombre": "7 zzz",
+        "id": 18,
+        "nombre": "4°b",
+        "anio": 4,
+        "division": "B",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 19,
+        "nombre": "4°c",
+        "anio": 4,
+        "division": "C",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 20,
+        "nombre": "4°e",
+        "anio": 4,
+        "division": "E",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 21,
+        "nombre": "4°g",
+        "anio": 4,
+        "division": "G",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 22,
+        "nombre": "5°a",
+        "anio": 5,
+        "division": "A",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 23,
+        "nombre": "5°b",
+        "anio": 5,
+        "division": "B",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 24,
+        "nombre": "5°c",
+        "anio": 5,
+        "division": "C",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 25,
+        "nombre": "5°e",
+        "anio": 5,
+        "division": "E",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 26,
+        "nombre": "5°h",
+        "anio": 5,
+        "division": "H",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 27,
+        "nombre": "6°a",
+        "anio": 6,
+        "division": "A",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 28,
+        "nombre": "6°b",
+        "anio": 6,
+        "division": "B",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 29,
+        "nombre": "6°c",
+        "anio": 6,
+        "division": "C",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 30,
+        "nombre": "6°e",
+        "anio": 6,
+        "division": "E",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 33,
+        "nombre": "6°h",
+        "anio": 6,
+        "division": "H",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 34,
+        "nombre": "7°b",
         "anio": 7,
-        "division": "z",
-        "turno": "Noche",
-        "orientacion": "Turismo",
+        "division": "B",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 36,
+        "nombre": "7°h",
+        "anio": 7,
+        "division": "H",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 37,
+        "nombre": "7°a",
+        "anio": 7,
+        "division": "A",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 38,
+        "nombre": "2°g",
+        "anio": 2,
+        "division": "G",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 39,
+        "nombre": "7°e",
+        "anio": 7,
+        "division": "E",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 40,
+        "nombre": "1°g",
+        "anio": 1,
+        "division": "G",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 41,
+        "nombre": "3°d",
+        "anio": 3,
+        "division": "D",
+        "turno": "Mañana",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 42,
+        "nombre": "4°d",
+        "anio": 4,
+        "division": "D",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 43,
+        "nombre": "7°c",
+        "anio": 7,
+        "division": "C",
+        "turno": "Vespertino",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 44,
+        "nombre": "3°f",
+        "anio": 3,
+        "division": "F",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 45,
+        "nombre": "3°g",
+        "anio": 3,
+        "division": "G",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 46,
+        "nombre": "7°f",
+        "anio": 7,
+        "division": "F",
+        "turno": "Tarde",
+        "materias": [],
+        "alumnos": [],
+        "profesores": []
+    },
+    {
+        "id": 47,
+        "nombre": "1°p",
+        "anio": 1,
+        "division": "P",
+        "turno": "",
         "materias": [],
         "alumnos": [],
         "profesores": []
