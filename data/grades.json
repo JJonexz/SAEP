@@ -219,5 +219,31 @@
         "estado": "aprobado",
         "fecha": "2026-04-27",
         "registrado_por": "69dd7a15948ce1.75245546"
+    },
+    {
+        "id": "69effa03b1f073.38384631",
+        "alumno_id": "69dd9f8a1w5x6y.11223344",
+        "curso_id": "69decf09321e69.91034466",
+        "materia_id": "69decf164ad7a3.54192330",
+        "cuatrimestre": 1,
+        "nota": 7,
+        "concepto": "TEA",
+        "asistencia": 80,
+        "estado": "aprobado",
+        "fecha": "2026-04-28",
+        "registrado_por": "69dd7a15948ce1.75245546"
+    },
+    {
+        "id": "69effa7beed225.28756113",
+        "alumno_id": "69dd9f8a1w5x6y.11223344",
+        "curso_id": "69decf09321e69.91034466",
+        "materia_id": "69decf164ad7a3.54192330",
+        "cuatrimestre": 2,
+        "nota": 7,
+        "concepto": "TEA",
+        "asistencia": 80,
+        "estado": "aprobado",
+        "fecha": "2026-04-28",
+        "registrado_por": "69dd7a15948ce1.75245546"
     }
 ]

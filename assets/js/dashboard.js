@@ -317,11 +317,28 @@ function renderGradesCards(){
             <h3>${c.anio}° ${c.division}</h3>
             <p>${esc(c.nombre)}<br><span style="color:var(--muted)">Turno: ${c.turno}</span><br><span style="color:var(--muted);font-size:.7rem">${c.orientacion||''}</span></p>
             <div class="card-meta"><span class="badge badge-blue">${c.alumnos?.length||0} alumnos</span><span class="badge badge-gray">${c.materias?.length||0} materias</span></div>
-            <div class="card-actions"><button class="btn btn-outline" onclick='openGradesCurso(${JSON.stringify(c)})'>Ver alumnos</button></div>
+            <div class="card-actions"><button class="btn btn-outline" onclick="openGradesCurso('${c.id}')">Ver alumnos</button></div>
         </div>`;
     }).join('');
 }
-function openGradesCurso(curso){
+// ── Modal stack (para anidar modales sin perder el anterior) ──
+const MSTACK=[];
+function mpush(html,maxW='28.125vw'){
+    MSTACK.push({html,maxW});
+    _mrender();
+}
+function mpop(){
+    MSTACK.pop();
+    if(MSTACK.length){_mrender();}else{document.getElementById('modal-root').innerHTML='';}
+}
+function _mrender(){
+    const t=MSTACK[MSTACK.length-1];
+    document.getElementById('modal-root').innerHTML=`<div class="overlay" onclick="if(event.target===this)mpop()"><div class="modal" style="max-width:${t.maxW}">${t.html}</div></div>`;
+}
+
+function openGradesCurso(cursoId){
+    const curso=S.courses.find(c=>c.id===cursoId);
+    if(!curso)return;
     GS.activeCurso=curso;
     const alumnos=S.users.filter(u=>curso.alumnos?.includes(u.id));
     const rows=alumnos.length
@@ -331,36 +348,57 @@ function openGradesCurso(curso){
                 <td>${esc(String(u.dni||'—'))}</td>
                 <td style="text-align:right">
                     <button class="btn btn-navy" style="font-size:.72rem;padding:.3rem .75rem"
-                        onclick="openNotasModalStacked('${u.id}','${esc((u.apellido||'')+' '+(u.nombre||''))}','${curso.id}')">
+                        onclick="openNotasDesdeAlumnos('${u.id}','${esc((u.apellido||'')+' '+(u.nombre||''))}','${curso.id}')">
                         Ver Notas
                     </button>
                 </td>
             </tr>`).join('')
         : '<tr><td colspan="4"><div class="empty" style="padding:1rem">Sin alumnos en este curso.</div></td></tr>';
 
-    // Crear modal propio apilable en modal-root-2
-    let root2=document.getElementById('modal-root-2');
-    if(!root2){root2=document.createElement('div');root2.id='modal-root-2';document.body.appendChild(root2);}
-    root2.innerHTML=`<div class="overlay" style="z-index:1100" onclick="if(event.target===this)closeModal2()">
-        <div class="modal" style="max-width:min(860px,94vw)">
-            <h3>${esc(curso.anio)}° ${esc(curso.division)} — ${esc(curso.nombre)}</h3>
-            <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Turno: ${esc(curso.turno)} · ${esc(curso.orientacion||'')}</p>
-            <div class="tbl-wrap">
-                <table>
-                    <thead><tr><th>Alumno</th><th>Curso</th><th>DNI</th><th style="text-align:right"></th></tr></thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            </div>
-            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal2()">Cerrar</button></div>
+    mpush(`
+        <h3>${esc(String(curso.anio))}° ${esc(curso.division)} — ${esc(curso.nombre)}</h3>
+        <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Turno: ${esc(curso.turno)} · ${esc(curso.orientacion||'')}</p>
+        <div class="tbl-wrap">
+            <table>
+                <thead><tr><th>Alumno</th><th>Curso</th><th>DNI</th><th style="text-align:right"></th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
         </div>
-    </div>`;
+        <div class="modal-footer"><button class="btn btn-outline" onclick="mpop()">Cerrar</button></div>
+    `,'min(860px,94vw)');
 }
-function closeModal2(){const r=document.getElementById('modal-root-2');if(r)r.innerHTML='';}
 
-// openNotasModal apilado: usa modal() normal (z-index:1200 por defecto overlay) encima del modal2
-function openNotasModalStacked(alumnoId, alumnoNombre, cursoId){
-    // modal() normal abre en modal-root con z-index superior al overlay de modal-root-2
-    openNotasModal(alumnoId, alumnoNombre, cursoId);
+async function openNotasDesdeAlumnos(alumnoId, alumnoNombre, cursoId){
+    const curso=S.courses.find(c=>c.id===cursoId);
+    const materias=curso?.materias||[];
+    const matSelectOpts=materias.length
+        ? '<option value="">Todas las materias</option>'+materias.map(m=>`<option value="${m.id}">${esc(m.nombre)}</option>`).join('')
+        : '<option value="">Sin materias</option>';
+
+    mpush(`
+        <div style="display:flex;flex-direction:column;gap:.85rem;width:100%">
+            <div style="display:flex;align-items:center;gap:.75rem">
+                <div style="width:36px;height:36px;flex-shrink:0;background:var(--navy-faint);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy);font-size:.9rem">${esc(alumnoNombre.charAt(0))}</div>
+                <div>
+                    <div style="font-weight:700;font-size:1rem;color:var(--text)">${esc(alumnoNombre)}</div>
+                    <div style="font-size:.75rem;color:var(--muted)">${curso?curso.anio+'° '+curso.division+' — '+curso.nombre:'Sin curso'}</div>
+                </div>
+                <div style="margin-left:auto;min-width:200px">
+                    <select id="notas-mat-select" onchange="renderNotasTabla('${alumnoId}','${cursoId}')"
+                        style="width:100%;font-family:var(--font);font-size:.78rem;padding:.4rem .65rem;border:1px solid var(--border);border-radius:var(--radius);color:var(--text);background:var(--white)">
+                        ${matSelectOpts}
+                    </select>
+                </div>
+            </div>
+            <div id="notas-tabla-wrap">
+                <div class="empty" style="padding:2rem;text-align:center;color:var(--muted);font-size:.82rem">Seleccioná una materia para ver las notas.</div>
+            </div>
+            <div class="modal-footer" style="padding-top:.25rem">
+                <button class="btn btn-outline" onclick="mpop()">Cerrar</button>
+            </div>
+        </div>
+    `,'min(1200px,94vw)');
+    if(materias.length) renderNotasTabla(alumnoId, cursoId);
 }
 
 // Modal "Cargar nota" (mismo contenido que antes, ahora como modal)
@@ -440,10 +478,16 @@ async function saveGradeModal(){
     gcmAutoFill();
     const body={alumno_id:document.getElementById('gcm-alumno').value,curso_id:document.getElementById('gcm-curso').value,materia_id:document.getElementById('gcm-materia').value,cuatrimestre:document.getElementById('gcm-cuatri').value,nota:document.getElementById('gcm-nota').value||null,concepto:document.getElementById('gcm-concepto').value||null,asistencia:document.getElementById('gcm-asist').value||null,estado:document.getElementById('gcm-estado').value};
     const err=document.getElementById('gcm-err');err.style.display='none';
-    if(!body.alumno_id||!body.curso_id||!body.materia_id){err.textContent='Seleccioná curso, materia y alumno.';err.style.display='block';return;}
+    const faltantes=[];
+    if(!body.curso_id)   faltantes.push('curso');
+    if(!body.materia_id) faltantes.push('materia');
+    if(!body.alumno_id)  faltantes.push('alumno');
+    if(!body.nota)       faltantes.push('nota');
+    if(!body.asistencia) faltantes.push('asistencia');
+    if(faltantes.length){err.textContent='Datos incompletos: falta '+faltantes.join(', ')+'.';err.style.display='block';return;}
     const r=await api('api/grades/grades.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const d=await r.json();
-    if(d.success){closeModal();}
+    if(d.success){volverAGestion();}
     else{err.textContent=d.error||'Error';err.style.display='block';}
 }
 
@@ -1051,7 +1095,7 @@ async function sendMail() {
     btn.disabled    = true;
     btn.textContent = 'Enviando...';
 
-    const r = await api('api/mail/send.debug.php', {
+    const r = await api('api/mail/send.php', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ ids: [...ML.selected], subject, message }),
