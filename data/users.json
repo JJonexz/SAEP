@@ -488,5 +488,19 @@
         "role": "alumno",
         "status": "approved",
         "manual": true
+    },
+    {
+        "id": "69eff151aabbb4.37550862",
+        "github_id": null,
+        "username": "manual_69eff151ab5280.80421301",
+        "avatar": null,
+        "email": "niquinfaulkner@gmail.com",
+        "nombre": "Nicolas",
+        "apellido": "Faulkner",
+        "dni": "12356326",
+        "telefono": "",
+        "role": "preceptor",
+        "status": "approved",
+        "manual": true
     }
 ]

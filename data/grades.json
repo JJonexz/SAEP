@@ -206,5 +206,18 @@
         "estado": "pendiente",
         "fecha": "2026-04-15",
         "registrado_por": "69cc5fe70971b9.26938206"
+    },
+    {
+        "id": "69eff3bad1a308.41582753",
+        "alumno_id": "69dd9f8a1w5x6y.11223344",
+        "curso_id": "69decf09321e69.91034466",
+        "materia_id": "69decf164ad7a3.54192330",
+        "cuatrimestre": 1,
+        "nota": 8,
+        "concepto": "TEA",
+        "asistencia": 90,
+        "estado": "aprobado",
+        "fecha": "2026-04-27",
+        "registrado_por": "69dd7960c7bad6.18044340"
     }
 ]

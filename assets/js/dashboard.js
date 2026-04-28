@@ -946,7 +946,7 @@ async function sendMail() {
     btn.disabled    = true;
     btn.textContent = 'Enviando...';
 
-    const r = await api('api/mail/send.php', {
+    const r = await api('api/mail/send.debug.php', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ ids: [...ML.selected], subject, message }),
