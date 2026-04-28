@@ -13,8 +13,9 @@ define('USERS_FILE',    DATA_DIR . 'users.json');
 define('COURSES_FILE',  DATA_DIR . 'courses.json');
 define('SUBJECTS_FILE', DATA_DIR . 'subjects.json');
 define('ROOMS_FILE',    DATA_DIR . 'rooms.json');
-define('GRADES_FILE',   DATA_DIR . 'grades.json');
-define('WORKS_FILE',    DATA_DIR . 'works.json');
+define('GRADES_FILE',    DATA_DIR . 'grades.json');
+define('WORKS_FILE',     DATA_DIR . 'works.json');
+define('CONTACTS_FILE',  DATA_DIR . 'contacts.json');
 
 define('ROLES', ['admin', 'director', 'subdirector', 'profesor', 'preceptor', 'alumno']);
 define('ROLES_STAFF', ['admin', 'director', 'subdirector', 'profesor', 'preceptor']);
