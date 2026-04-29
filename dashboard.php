@@ -180,12 +180,12 @@ $role=$user['role'];
     </div>
     <div class="pb">
         <div class="tbl-wrap" id="users-tbl"></div>
-        <div id="users-pagination" style="display:flex;justify-content:space-between;align-items:center;padding-top:1rem;margin-top:1rem;border-top:1px solid var(--border);">
-            <div style="font-size:.75rem;color:var(--muted)" id="users-page-info"></div>
-            <div class="btn-group">
-                <button class="btn btn-outline" id="users-prev-btn" onclick="prevUsersPage()" style="font-size:.7rem;padding:.28rem .55rem">Anterior</button>
-                <button class="btn btn-outline" id="users-next-btn" onclick="nextUsersPage()" style="font-size:.7rem;padding:.28rem .55rem">Siguiente</button>
+        <div id="users-pagination" style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0.75rem;padding-top:1.5rem;margin-top:1.5rem;border-top:1px solid var(--border);">
+            <div class="btn-group" style="gap:0.5rem">
+                <button class="btn btn-navy" id="users-prev-btn" onclick="prevUsersPage()" style="font-size:.9rem;padding:.5rem 1.2rem;min-width:120px">← Anterior</button>
+                <button class="btn btn-navy" id="users-next-btn" onclick="nextUsersPage()" style="font-size:.9rem;padding:.5rem 1.2rem;min-width:120px">Siguiente →</button>
             </div>
+            <div style="font-size:.82rem;color:var(--muted);font-weight:500" id="users-page-info"></div>
         </div>
     </div>
 </div>
