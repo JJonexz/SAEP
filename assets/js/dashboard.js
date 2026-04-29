@@ -20,20 +20,21 @@ async function api(url,opts={}){
 
 // ── INICIO ─────────────────────────────────────────────────────────────────
 async function loadInicio(){
-    const [cRes,rRes]=await Promise.all([api('api/courses/courses.php'),api('api/rooms/rooms.php')]);
-    S.courses=await cRes.json(); S.rooms=await rRes.json();
-    let usersData=[];
-    if(['admin','director','subdirector'].includes(ROLE)){const uRes=await api('api/admin/users.php');usersData=await uRes.json();S.users=usersData;}
-    const pending=usersData.filter(u=>u.status==='pending_approval');
-    const approved=usersData.filter(u=>u.status==='approved');
+    let stats = {users: {approved: '—', pending: 0}, courses: '—', rooms: '—'};
+    if(['admin','director','subdirector'].includes(ROLE)){
+        try {
+            const res = await api('api/admin/stats.php');
+            stats = await res.json();
+        } catch(e) {}
+    }
     document.getElementById('stats-row').innerHTML=`
-        <div class="stat"><div class="stat-val">${approved.length||'—'}</div><div class="stat-lbl">Usuarios activos</div></div>
-        <div class="stat"><div class="stat-val" style="color:${pending.length>0?'var(--amber)':'var(--navy)'}">${pending.length}</div><div class="stat-lbl">Pendientes aprobación</div></div>
-        <div class="stat"><div class="stat-val">${S.courses.length}</div><div class="stat-lbl">Cursos</div></div>
-        <div class="stat"><div class="stat-val">${S.rooms.length}</div><div class="stat-lbl">Aulas</div></div>`;
+        <div class="stat"><div class="stat-val">${stats.users.approved}</div><div class="stat-lbl">Usuarios activos</div></div>
+        <div class="stat"><div class="stat-val" style="color:${stats.users.pending>0?'var(--amber)':'var(--navy)'}">${stats.users.pending}</div><div class="stat-lbl">Pendientes aprobación</div></div>
+        <div class="stat"><div class="stat-val">${stats.courses}</div><div class="stat-lbl">Cursos</div></div>
+        <div class="stat"><div class="stat-val">${stats.rooms}</div><div class="stat-lbl">Aulas</div></div>`;
     const alertsEl=document.getElementById('pending-alerts');
-    if(pending.length>0&&['admin','director','subdirector'].includes(ROLE)){
-        alertsEl.innerHTML=`<div class="alert alert-amber">Hay <strong>${pending.length}</strong> usuario(s) pendientes de aprobación. <a href="#" onclick="nav('users');document.getElementById('uf-status').value='pending_approval';filterUsers()" style="color:var(--amber);font-weight:600">Revisar →</a></div>`;
+    if(stats.users.pending>0&&['admin','director','subdirector'].includes(ROLE)){
+        alertsEl.innerHTML=`<div class="alert alert-amber">Hay <strong>${stats.users.pending}</strong> usuario(s) pendientes de aprobación. <a href="#" onclick="nav('users');document.getElementById('uf-status').value='pending_approval';filterUsers()" style="color:var(--amber);font-weight:600">Revisar →</a></div>`;
     } else alertsEl.innerHTML='';
 }
 
@@ -674,15 +675,51 @@ async function loadMyGrades(){
 }
 
 // ── USERS ──────────────────────────────────────────────────────────────────
-async function loadUsers(){const r=await api('api/admin/users.php');S.users=await r.json();renderUsersTable();}
-function filterUsers(){renderUsersTable();}
+let U_PAGE = 1;
+const U_LIMIT = 50;
+
+async function loadUsers(){if(!S.users.length){document.getElementById('users-tbl').innerHTML='<div class="empty">Cargando...</div>';const r=await api('api/admin/users.php');S.users=await r.json();}renderUsersTable();}
+function filterUsers(){ U_PAGE = 1; renderUsersTable(); }
+function nextUsersPage(){ U_PAGE++; renderUsersTable(); }
+function prevUsersPage(){ if(U_PAGE>1) { U_PAGE--; renderUsersTable(); } }
+
 function renderUsersTable(){
     const f=document.getElementById('uf-status')?.value||'';
-    const list=f?S.users.filter(u=>u.status===f):S.users;
+    const q=document.getElementById('uf-search')?.value.toLowerCase().trim()||'';
+    
+    let list=S.users;
+    if(f) list=list.filter(u=>u.status===f);
+    if(q) {
+        list=list.filter(u=>{
+            const name = ((u.apellido||'') + ' ' + (u.nombre||'')).toLowerCase();
+            const email = (u.email||'').toLowerCase();
+            const dni = String(u.dni||'');
+            const user = (u.username||'').toLowerCase();
+            return name.includes(q) || email.includes(q) || dni.includes(q) || user.includes(q);
+        });
+    }
+
+    const totalPages = Math.ceil(list.length / U_LIMIT) || 1;
+    if (U_PAGE > totalPages) U_PAGE = totalPages;
+
+    const start = (U_PAGE - 1) * U_LIMIT;
+    const paginatedList = list.slice(start, start + U_LIMIT);
+
     const stB={pending_profile:'badge-gray',pending_approval:'badge-amber',approved:'badge-green',rejected:'badge-red'};
     const stL={pending_profile:'Sin perfil',pending_approval:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    if(!list.length){document.getElementById('users-tbl').innerHTML='<div class="empty">Sin usuarios.</div>';return;}
-    document.getElementById('users-tbl').innerHTML=`<div class="cards">${list.map(u=>`
+    
+    const pageInfo = document.getElementById('users-page-info');
+    const prevBtn = document.getElementById('users-prev-btn');
+    const nextBtn = document.getElementById('users-next-btn');
+    
+    if(pageInfo) {
+        pageInfo.textContent = list.length ? `Mostrando ${start + 1} - ${Math.min(start + U_LIMIT, list.length)} de ${list.length} (Página ${U_PAGE} de ${totalPages})` : 'Sin resultados';
+        prevBtn.disabled = U_PAGE === 1;
+        nextBtn.disabled = U_PAGE === totalPages;
+    }
+
+    if(!paginatedList.length){document.getElementById('users-tbl').innerHTML='<div class="empty">Sin usuarios.</div>';return;}
+    document.getElementById('users-tbl').innerHTML=`<div class="cards">${paginatedList.map(u=>`
         <div class="card">
             <h3>${u.apellido||''} ${u.nombre||''}</h3>
             <p>@${u.username}</p>
@@ -1078,7 +1115,7 @@ async function deleteContact(alumnoId, contactId){
 
 // ── COURSES ────────────────────────────────────────────────────────────────
 async function loadCourses(){
-    const r=await api('api/courses/courses.php');S.courses=await r.json();
+    if(!S.courses.length){const r=await api('api/courses/courses.php');S.courses=await r.json();}
     if(!S.users.length){const ur=await api('api/admin/users.php');S.users=await ur.json();}
     renderCoursesCards();
 }
@@ -1395,5 +1432,3 @@ async function sendMail() {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 loadInicio();
-if(['admin','director','subdirector'].includes(ROLE)){api('api/admin/users.php').then(r=>r.json()).then(u=>S.users=u);}
-api('api/courses/courses.php').then(r=>r.json()).then(c=>S.courses=c);

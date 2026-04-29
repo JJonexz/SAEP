@@ -8,7 +8,18 @@ $me=$_method=$_SERVER['REQUEST_METHOD'];
 $me=require_approved();
 $method=$_SERVER['REQUEST_METHOD'];
 
-if ($method==='GET') { echo json_encode(db_read(COURSES_FILE)); exit; }
+if ($method==='GET') { 
+    $courses = db_read(COURSES_FILE);
+    if (isset($_GET['lite']) && $_GET['lite'] === 'true') {
+        foreach ($courses as &$c) {
+            unset($c['alumnos']);
+            unset($c['profesores']);
+            unset($c['materias']);
+        }
+    }
+    echo json_encode($courses); 
+    exit; 
+}
 
 require_role(['admin','director','subdirector']);
 $body=json_decode(file_get_contents('php://input'),true);
