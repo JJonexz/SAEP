@@ -35,14 +35,15 @@ if ($method === 'POST') {
         if ($u['dni'] === $dni) { http_response_code(409); echo json_encode(['error'=>'DNI ya registrado']); exit; }
     }
 
+    $newId = generate_id();
     $users[] = [
-        'id'=>generate_id(),'github_id'=>null,'username'=>$username ?: 'manual_'.generate_id(),
+        'id'=>$newId,'github_id'=>null,'username'=>$username ?: 'manual_'.generate_id(),
         'avatar'=>null,'email'=>$email,'nombre'=>$nombre,'apellido'=>$apellido,
         'dni'=>$dni,'telefono'=>$body['telefono']??null,
         'role'=>$role,'status'=>'approved','manual'=>true,
     ];
     db_write(USERS_FILE, $users);
-    echo json_encode(['success'=>true]); exit;
+    echo json_encode(['success'=>true,'id'=>$newId]); exit;
 }
 
 if ($method === 'PATCH') {
