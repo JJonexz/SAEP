@@ -1,0 +1,346 @@
+/* ═══════════════════════════════════════════════════════════════════
+   SAEP — Módulo de Métricas
+   Se integra con el sistema de variables CSS existente (global.css)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Layout principal del panel métricas ──────────────────────────── */
+#panel-metrics {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+#panel-metrics.visible {
+    display: flex;
+}
+
+/* ── Tabs de navegación interna ──────────────────────────────────── */
+.metrics-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
+    padding: 0 1.5rem;
+    flex-shrink: 0;
+    overflow-x: auto;
+}
+.metrics-nav::-webkit-scrollbar { height: 0; }
+
+.metrics-tab {
+    padding: .65rem 1.1rem;
+    font-family: var(--font);
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--muted);
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .15s, border-color .15s;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+.metrics-tab:hover { color: var(--text); }
+.metrics-tab.active {
+    color: var(--navy);
+    border-bottom-color: var(--navy);
+}
+
+/* ── Contenido scrolleable ───────────────────────────────────────── */
+.metrics-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: #f5f6f8;
+}
+
+/* ── Secciones internas ──────────────────────────────────────────── */
+.metrics-section { display: none; }
+.metrics-section.active { display: block; }
+
+/* ── Cards de KPI ────────────────────────────────────────────────── */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+}
+.kpi-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .15s;
+}
+.kpi-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,.07); }
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--kpi-color, var(--navy));
+}
+.kpi-card.green  { --kpi-color: #16a34a; }
+.kpi-card.red    { --kpi-color: #dc2626; }
+.kpi-card.amber  { --kpi-color: #d97706; }
+.kpi-card.blue   { --kpi-color: #2563eb; }
+.kpi-card.purple { --kpi-color: #7c3aed; }
+.kpi-card.teal   { --kpi-color: #0d9488; }
+
+.kpi-label {
+    font-size: .68rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: .4rem;
+}
+.kpi-value {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    font-family: var(--font);
+}
+.kpi-value.small { font-size: 1.2rem; }
+.kpi-sub {
+    font-size: .7rem;
+    color: var(--muted);
+    margin-top: .3rem;
+}
+
+/* ── Gráficos ─────────────────────────────────────────────────────── */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+}
+.charts-grid.single { grid-template-columns: 1fr; }
+.charts-grid.thirds { grid-template-columns: 1fr 1fr 1fr; }
+
+@media (max-width: 900px) {
+    .charts-grid, .charts-grid.thirds { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.chart-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem 1.25rem;
+}
+.chart-title {
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: .9rem;
+}
+.chart-wrap {
+    position: relative;
+    height: 220px;
+}
+.chart-wrap.tall { height: 300px; }
+.chart-wrap.short { height: 160px; }
+
+/* ── Highlights (mejor/peor curso, etc.) ─────────────────────────── */
+.highlights-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-bottom: 1.25rem;
+}
+.highlight-chip {
+    background: var(--navy-faint, #eef1f8);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: .3rem .85rem;
+    font-size: .73rem;
+    font-weight: 600;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+.highlight-chip span.hl-label {
+    color: var(--muted);
+    font-weight: 500;
+}
+
+/* ── Tabla de ranking ─────────────────────────────────────────────── */
+.metrics-table-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+}
+.metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .78rem;
+}
+.metrics-table th {
+    padding: .6rem .9rem;
+    text-align: left;
+    font-size: .67rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    background: #f9fafb;
+    border-bottom: 1px solid var(--border);
+}
+.metrics-table td {
+    padding: .6rem .9rem;
+    color: var(--text);
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+.metrics-table tr:last-child td { border-bottom: none; }
+.metrics-table tr:hover td { background: #fafafa; }
+
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: .67rem;
+    font-weight: 700;
+    background: var(--border);
+    color: var(--text2);
+}
+.rank-badge.gold   { background: #fef3c7; color: #92400e; }
+.rank-badge.silver { background: #f1f5f9; color: #475569; }
+.rank-badge.bronze { background: #fde8d8; color: #9a3412; }
+
+/* ── Barra de progreso inline ─────────────────────────────────────── */
+.prog-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.prog-bar {
+    flex: 1;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.prog-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--navy);
+    transition: width .4s ease;
+}
+.prog-bar-fill.green  { background: #16a34a; }
+.prog-bar-fill.amber  { background: #d97706; }
+.prog-bar-fill.red    { background: #dc2626; }
+
+/* ── Filtros ─────────────────────────────────────────────────────── */
+.metrics-filters {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+.metrics-filters label {
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+.metrics-filters select {
+    font-family: var(--font);
+    font-size: .78rem;
+    padding: .38rem .65rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    background: var(--white);
+    cursor: pointer;
+}
+
+/* ── Estado de carga ─────────────────────────────────────────────── */
+.metrics-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+    gap: .75rem;
+}
+.metrics-spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--navy);
+    border-radius: 50%;
+    animation: metrics-spin .7s linear infinite;
+}
+@keyframes metrics-spin { to { transform: rotate(360deg); } }
+
+.metrics-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    color: #b91c1c;
+    font-size: .82rem;
+    margin-bottom: 1rem;
+}
+
+/* ── Sección header ─────────────────────────────────────────────── */
+.metrics-sec-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .85rem;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+.metrics-sec-title {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+/* ── Badge de estado ─────────────────────────────────────────────── */
+.estado-badge {
+    display: inline-block;
+    padding: .15rem .55rem;
+    border-radius: 12px;
+    font-size: .67rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.estado-badge.aprobado   { background: #dcfce7; color: #15803d; }
+.estado-badge.desaprobado{ background: #fee2e2; color: #b91c1c; }
+.estado-badge.pendiente  { background: #fef9c3; color: #92400e; }
+
+/* ── Nota pill ───────────────────────────────────────────────────── */
+.nota-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    font-size: .82rem;
+    font-weight: 700;
+    background: #f3f4f6;
+    color: var(--text);
+}
+.nota-pill.alta  { background: #dcfce7; color: #15803d; }
+.nota-pill.media { background: #fef9c3; color: #92400e; }
+.nota-pill.baja  { background: #fee2e2; color: #b91c1c; }
