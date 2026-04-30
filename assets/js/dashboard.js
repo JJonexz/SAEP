@@ -20,20 +20,21 @@ async function api(url,opts={}){
 
 // ── INICIO ─────────────────────────────────────────────────────────────────
 async function loadInicio(){
-    const [cRes,rRes]=await Promise.all([api('api/courses/courses.php'),api('api/rooms/rooms.php')]);
-    S.courses=await cRes.json(); S.rooms=await rRes.json();
-    let usersData=[];
-    if(['admin','director','subdirector'].includes(ROLE)){const uRes=await api('api/admin/users.php');usersData=await uRes.json();S.users=usersData;}
-    const pending=usersData.filter(u=>u.status==='pending_approval');
-    const approved=usersData.filter(u=>u.status==='approved');
+    let stats = {users: {approved: '—', pending: 0}, courses: '—', rooms: '—'};
+    if(['admin','director','subdirector'].includes(ROLE)){
+        try {
+            const res = await api('api/admin/stats.php');
+            stats = await res.json();
+        } catch(e) {}
+    }
     document.getElementById('stats-row').innerHTML=`
-        <div class="stat"><div class="stat-val">${approved.length||'—'}</div><div class="stat-lbl">Usuarios activos</div></div>
-        <div class="stat"><div class="stat-val" style="color:${pending.length>0?'var(--amber)':'var(--navy)'}">${pending.length}</div><div class="stat-lbl">Pendientes aprobación</div></div>
-        <div class="stat"><div class="stat-val">${S.courses.length}</div><div class="stat-lbl">Cursos</div></div>
-        <div class="stat"><div class="stat-val">${S.rooms.length}</div><div class="stat-lbl">Aulas</div></div>`;
+        <div class="stat"><div class="stat-val">${stats.users.approved}</div><div class="stat-lbl">Usuarios activos</div></div>
+        <div class="stat"><div class="stat-val" style="color:${stats.users.pending>0?'var(--amber)':'var(--navy)'}">${stats.users.pending}</div><div class="stat-lbl">Pendientes aprobación</div></div>
+        <div class="stat"><div class="stat-val">${stats.courses}</div><div class="stat-lbl">Cursos</div></div>
+        <div class="stat"><div class="stat-val">${stats.rooms}</div><div class="stat-lbl">Aulas</div></div>`;
     const alertsEl=document.getElementById('pending-alerts');
-    if(pending.length>0&&['admin','director','subdirector'].includes(ROLE)){
-        alertsEl.innerHTML=`<div class="alert alert-amber">Hay <strong>${pending.length}</strong> usuario(s) pendientes de aprobación. <a href="#" onclick="nav('users');document.getElementById('uf-status').value='pending_approval';filterUsers()" style="color:var(--amber);font-weight:600">Revisar →</a></div>`;
+    if(stats.users.pending>0&&['admin','director','subdirector'].includes(ROLE)){
+        alertsEl.innerHTML=`<div class="alert alert-amber">Hay <strong>${stats.users.pending}</strong> usuario(s) pendientes de aprobación. <a href="#" onclick="nav('users');document.getElementById('uf-status').value='pending_approval';filterUsers()" style="color:var(--amber);font-weight:600">Revisar →</a></div>`;
     } else alertsEl.innerHTML='';
 }
 
@@ -674,15 +675,51 @@ async function loadMyGrades(){
 }
 
 // ── USERS ──────────────────────────────────────────────────────────────────
-async function loadUsers(){const r=await api('api/admin/users.php');S.users=await r.json();renderUsersTable();}
-function filterUsers(){renderUsersTable();}
+let U_PAGE = 1;
+const U_LIMIT = 50;
+
+async function loadUsers(){if(!S.users.length){document.getElementById('users-tbl').innerHTML='<div class="empty">Cargando...</div>';const r=await api('api/admin/users.php');S.users=await r.json();}renderUsersTable();}
+function filterUsers(){ U_PAGE = 1; renderUsersTable(); }
+function nextUsersPage(){ U_PAGE++; renderUsersTable(); }
+function prevUsersPage(){ if(U_PAGE>1) { U_PAGE--; renderUsersTable(); } }
+
 function renderUsersTable(){
     const f=document.getElementById('uf-status')?.value||'';
-    const list=f?S.users.filter(u=>u.status===f):S.users;
+    const q=document.getElementById('uf-search')?.value.toLowerCase().trim()||'';
+    
+    let list=S.users;
+    if(f) list=list.filter(u=>u.status===f);
+    if(q) {
+        list=list.filter(u=>{
+            const name = ((u.apellido||'') + ' ' + (u.nombre||'')).toLowerCase();
+            const email = (u.email||'').toLowerCase();
+            const dni = String(u.dni||'');
+            const user = (u.username||'').toLowerCase();
+            return name.includes(q) || email.includes(q) || dni.includes(q) || user.includes(q);
+        });
+    }
+
+    const totalPages = Math.ceil(list.length / U_LIMIT) || 1;
+    if (U_PAGE > totalPages) U_PAGE = totalPages;
+
+    const start = (U_PAGE - 1) * U_LIMIT;
+    const paginatedList = list.slice(start, start + U_LIMIT);
+
     const stB={pending_profile:'badge-gray',pending_approval:'badge-amber',approved:'badge-green',rejected:'badge-red'};
     const stL={pending_profile:'Sin perfil',pending_approval:'Pendiente',approved:'Aprobado',rejected:'Rechazado'};
-    if(!list.length){document.getElementById('users-tbl').innerHTML='<div class="empty">Sin usuarios.</div>';return;}
-    document.getElementById('users-tbl').innerHTML=`<div class="cards">${list.map(u=>`
+    
+    const pageInfo = document.getElementById('users-page-info');
+    const prevBtn = document.getElementById('users-prev-btn');
+    const nextBtn = document.getElementById('users-next-btn');
+    
+    if(pageInfo) {
+        pageInfo.textContent = list.length ? `Mostrando ${start + 1} - ${Math.min(start + U_LIMIT, list.length)} de ${list.length} (Página ${U_PAGE} de ${totalPages})` : 'Sin resultados';
+        prevBtn.disabled = U_PAGE === 1;
+        nextBtn.disabled = U_PAGE === totalPages;
+    }
+
+    if(!paginatedList.length){document.getElementById('users-tbl').innerHTML='<div class="empty">Sin usuarios.</div>';return;}
+    document.getElementById('users-tbl').innerHTML=`<div class="cards">${paginatedList.map(u=>`
         <div class="card">
             <h3>${u.apellido||''} ${u.nombre||''}</h3>
             <p>@${u.username}</p>
@@ -724,15 +761,44 @@ async function openUserModal(userId){
             const cr=await api(`api/contacts/contacts.php?alumno_id=${encodeURIComponent(u.id)}`);
             const contactos=await cr.json();
             const parentescoIcon={'MADRE':'👩','PADRE':'👨','TUTOR/RESPONSABLE':'🧑','TUTORA/RESPONSABLE':'🧑','OTRA PERSONA AUTORIZADA':'🧑','HERMANO/A':'👦'};
+            const addBtn=`<button class="btn btn-outline" style="font-size:.68rem;padding:.22rem .5rem" onclick="openAddContactModal('${u.id}')">+ Agregar</button>`;
             if(contactos.length){
                 const cards=contactos.map(c=>{
                     const icon=parentescoIcon[c.parentesco]||'👤';
                     const nombre=`${esc(c.nombre||'')} ${esc(c.apellido||'')}`.trim();
-                    return `<div style="background:var(--white);border:1px solid var(--border);border-radius:6px;padding:.75rem;display:flex;gap:.75rem;align-items:flex-start"><div style="font-size:1.4rem;line-height:1;flex-shrink:0">${icon}</div><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700;color:var(--text)">${nombre||'—'}</div><div style="font-size:.7rem;color:var(--navy);font-weight:600;margin-top:.1rem">${esc(c.parentesco||'—')}</div><div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.35rem">${c.ocupacion?`<span class="tag" style="font-size:.65rem">${esc(c.ocupacion)}</span>`:''} ${c.telefono?`<span class="tag tag-blue" style="font-size:.65rem">☎ ${esc(String(c.telefono))}</span>`:''} ${c.domicilio?`<span class="tag" style="font-size:.65rem">📍 ${esc(c.domicilio)}</span>`:''} ${c.sexo?`<span class="tag tag-amber" style="font-size:.65rem">${c.sexo==='M'?'Masc.':'Fem.'}</span>`:''}</div></div></div>`;
+                    return `<div style="background:var(--white);border:1px solid var(--border);border-radius:6px;padding:.75rem;display:flex;gap:.75rem;align-items:flex-start">
+                        <div style="font-size:1.4rem;line-height:1;flex-shrink:0">${icon}</div>
+                        <div style="flex:1;min-width:0">
+                            <div style="font-size:.82rem;font-weight:700;color:var(--text)">${nombre||'—'}</div>
+                            <div style="font-size:.7rem;color:var(--navy);font-weight:600;margin-top:.1rem">${esc(c.parentesco||'—')}</div>
+                            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.35rem">
+                                ${c.ocupacion?`<span class="tag" style="font-size:.65rem">${esc(c.ocupacion)}</span>`:''}
+                                ${c.telefono?`<span class="tag tag-blue" style="font-size:.65rem">☎ ${esc(String(c.telefono))}</span>`:''}
+                                ${c.domicilio?`<span class="tag" style="font-size:.65rem">📍 ${esc(c.domicilio)}</span>`:''}
+                                ${c.sexo?`<span class="tag tag-amber" style="font-size:.65rem">${c.sexo==='M'?'Masc.':'Fem.'}</span>`:''}
+                            </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:.3rem;flex-shrink:0">
+                            <button class="btn btn-outline" style="font-size:.65rem;padding:.18rem .4rem" onclick="openEditContactModal('${u.id}','${c.id}')">✏️</button>
+                            <button class="btn btn-red" style="font-size:.65rem;padding:.18rem .4rem" onclick="deleteContact('${u.id}','${c.id}')">🗑️</button>
+                        </div>
+                    </div>`;
                 }).join('');
-                contactosHtml=`<div><div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Contactos familiares / tutores</div><div style="display:flex;flex-direction:column;gap:.5rem">${cards}</div></div>`;
+                contactosHtml=`<div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+                        <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Contactos familiares / tutores</div>
+                        ${addBtn}
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:.5rem">${cards}</div>
+                </div>`;
             } else {
-                contactosHtml=`<div><div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem">Contactos familiares / tutores</div><div style="font-size:.78rem;color:var(--muted);padding:.5rem 0">Sin contactos registrados.</div></div>`;
+                contactosHtml=`<div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem">
+                        <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Contactos familiares / tutores</div>
+                        ${addBtn}
+                    </div>
+                    <div style="font-size:.78rem;color:var(--muted);padding:.5rem 0">Sin contactos registrados.</div>
+                </div>`;
             }
         }catch(e){
             contactosHtml=`<div style="font-size:.75rem;color:var(--muted)">No se pudieron cargar los contactos.</div>`;
@@ -745,7 +811,7 @@ async function openUserModal(userId){
             <!-- Avatar + nombre -->
             <div style="display:flex;align-items:center;gap:1rem">
                 <div style="width:56px;height:56px;flex-shrink:0;border-radius:50%;background:${roleColor}22;border:2px solid ${roleColor}44;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:${roleColor}">${initials||'?'}</div>
-                <div>
+                <div style="flex:1;min-width:0">
                     <div style="font-size:1.15rem;font-weight:800;color:var(--text)">${esc(u.apellido||'')} ${esc(u.nombre||'')}</div>
                     <div style="font-size:.8rem;color:var(--muted);margin-top:.1rem">@${esc(u.username)}</div>
                     <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap">
@@ -755,19 +821,25 @@ async function openUserModal(userId){
                 </div>
             </div>
 
-            <!-- Info personal -->
-            <div style="background:var(--bg);border-radius:6px;padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
-                <div>
-                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">DNI</div>
-                    <div style="font-size:.88rem;font-weight:600;color:var(--text)">${esc(String(u.dni||'—'))}</div>
+            <!-- Info personal + botón editar -->
+            <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Información personal</div>
+                    <button class="btn btn-outline" style="font-size:.68rem;padding:.22rem .5rem" onclick="openEditUserModal('${u.id}')">✏️ Editar</button>
                 </div>
-                <div>
-                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Teléfono</div>
-                    <div style="font-size:.88rem;color:var(--text2)">${esc(String(u.telefono||'—'))}</div>
-                </div>
-                <div style="grid-column:1/-1">
-                    <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Email</div>
-                    <div style="font-size:.88rem;color:var(--text2);word-break:break-all">${u.email?`<a href="mailto:${esc(u.email)}" style="color:var(--navy)">${esc(u.email)}</a>`:'—'}</div>
+                <div style="background:var(--bg);border-radius:6px;padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+                    <div>
+                        <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">DNI</div>
+                        <div style="font-size:.88rem;font-weight:600;color:var(--text)">${esc(String(u.dni||'—'))}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Teléfono</div>
+                        <div style="font-size:.88rem;color:var(--text2)">${esc(String(u.telefono||'—'))}</div>
+                    </div>
+                    <div style="grid-column:1/-1">
+                        <div style="font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">Email</div>
+                        <div style="font-size:.88rem;color:var(--text2);word-break:break-all">${u.email?`<a href="mailto:${esc(u.email)}" style="color:var(--navy)">${esc(u.email)}</a>`:'—'}</div>
+                    </div>
                 </div>
             </div>
 
@@ -806,20 +878,99 @@ async function approveUser(id){await api('api/admin/users.php',{method:'PATCH',h
 async function rejectUser(id){await api('api/admin/users.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status:'rejected'})});loadUsers();loadInicio();}
 async function changeRole(id,role){await api('api/admin/users.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,role})});}
 async function deleteUser(id){if(!confirm('¿Eliminar este usuario?'))return;await api('api/admin/users.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});loadUsers();}
+// ── CREAR USUARIO MANUAL ─────────────────────────────────────────────────
+// Contactos pendientes para agregar luego de crear al alumno
+let _pendingContacts = [];
+
 function openManualUserModal(){
+    _pendingContacts = [];
     modal(`<h3>Crear usuario manualmente</h3>
         <div class="fgrid">
-            <div class="field"><label>Nombre</label><input id="mu-n" placeholder="Juan"></div>
-            <div class="field"><label>Apellido</label><input id="mu-a" placeholder="Pérez"></div>
-            <div class="field"><label>DNI</label><input id="mu-dni" placeholder="12345678" maxlength="8"></div>
+            <div class="field"><label>Nombre *</label><input id="mu-n" placeholder="Juan"></div>
+            <div class="field"><label>Apellido *</label><input id="mu-a" placeholder="Pérez"></div>
+            <div class="field"><label>DNI *</label><input id="mu-dni" placeholder="12345678" maxlength="8"></div>
             <div class="field"><label>Email</label><input id="mu-email" type="email" placeholder="juan@escuela.edu.ar"></div>
             <div class="field"><label>Teléfono (opcional)</label><input id="mu-tel" placeholder="2241xxxxxx"></div>
             <div class="field"><label>Username (opcional)</label><input id="mu-user" placeholder="juan.perez"></div>
-            <div class="field ffull"><label>Rol</label><select id="mu-role">${['alumno','profesor','preceptor','subdirector','director','admin'].map(r=>`<option value="${r}">${r}</option>`).join('')}</select></div>
+            <div class="field ffull"><label>Rol</label><select id="mu-role" onchange="muToggleContactos(this.value)">${['alumno','profesor','preceptor','subdirector','director','admin'].map(r=>`<option value="${r}">${r}</option>`).join('')}</select></div>
         </div>
+
+        <!-- Sección contactos: solo visible si rol=alumno -->
+        <div id="mu-contactos-wrap" style="margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem">
+                <div style="font-size:.75rem;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em">Padres / Tutores</div>
+                <button class="btn btn-outline" style="font-size:.7rem;padding:.25rem .55rem" onclick="muAbrirFormContacto()">+ Agregar</button>
+            </div>
+            <div id="mu-contactos-list" style="display:flex;flex-direction:column;gap:.4rem">
+                <div style="font-size:.78rem;color:var(--muted)">Sin contactos agregados.</div>
+            </div>
+        </div>
+
         <div class="err-msg" id="mu-err"></div>
-        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-navy" onclick="createManualUser()">Crear usuario</button></div>`);
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-navy" onclick="createManualUser()">Crear usuario</button></div>`,
+    '540px');
+    // Al iniciar el select ya está en "alumno" así que mostramos la sección
+    muToggleContactos('alumno');
 }
+
+function muToggleContactos(role){
+    const wrap = document.getElementById('mu-contactos-wrap');
+    if(wrap) wrap.style.display = role==='alumno' ? 'block' : 'none';
+}
+
+function muRenderContactosList(){
+    const el = document.getElementById('mu-contactos-list');
+    if(!el) return;
+    if(!_pendingContacts.length){el.innerHTML='<div style="font-size:.78rem;color:var(--muted)">Sin contactos agregados.</div>';return;}
+    const parentescoIcon={'MADRE':'👩','PADRE':'👨','TUTOR/RESPONSABLE':'🧑','TUTORA/RESPONSABLE':'🧑','OTRA PERSONA AUTORIZADA':'🧑','HERMANO/A':'👦'};
+    el.innerHTML = _pendingContacts.map((c,i)=>`
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.6rem .75rem;display:flex;justify-content:space-between;align-items:center">
+            <div>
+                <span style="font-size:.82rem;font-weight:700;color:var(--text)">${parentescoIcon[c.parentesco]||'👤'} ${esc(c.nombre)} ${esc(c.apellido)}</span>
+                <span style="font-size:.72rem;color:var(--navy);margin-left:.4rem">${esc(c.parentesco)}</span>
+                ${c.telefono?`<span style="font-size:.7rem;color:var(--muted);margin-left:.4rem">☎ ${esc(c.telefono)}</span>`:''}
+            </div>
+            <button class="btn btn-red" style="font-size:.65rem;padding:.2rem .45rem" onclick="_pendingContacts.splice(${i},1);muRenderContactosList()">✕</button>
+        </div>`).join('');
+}
+
+function muAbrirFormContacto(){
+    mpush(`<h3 style="font-size:.95rem">Agregar contacto</h3>
+        <div class="fgrid">
+            <div class="field"><label>Nombre *</label><input id="ct-n" placeholder="María"></div>
+            <div class="field"><label>Apellido *</label><input id="ct-a" placeholder="López"></div>
+            <div class="field ffull"><label>Parentesco *</label><select id="ct-par">
+                ${['MADRE','PADRE','TUTOR/RESPONSABLE','TUTORA/RESPONSABLE','HERMANO/A','OTRA PERSONA AUTORIZADA'].map(p=>`<option value="${p}">${p}</option>`).join('')}
+            </select></div>
+            <div class="field"><label>Sexo</label><select id="ct-sex"><option value="">—</option><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+            <div class="field"><label>Teléfono</label><input id="ct-tel" placeholder="2241xxxxxx"></div>
+            <div class="field ffull"><label>Ocupación</label><input id="ct-ocu" placeholder="Ej: Docente"></div>
+            <div class="field ffull"><label>Domicilio</label><input id="ct-dom" placeholder="Calle 123, Mar del Tuyú"></div>
+        </div>
+        <div class="err-msg" id="ct-err"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="mpop()">Cancelar</button>
+            <button class="btn btn-navy" onclick="muGuardarContacto()">Agregar</button>
+        </div>`, '480px');
+}
+
+function muGuardarContacto(){
+    const nombre=document.getElementById('ct-n')?.value.trim();
+    const apellido=document.getElementById('ct-a')?.value.trim();
+    const parentesco=document.getElementById('ct-par')?.value;
+    const err=document.getElementById('ct-err');
+    if(!nombre||!apellido||!parentesco){if(err){err.textContent='Nombre, apellido y parentesco son obligatorios.';err.style.display='block';}return;}
+    _pendingContacts.push({
+        nombre:nombre.toUpperCase(),apellido:apellido.toUpperCase(),parentesco,
+        sexo:document.getElementById('ct-sex')?.value||null,
+        telefono:document.getElementById('ct-tel')?.value.trim()||null,
+        ocupacion:document.getElementById('ct-ocu')?.value.trim()||null,
+        domicilio:document.getElementById('ct-dom')?.value.trim()||null,
+    });
+    mpop();
+    muRenderContactosList();
+}
+
 async function createManualUser(){
     const body={nombre:document.getElementById('mu-n').value.trim(),apellido:document.getElementById('mu-a').value.trim(),dni:document.getElementById('mu-dni').value.trim(),email:document.getElementById('mu-email').value.trim(),telefono:document.getElementById('mu-tel').value.trim(),username:document.getElementById('mu-user').value.trim(),role:document.getElementById('mu-role').value};
     const err=document.getElementById('mu-err'); err.style.display='none';
@@ -827,12 +978,144 @@ async function createManualUser(){
     if(!/^\d{7,8}$/.test(body.dni)){err.textContent='DNI inválido (7 u 8 dígitos).';err.style.display='block';return;}
     const r=await api('api/admin/users.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const d=await r.json();
-    if(d.success){closeModal();loadUsers();}else{err.textContent=d.error||'Error';err.style.display='block';}
+    if(!d.success){err.textContent=d.error||'Error';err.style.display='block';return;}
+
+    // Si hay contactos y el rol es alumno, los guardamos
+    if(body.role==='alumno' && _pendingContacts.length && d.id){
+        for(const c of _pendingContacts){
+            await api('api/contacts/contacts.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({alumno_id:d.id,...c})});
+        }
+    }
+    closeModal();
+    loadUsers();
+}
+
+// ── EDITAR USUARIO ────────────────────────────────────────────────────────
+function openEditUserModal(userId){
+    const u=S.users.find(x=>String(x.id)===String(userId));
+    if(!u) return;
+    mpush(`<h3>Editar información</h3>
+        <div class="fgrid">
+            <div class="field"><label>Nombre</label><input id="eu-n" value="${esc(u.nombre||'')}"></div>
+            <div class="field"><label>Apellido</label><input id="eu-a" value="${esc(u.apellido||'')}"></div>
+            <div class="field"><label>DNI</label><input id="eu-dni" value="${esc(String(u.dni||''))}" maxlength="8"></div>
+            <div class="field"><label>Email</label><input id="eu-email" type="email" value="${esc(u.email||'')}"></div>
+            <div class="field ffull"><label>Teléfono</label><input id="eu-tel" value="${esc(String(u.telefono||''))}"></div>
+        </div>
+        <div class="err-msg" id="eu-err"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="mpop()">Cancelar</button>
+            <button class="btn btn-navy" onclick="saveEditUser('${userId}')">Guardar cambios</button>
+        </div>`, '480px');
+}
+
+async function saveEditUser(userId){
+    const err=document.getElementById('eu-err'); err.style.display='none';
+    const dni=document.getElementById('eu-dni').value.trim();
+    if(dni && !/^\d{7,8}$/.test(dni)){err.textContent='DNI inválido (7 u 8 dígitos).';err.style.display='block';return;}
+    const body={
+        id:userId,
+        nombre:document.getElementById('eu-n').value.trim()||null,
+        apellido:document.getElementById('eu-a').value.trim()||null,
+        dni:dni||null,
+        email:document.getElementById('eu-email').value.trim()||null,
+        telefono:document.getElementById('eu-tel').value.trim()||null,
+    };
+    const r=await api('api/admin/users.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!d.success){err.textContent=d.error||'Error al guardar';err.style.display='block';return;}
+    await loadUsers();
+    mpop();
+    // Refrescar el modal de usuario
+    openUserModal(userId);
+}
+
+// ── GESTIÓN DE CONTACTOS EN MODAL DE USUARIO ──────────────────────────────
+async function openAddContactModal(alumnoId){
+    mpush(`<h3 style="font-size:.95rem">Agregar contacto</h3>
+        <div class="fgrid">
+            <div class="field"><label>Nombre *</label><input id="ac-n" placeholder="María"></div>
+            <div class="field"><label>Apellido *</label><input id="ac-a" placeholder="López"></div>
+            <div class="field ffull"><label>Parentesco *</label><select id="ac-par">
+                ${['MADRE','PADRE','TUTOR/RESPONSABLE','TUTORA/RESPONSABLE','HERMANO/A','OTRA PERSONA AUTORIZADA'].map(p=>`<option value="${p}">${p}</option>`).join('')}
+            </select></div>
+            <div class="field"><label>Sexo</label><select id="ac-sex"><option value="">—</option><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+            <div class="field"><label>Teléfono</label><input id="ac-tel" placeholder="2241xxxxxx"></div>
+            <div class="field ffull"><label>Ocupación</label><input id="ac-ocu"></div>
+            <div class="field ffull"><label>Domicilio</label><input id="ac-dom"></div>
+        </div>
+        <div class="err-msg" id="ac-err"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="mpop()">Cancelar</button>
+            <button class="btn btn-navy" onclick="saveNewContact('${alumnoId}')">Guardar</button>
+        </div>`, '480px');
+}
+
+async function saveNewContact(alumnoId){
+    const err=document.getElementById('ac-err'); err.style.display='none';
+    const nombre=document.getElementById('ac-n').value.trim();
+    const apellido=document.getElementById('ac-a').value.trim();
+    const parentesco=document.getElementById('ac-par').value;
+    if(!nombre||!apellido){err.textContent='Nombre y apellido son obligatorios.';err.style.display='block';return;}
+    const body={alumno_id:alumnoId,nombre,apellido,parentesco,sexo:document.getElementById('ac-sex').value||null,telefono:document.getElementById('ac-tel').value.trim()||null,ocupacion:document.getElementById('ac-ocu').value.trim()||null,domicilio:document.getElementById('ac-dom').value.trim()||null};
+    const r=await api('api/contacts/contacts.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!d.success){err.textContent=d.error||'Error';err.style.display='block';return;}
+    mpop();
+    openUserModal(alumnoId);
+}
+
+async function openEditContactModal(alumnoId, contactId){
+    // Buscar el contacto en la API
+    const cr=await api(`api/contacts/contacts.php?alumno_id=${encodeURIComponent(alumnoId)}`);
+    const contactos=await cr.json();
+    const c=contactos.find(x=>String(x.id)===String(contactId));
+    if(!c) return;
+    mpush(`<h3 style="font-size:.95rem">Editar contacto</h3>
+        <div class="fgrid">
+            <div class="field"><label>Nombre *</label><input id="ec-n" value="${esc(c.nombre||'')}"></div>
+            <div class="field"><label>Apellido *</label><input id="ec-a" value="${esc(c.apellido||'')}"></div>
+            <div class="field ffull"><label>Parentesco *</label><select id="ec-par">
+                ${['MADRE','PADRE','TUTOR/RESPONSABLE','TUTORA/RESPONSABLE','HERMANO/A','OTRA PERSONA AUTORIZADA'].map(p=>`<option value="${p}"${c.parentesco===p?' selected':''}>${p}</option>`).join('')}
+            </select></div>
+            <div class="field"><label>Sexo</label><select id="ec-sex">
+                <option value="">—</option>
+                <option value="M"${c.sexo==='M'?' selected':''}>Masculino</option>
+                <option value="F"${c.sexo==='F'?' selected':''}>Femenino</option>
+            </select></div>
+            <div class="field"><label>Teléfono</label><input id="ec-tel" value="${esc(String(c.telefono||''))}"></div>
+            <div class="field ffull"><label>Ocupación</label><input id="ec-ocu" value="${esc(c.ocupacion||'')}"></div>
+            <div class="field ffull"><label>Domicilio</label><input id="ec-dom" value="${esc(c.domicilio||'')}"></div>
+        </div>
+        <div class="err-msg" id="ec-err"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="mpop()">Cancelar</button>
+            <button class="btn btn-navy" onclick="saveEditContact('${alumnoId}','${contactId}')">Guardar cambios</button>
+        </div>`, '480px');
+}
+
+async function saveEditContact(alumnoId, contactId){
+    const err=document.getElementById('ec-err'); err.style.display='none';
+    const nombre=document.getElementById('ec-n').value.trim();
+    const apellido=document.getElementById('ec-a').value.trim();
+    if(!nombre||!apellido){err.textContent='Nombre y apellido son obligatorios.';err.style.display='block';return;}
+    const body={alumno_id:alumnoId,contact_id:contactId,nombre,apellido,parentesco:document.getElementById('ec-par').value,sexo:document.getElementById('ec-sex').value||null,telefono:document.getElementById('ec-tel').value.trim()||null,ocupacion:document.getElementById('ec-ocu').value.trim()||null,domicilio:document.getElementById('ec-dom').value.trim()||null};
+    const r=await api('api/contacts/contacts.php',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!d.success){err.textContent=d.error||'Error';err.style.display='block';return;}
+    mpop();
+    openUserModal(alumnoId);
+}
+
+async function deleteContact(alumnoId, contactId){
+    if(!confirm('¿Eliminar este contacto?')) return;
+    await api('api/contacts/contacts.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({alumno_id:alumnoId,contact_id:contactId})});
+    openUserModal(alumnoId);
 }
 
 // ── COURSES ────────────────────────────────────────────────────────────────
 async function loadCourses(){
-    const r=await api('api/courses/courses.php');S.courses=await r.json();
+    if(!S.courses.length){const r=await api('api/courses/courses.php');S.courses=await r.json();}
     if(!S.users.length){const ur=await api('api/admin/users.php');S.users=await ur.json();}
     renderCoursesCards();
 }
@@ -1149,5 +1432,3 @@ async function sendMail() {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 loadInicio();
-if(['admin','director','subdirector'].includes(ROLE)){api('api/admin/users.php').then(r=>r.json()).then(u=>S.users=u);}
-api('api/courses/courses.php').then(r=>r.json()).then(c=>S.courses=c);

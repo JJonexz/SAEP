@@ -178,12 +178,22 @@ $role=$user['role'];
             <?php if($role==='admin'): ?>
             <button class="btn btn-navy" onclick="openManualUserModal()">+ Crear usuario</button>
             <?php endif; ?>
+            <input type="text" id="uf-search" placeholder="Buscar por nombre, DNI, email..." oninput="filterUsers()" style="font-family:var(--font);font-size:.78rem;padding:.4rem .7rem;border:0.052vw solid var(--border);border-radius:var(--radius);color:var(--text);width:200px">
             <select id="uf-status" onchange="filterUsers()" style="font-family:var(--font);font-size:.78rem;padding:.4rem .7rem;border:0.052vw solid var(--border);border-radius:var(--radius);color:var(--text2)">
                 <option value="">Todos</option><option value="pending_approval">Pendientes</option><option value="approved">Aprobados</option><option value="rejected">Rechazados</option>
             </select>
         </div>
     </div>
-    <div class="pb"><div class="tbl-wrap" id="users-tbl"></div></div>
+    <div class="pb">
+        <div class="tbl-wrap" id="users-tbl"></div>
+        <div id="users-pagination" style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0.75rem;padding-top:1.5rem;margin-top:1.5rem;border-top:1px solid var(--border);">
+            <div class="btn-group" style="gap:0.5rem">
+                <button class="btn btn-navy" id="users-prev-btn" onclick="prevUsersPage()" style="font-size:.9rem;padding:.5rem 1.2rem;min-width:120px">← Anterior</button>
+                <button class="btn btn-navy" id="users-next-btn" onclick="nextUsersPage()" style="font-size:.9rem;padding:.5rem 1.2rem;min-width:120px">Siguiente →</button>
+            </div>
+            <div style="font-size:.82rem;color:var(--muted);font-weight:500" id="users-page-info"></div>
+        </div>
+    </div>
 </div>
 <?php endif; ?>
 
