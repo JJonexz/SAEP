@@ -19,6 +19,8 @@ $role=$user['role'];
 <link href="assets/css/global.css" rel="stylesheet">
     <link href="assets/css/dashboard.css" rel="stylesheet">
 <link href="assets/css/lab.css" rel="stylesheet">
+<link href="assets/css/metrics.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -87,6 +89,10 @@ $role=$user['role'];
         
         <div class="nav-item" onclick="nav('mail')" id="nav-mail">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>Correos
+        </div>
+
+        <div class="nav-item" onclick="nav('metricas')" id="nav-metricas">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Métricas
         </div>
         
     </div>
@@ -180,12 +186,12 @@ $role=$user['role'];
     </div>
     <div class="pb">
         <div class="tbl-wrap" id="users-tbl"></div>
-        <div id="users-pagination" style="display:flex;justify-content:space-between;align-items:center;padding-top:1rem;margin-top:1rem;border-top:1px solid var(--border);">
-            <div style="font-size:.75rem;color:var(--muted)" id="users-page-info"></div>
-            <div class="btn-group">
-                <button class="btn btn-outline" id="users-prev-btn" onclick="prevUsersPage()" style="font-size:.7rem;padding:.28rem .55rem">Anterior</button>
-                <button class="btn btn-outline" id="users-next-btn" onclick="nextUsersPage()" style="font-size:.7rem;padding:.28rem .55rem">Siguiente</button>
+        <div id="users-pagination" style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0.75rem;padding-top:1.5rem;margin-top:1.5rem;border-top:1px solid var(--border);">
+            <div class="btn-group" style="gap:0.5rem">
+                <button class="btn btn-navy" id="users-prev-btn" onclick="prevUsersPage()" style="font-size:.9rem;padding:.5rem 1.2rem;min-width:120px">← Anterior</button>
+                <button class="btn btn-navy" id="users-next-btn" onclick="nextUsersPage()" style="font-size:.9rem;padding:.5rem 1.2rem;min-width:120px">Siguiente →</button>
             </div>
+            <div style="font-size:.82rem;color:var(--muted);font-weight:500" id="users-page-info"></div>
         </div>
     </div>
 </div>
@@ -768,6 +774,58 @@ $role=$user['role'];
      FIN PANEL LABORATORIOS
      ═══════════════════════════════════════════════════════════════════════ -->
 
+
+<?php if(in_array($role,['admin','director','subdirector'])): ?>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PANEL MÉTRICAS
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-metricas">
+
+    <!-- Tabs de navegación interna -->
+    <div class="metrics-nav">
+        <button class="metrics-tab active" data-tab="general"  onclick="metricsNav('general')">General</button>
+        <button class="metrics-tab"        data-tab="alumnos"  onclick="metricsNav('alumnos')">Alumnos</button>
+        <button class="metrics-tab"        data-tab="cursos"   onclick="metricsNav('cursos')">Cursos</button>
+        <button class="metrics-tab"        data-tab="aulas"    onclick="metricsNav('aulas')">Aulas</button>
+        <button class="metrics-tab"        data-tab="notas"    onclick="metricsNav('notas')">Notas / Materias</button>
+    </div>
+
+    <!-- Cuerpo scrolleable -->
+    <div class="metrics-body">
+
+        <!-- ── GENERAL ──────────────────────────────────────────── -->
+        <div class="metrics-section active" id="metrics-sec-general">
+            <div id="mc-general-kpis"></div>
+            <div id="mc-general-charts"></div>
+        </div>
+
+        <!-- ── ALUMNOS ──────────────────────────────────────────── -->
+        <div class="metrics-section" id="metrics-sec-alumnos">
+            <div id="mc-alumnos-content"></div>
+        </div>
+
+        <!-- ── CURSOS ───────────────────────────────────────────── -->
+        <div class="metrics-section" id="metrics-sec-cursos">
+            <div id="mc-cursos-content"></div>
+        </div>
+
+        <!-- ── AULAS ────────────────────────────────────────────── -->
+        <div class="metrics-section" id="metrics-sec-aulas">
+            <div id="mc-aulas-content"></div>
+        </div>
+
+        <!-- ── NOTAS / MATERIAS ─────────────────────────────────── -->
+        <div class="metrics-section" id="metrics-sec-notas">
+            <div id="mc-notas-content"></div>
+        </div>
+
+    </div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     FIN PANEL MÉTRICAS
+     ═══════════════════════════════════════════════════════════════════════ -->
+<?php endif; ?>
+
 </main>
 </div>
 <div id="modal-root"></div>
@@ -778,6 +836,7 @@ window.MY_ID = '<?=$user['id']?>';
 </script>
 <script src="assets/js/dashboard.js"></script>
 <script src="assets/js/lab.js"></script>
+<script src="assets/js/metrics.js"></script>
 <script>
 function toggleSidebar(){
     const aside = document.getElementById('main-sidebar');
