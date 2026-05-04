@@ -1,10 +1,338 @@
 [
-    {
-        "id": "69d3d21f5d63c2.43065179",
-        "nombre": "101",
-        "capacidad": 20,
-        "ubicacion": "a31",
-        "curso_id": "69debaa5a427e5.75618697",
-        "preceptor_id": null
-    }
+  {
+    "id": "1",
+    "nombre": "Aula 1",
+    "capacidad": 34,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "2",
+    "nombre": "Aula 2",
+    "capacidad": 34,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "3",
+    "nombre": "Aula 3",
+    "capacidad": 34,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "4",
+    "nombre": "Aula 4",
+    "capacidad": 34,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "5",
+    "nombre": "AULA TALLER ELECTRICIDAD",
+    "capacidad": 15,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "6",
+    "nombre": "AULA TALLER MECANICA  A",
+    "capacidad": 28,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "7",
+    "nombre": "Aula 7",
+    "capacidad": 44,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "8",
+    "nombre": "Aula 8",
+    "capacidad": 38,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "9",
+    "nombre": "AULA TALLER CARPINT. A",
+    "capacidad": 16,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "10",
+    "nombre": "Aula 10",
+    "capacidad": 38,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "11",
+    "nombre": "AULA TALLER INSTALAC. A",
+    "capacidad": 40,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "12",
+    "nombre": "Aula 12",
+    "capacidad": 30,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "13",
+    "nombre": "Aula 13",
+    "capacidad": 30,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "14",
+    "nombre": "AULA TALLER (POZO)",
+    "capacidad": 30,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "15",
+    "nombre": "AULA TALLER (MORGUE)",
+    "capacidad": 15,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "17",
+    "nombre": "AULA TALLER (CINEMA)",
+    "capacidad": 0,
+    "ubicacion": "",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "18",
+    "nombre": "AULA TALLER (TURISMO)",
+    "capacidad": 20,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "19",
+    "nombre": "AULA TALLER (SALVADO)",
+    "capacidad": 20,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "20",
+    "nombre": "AULA (APLICACIONES)",
+    "capacidad": 17,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "21",
+    "nombre": "Aula 21",
+    "capacidad": 37,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "22",
+    "nombre": "Aula 22",
+    "capacidad": 40,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "23",
+    "nombre": "Aula 23",
+    "capacidad": 34,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "24",
+    "nombre": "Aula 24",
+    "capacidad": 30,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "25",
+    "nombre": "AULA TALLER DIBUJO A",
+    "capacidad": 16,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "26",
+    "nombre": "AULA TALLER",
+    "capacidad": 16,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "27",
+    "nombre": "Aula 27",
+    "capacidad": 30,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "28",
+    "nombre": "Aula 28",
+    "capacidad": 30,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "29",
+    "nombre": "Aula 29",
+    "capacidad": 30,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "30",
+    "nombre": "Aula 30",
+    "capacidad": 30,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "31",
+    "nombre": "AULA TALLER S.O.",
+    "capacidad": 14,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "32",
+    "nombre": "AULA TALLER HARDWARE",
+    "capacidad": 16,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "33",
+    "nombre": "AULA TALLER",
+    "capacidad": 24,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "34",
+    "nombre": "AULA TALLER",
+    "capacidad": 28,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "37",
+    "nombre": "GIMNASIO A",
+    "capacidad": 0,
+    "ubicacion": "",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "39",
+    "nombre": "AULA TALLER CARPINT. B",
+    "capacidad": 16,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "40",
+    "nombre": "AULA TALLER INSTALAC. B",
+    "capacidad": 20,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "41",
+    "nombre": "AULA TALLER ",
+    "capacidad": 20,
+    "ubicacion": "",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "43",
+    "nombre": "AULA TALLER DIBUJO B",
+    "capacidad": 16,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "46",
+    "nombre": "AULA TALLER BIBLIO",
+    "capacidad": 20,
+    "ubicacion": "PA",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "51",
+    "nombre": "GIMNASIO B",
+    "capacidad": 0,
+    "ubicacion": "",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "52",
+    "nombre": "AULA  TALLER MECANICA B",
+    "capacidad": 15,
+    "ubicacion": "PB",
+    "curso_id": null,
+    "preceptor_id": null
+  },
+  {
+    "id": "58",
+    "nombre": "AULA",
+    "capacidad": 0,
+    "ubicacion": "",
+    "curso_id": null,
+    "preceptor_id": null
+  }
 ]
